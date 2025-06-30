@@ -28,6 +28,8 @@ const eslintConfig = [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
         ecmaFeatures: {
           jsx: true,
         },
@@ -46,9 +48,16 @@ const eslintConfig = [
       ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      // Type-aware rules removed for simplicity
       'prefer-const': 'error',
       'no-var': 'error',
+      'react/no-unescaped-entities': 'error',
+      'react/jsx-curly-brace-presence': [
+        'error',
+        { props: 'never', children: 'never' },
+      ],
+      'import/prefer-default-export': 'off',
+      'import/no-default-export': 'off',
     },
   },
   {

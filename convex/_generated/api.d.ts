@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as cron from "../cron.js";
 import type * as discord from "../discord.js";
+import type * as serverSettings from "../serverSettings.js";
 import type * as users from "../users.js";
 
 /**
@@ -28,6 +29,7 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   cron: typeof cron;
   discord: typeof discord;
+  serverSettings: typeof serverSettings;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

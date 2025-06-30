@@ -1,6 +1,6 @@
 'use client';
 
-import { DashboardContent } from '@/components/dashboard/dashboard-content';
+import { DashboardContent } from '@/features/dashboard';
 import { use } from 'react';
 
 interface DashboardPageProps {

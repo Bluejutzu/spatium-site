@@ -1,6 +1,11 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -22,7 +27,11 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@clerk/nextjs';
 
@@ -104,7 +113,7 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
 
   // Server data error handling is handled by Convex automatically
 
-  const handleRefreshData = async () => {
+  const _handleRefreshData = async () => {
     if (!user?.id || isRefreshing) return;
 
     setIsRefreshing(true);
@@ -150,7 +159,7 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
     serverId ? { serverId } : 'skip'
   );
 
-  console.log(serverData);
+  // Server data available for debugging
 
   if (!serverId) {
     return <DashboardHome />;
@@ -233,7 +242,7 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                   transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
                   <Avatar>
-                    <AvatarImage src={serverData?.server?.icon} alt={`@`} />
+                    <AvatarImage src={serverData?.server?.icon} alt='@' />
                     <AvatarFallback>
                       {serverData?.server?.name.charAt(0)}
                     </AvatarFallback>

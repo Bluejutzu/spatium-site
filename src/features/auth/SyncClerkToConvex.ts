@@ -1,14 +1,12 @@
 'use client';
 
-import { useClerk, useSignIn, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { useMutation } from 'convex/react';
 import { useEffect } from 'react';
 import { api } from '../../../convex/_generated/api';
 
-export default function SyncClerkToConvex() {
+export function SyncClerkToConvex() {
   const { user, isLoaded } = useUser();
-  const { signOut, session } = useClerk();
-  const { signIn } = useSignIn();
   const syncUser = useMutation(api.users.syncUser);
 
   useEffect(() => {
@@ -51,19 +49,7 @@ export default function SyncClerkToConvex() {
         body: JSON.stringify({ userId }),
       });
 
-      if (response.status === 401 || 400) {
-        // if (session?.id) {
-        //     await signOut({ sessionId: session.id });
-        // } else {
-        //     await signOut();
-        //     await signIn?.authenticateWithRedirect({
-        //         strategy: "oauth_discord",
-        //         redirectUrl: "/",
-        //         redirectUrlComplete: "/"
-        //     });
-        // }
-        // return
-      } else if (!response.ok) {
+      if (!response.ok) {
         console.error('Failed to sync Discord data:', response.statusText);
       } else {
         const result = await response.json();

@@ -3,7 +3,12 @@
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useUser } from '@clerk/nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserButton } from '@clerk/nextjs';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
@@ -27,6 +32,8 @@ import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AvatarImage } from '@radix-ui/react-avatar';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
@@ -276,11 +283,16 @@ export default function ServersPage() {
                               <div className='relative'>
                                 <div className='w-12 h-12 bg-gradient-to-br from-discord-blurple to-discord-purple rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden'>
                                   {server.icon ? (
-                                    <img
-                                      src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`}
-                                      alt={server.name}
-                                      className='w-12 h-12 rounded-lg object-cover'
-                                    />
+                                    <Avatar>
+                                      <AvatarImage
+                                        src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`}
+                                        alt={server.name}
+                                        className='w-12 h-12 rounded-lg object-cover'
+                                      />
+                                      <AvatarFallback>
+                                        {server.name}
+                                      </AvatarFallback>
+                                    </Avatar>
                                   ) : (
                                     server.name.charAt(0).toUpperCase()
                                   )}
@@ -431,8 +443,8 @@ export default function ServersPage() {
               <span className='text-discord-blurple glow-text'>DOMINION</span>
             </h2>
             <p className='text-xl text-discord-text max-w-3xl mx-auto'>
-              Real-time insights into your Discord empire's reach, engagement,
-              and growth across all managed communities.
+              Real-time insights into your Discord empir`&apos;s reach,
+              engagement, and growth across all managed communities.
             </p>
           </motion.div>
 

@@ -3,7 +3,7 @@
 import type React from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { useParams } from 'next/navigation';
-import { DashboardSidebar } from '@/components/dashboard/sidebar';
+import { DashboardSidebar } from '@/features/dashboard';
 
 export default function DashboardLayout({
   children,

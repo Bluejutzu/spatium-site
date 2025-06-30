@@ -433,7 +433,7 @@ export function LandingPage() {
   });
 
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const _opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

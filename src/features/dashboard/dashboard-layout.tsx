@@ -1,8 +1,8 @@
 'use client';
 
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '../app/sidebar';
 import { DashboardContent } from './dashboard-content';
+import { AppSidebar } from '@/components/app/sidebar';
 
 export function DashboardLayout() {
   return (

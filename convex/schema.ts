@@ -56,6 +56,7 @@ export default defineSchema({
     prefix: v.string(),
     welcomeMessage: v.optional(v.string()),
     autoRole: v.boolean(),
+    autoRoleId: v.optional(v.string()),
     moderationEnabled: v.boolean(),
     spamFilter: v.boolean(),
     linkFilter: v.boolean(),
@@ -75,4 +76,12 @@ export default defineSchema({
   })
     .index('by_server', ['serverId'])
     .index('by_timestamp', ['timestamp']),
+
+  commands: defineTable({
+    serverId: v.string(),
+    name: v.string(),
+    blocks: v.string(), // JSON serialized block structure
+    _creationTime: v.optional(v.number()),
+    _lastUpdateTime: v.optional(v.number()),
+  }).index('by_server', ['serverId']),
 });

@@ -306,7 +306,7 @@ export function DiscordFooter() {
                   { name: 'Privacy Policy', href: '/privacy' },
                   { name: 'Cookie Settings', href: '/cookies' },
                   { name: 'Accessibility', href: '/accessibility' },
-                ].map((link, index) => (
+                ].map((link, _index) => (
                   <motion.div
                     key={link.name}
                     whileHover={{ y: -2 }}

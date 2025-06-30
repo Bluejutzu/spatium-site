@@ -342,7 +342,7 @@ export default function PricingPage() {
                     {/* Features List */}
                     <div className='space-y-4 flex-grow'>
                       <h4 className='font-bold text-white mb-6 text-lg tracking-wide'>
-                        WHAT'S INCLUDED:
+                        WHAT&apos;S INCLUDED:
                       </h4>
                       {plan.features.map((feature, featureIndex) => (
                         <motion.div

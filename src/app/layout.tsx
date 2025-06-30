@@ -4,8 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/theme/theme-provider';
-import ConvexClientProvider from '@/components/Clerk/ConvexClientProvider';
-import SyncClerkToConvex from '@/components/Clerk/SyncClerkToConvex';
+import { ConvexClientProvider, SyncClerkToConvex } from '@/features/auth';
 import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });

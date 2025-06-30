@@ -6,7 +6,7 @@ import {
   action,
 } from './_generated/server';
 import { v } from 'convex/values';
-import { DiscordAPI } from '../src/lib/discord-api';
+import { DiscordAPI } from '@/features/discord';
 import { api, internal } from './_generated/api';
 
 export const getServers = internalQuery({
@@ -196,6 +196,45 @@ export const updateAllServerMetrics = internalMutation({
       await ctx.scheduler.runAfter(0, internal.discord._updateServerMetrics, {
         serverId: server.serverId,
       });
+    }
+  },
+});
+
+export const getCommands = query({
+  args: { serverId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('commands')
+      .withIndex('by_server', q => q.eq('serverId', args.serverId))
+      .collect();
+  },
+});
+
+export const saveCommand = mutation({
+  args: {
+    serverId: v.string(),
+    name: v.string(),
+    blocks: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query('commands')
+      .withIndex('by_server', q => q.eq('serverId', args.serverId))
+      .collect();
+    const match = existing.find(cmd => cmd.name === args.name);
+    if (match) {
+      await ctx.db.patch(match._id, {
+        blocks: args.blocks,
+        _lastUpdateTime: Date.now(),
+      });
+      return { updated: true };
+    } else {
+      await ctx.db.insert('commands', {
+        serverId: args.serverId,
+        name: args.name,
+        blocks: args.blocks,
+      });
+      return { created: true };
     }
   },
 });
