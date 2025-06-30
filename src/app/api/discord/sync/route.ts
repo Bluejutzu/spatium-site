@@ -80,12 +80,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      message: 'Discord servers synced successfully',
       serversCount: serverData.length,
     });
   } catch (error) {
     console.error('Discord sync error:', error);
     return NextResponse.json(
-      { error: 'Failed to sync Discord data' },
+      { 
+        error: 'Failed to sync Discord data',
+        message: 'An error occurred while syncing your Discord servers. Please try again.' 
+      },
       { status: 500 }
     );
   }

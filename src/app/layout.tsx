@@ -6,6 +6,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import ConvexClientProvider from '@/components/Clerk/ConvexClientProvider';
 import SyncClerkToConvex from '@/components/Clerk/SyncClerkToConvex';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
             <ConvexClientProvider>
               {children} <SyncClerkToConvex />
             </ConvexClientProvider>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>

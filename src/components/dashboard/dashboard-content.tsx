@@ -20,10 +20,13 @@ import {
   MessageSquare,
   Zap,
   ArrowDown,
+  RefreshCw,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@clerk/nextjs';
 
 interface DashboardContentProps {
   serverId?: string;
@@ -92,10 +95,53 @@ const dashboardFeatures = [
 ];
 
 export function DashboardContent({ serverId }: DashboardContentProps) {
+  const toast = useToast();
+  const { user } = useUser();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const serverData = useQuery(
     api.discord.getServerMetrics,
     serverId ? { serverId } : 'skip'
   );
+
+  useEffect(() => {
+    if (serverData && serverData.error) {
+      toast.error('Error loading server data', serverData.error.message);
+    }
+  }, [serverData, toast]);
+
+  const handleRefreshData = async () => {
+    if (!user?.id || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    toast.loading('Syncing Discord data...');
+    
+    try {
+      const response = await fetch('/api/discord/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.dismiss();
+        toast.success(data.message || 'Discord data synced successfully', 
+          `Updated ${data.serversCount} servers`);
+      } else {
+        toast.dismiss();
+        toast.error('Sync failed', data.message || 'Failed to sync Discord data');
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Network error', 'Failed to connect to sync service');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   const alerts = useQuery(
     api.discord.getServerAlerts,
     serverId ? { serverId } : 'skip'
