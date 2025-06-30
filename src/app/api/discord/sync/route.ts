@@ -86,9 +86,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Discord sync error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to sync Discord data',
-        message: 'An error occurred while syncing your Discord servers. Please try again.' 
+        message:
+          'An error occurred while syncing your Discord servers. Please try again.',
       },
       { status: 500 }
     );

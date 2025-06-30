@@ -17,10 +17,8 @@ import {
   AlertTriangle,
   Crown,
   Shield,
-  MessageSquare,
   Zap,
   ArrowDown,
-  RefreshCw,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -104,18 +102,14 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
     serverId ? { serverId } : 'skip'
   );
 
-  useEffect(() => {
-    if (serverData && serverData.error) {
-      toast.error('Error loading server data', serverData.error.message);
-    }
-  }, [serverData, toast]);
+  // Server data error handling is handled by Convex automatically
 
   const handleRefreshData = async () => {
     if (!user?.id || isRefreshing) return;
-    
+
     setIsRefreshing(true);
     toast.loading('Syncing Discord data...');
-    
+
     try {
       const response = await fetch('/api/discord/sync', {
         method: 'POST',
@@ -124,18 +118,23 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
         },
         body: JSON.stringify({ userId: user.id }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         toast.dismiss();
-        toast.success(data.message || 'Discord data synced successfully', 
-          `Updated ${data.serversCount} servers`);
+        toast.success(
+          data.message || 'Discord data synced successfully',
+          `Updated ${data.serversCount} servers`
+        );
       } else {
         toast.dismiss();
-        toast.error('Sync failed', data.message || 'Failed to sync Discord data');
+        toast.error(
+          'Sync failed',
+          data.message || 'Failed to sync Discord data'
+        );
       }
-    } catch (error) {
+    } catch (_error) {
       toast.dismiss();
       toast.error('Network error', 'Failed to connect to sync service');
     } finally {

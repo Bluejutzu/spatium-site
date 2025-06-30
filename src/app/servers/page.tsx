@@ -26,10 +26,19 @@ import {
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
-const serverFeatures = [
+const handleInviteClick = (toast: ReturnType<typeof useToast>) => {
+  toast.info(
+    'Opening Discord authorization...',
+    'You will be redirected to Discord to authorize the bot'
+  );
+  // Additional tracking or analytics could go here
+};
+
+const _serverFeatures = [
   {
     icon: BarChart3,
     title: 'ADVANCED ANALYTICS',
@@ -93,6 +102,7 @@ function AnimatedCounter({
 
 export default function ServersPage() {
   const { user } = useUser();
+  const toast = useToast();
   const servers = useQuery(
     api.discord.getUserServers,
     user ? { userId: user.id } : 'skip'
@@ -237,6 +247,7 @@ export default function ServersPage() {
                     href={DISCORD_INVITE_URL}
                     target='_blank'
                     rel='noopener noreferrer'
+                    onClick={() => handleInviteClick(toast)}
                   >
                     <Button className='discord-button-primary'>
                       <Plus className='h-4 w-4 mr-2' />
@@ -361,6 +372,7 @@ export default function ServersPage() {
                         href={DISCORD_INVITE_URL}
                         target='_blank'
                         rel='noopener noreferrer'
+                        onClick={() => handleInviteClick(toast)}
                       >
                         <Button
                           size='lg'
@@ -607,6 +619,7 @@ export default function ServersPage() {
                 href={DISCORD_INVITE_URL}
                 target='_blank'
                 rel='noopener noreferrer'
+                onClick={() => handleInviteClick(toast)}
               >
                 <Button className='discord-button-primary text-xl px-12 py-6'>
                   BEGIN EXPANSION

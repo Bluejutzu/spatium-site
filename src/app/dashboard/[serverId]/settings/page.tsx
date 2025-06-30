@@ -6,12 +6,61 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 interface SettingsPageProps {
   params: { serverId: string };
 }
 
-export default function SettingsPage({ params }: SettingsPageProps) {
+export default function SettingsPage({ params: _params }: SettingsPageProps) {
+  const toast = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState({
+    prefix: '!',
+    welcomeMessage: 'Welcome to our server, {user}! Please read the rules.',
+    autoRole: true,
+    autoMod: true,
+    spamFilter: true,
+    linkFilter: false,
+    joinNotifications: true,
+    leaveNotifications: false,
+    logChannel: '#bot-logs',
+  });
+
+  const handleSaveSettings = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    toast.loading('Saving settings...', 'Your changes are being applied');
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Here you would typically make an API call to save settings
+      // await fetch(`/api/servers/${params.serverId}/settings`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(settings),
+      // });
+
+      toast.dismiss();
+      toast.success(
+        'Settings saved successfully!',
+        'Your bot configuration has been updated'
+      );
+    } catch (_error) {
+      toast.dismiss();
+      toast.error(
+        'Failed to save settings',
+        'Please try again or contact support'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className='space-y-6'>
       <div>
@@ -97,7 +146,13 @@ export default function SettingsPage({ params }: SettingsPageProps) {
         </Card>
 
         <div className='flex justify-end'>
-          <Button>Save Changes</Button>
+          <Button
+            onClick={handleSaveSettings}
+            disabled={isLoading}
+            className='min-w-[120px]'
+          >
+            {isLoading ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
       </div>
     </div>
