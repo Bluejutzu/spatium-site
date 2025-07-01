@@ -147,9 +147,6 @@ export function DashboardHome() {
                       Online
                     </Badge>
                   </div>
-                  <p className='text-sm text-muted-foreground mt-1'>
-                    99.9% uptime
-                  </p>
                 </div>
                 <div className='p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl'>
                   <Bot className='h-6 w-6 text-purple-600 dark:text-purple-400' />
