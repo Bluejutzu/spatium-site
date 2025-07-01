@@ -82,8 +82,6 @@ export function FloatingSidebar() {
   }
 
   if (isMobile) {
-    // Helper to compute correct href for dashboard subpages
-
     return (
       <>
         {/* Mobile Menu Button */}

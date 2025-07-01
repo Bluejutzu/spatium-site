@@ -560,6 +560,7 @@ export default function CommandBuilderPage({ params }: any) {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [configBlock, setConfigBlock] = useState<Block | null>(null);
   const [commandName, setCommandName] = useState('');
+  const [description, setDescription] = useState('');
   const [selectedCommand, setSelectedCommand] = useState<string | null>(null);
 
   const commands = useQuery(api.discord.getCommands, serverId ? { serverId } : 'skip');
@@ -571,6 +572,7 @@ export default function CommandBuilderPage({ params }: any) {
       if (cmd) {
         setBlocks(JSON.parse(cmd.blocks));
         setCommandName(cmd.name);
+        setDescription(cmd.description || '');
       }
     }
   }, [selectedCommand, commands]);
@@ -612,6 +614,7 @@ export default function CommandBuilderPage({ params }: any) {
     await saveCommandMutation({
       serverId,
       name: commandName,
+      description,
       blocks: JSON.stringify(blocks),
     });
     alert('Command saved!');
@@ -660,6 +663,12 @@ export default function CommandBuilderPage({ params }: any) {
             placeholder='Command name...'
             value={commandName}
             onChange={e => setCommandName(e.target.value)}
+          />
+          <input
+            className='p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-100'
+            placeholder='Description...'
+            value={description}
+            onChange={e => setDescription(e.target.value)}
           />
           <button
             className='bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700'

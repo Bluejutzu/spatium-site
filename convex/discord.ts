@@ -214,6 +214,7 @@ export const saveCommand = mutation({
   args: {
     serverId: v.string(),
     name: v.string(),
+    description: v.string(),
     blocks: v.string(),
   },
   handler: async (ctx, args) => {
@@ -232,6 +233,7 @@ export const saveCommand = mutation({
       await ctx.db.insert('commands', {
         serverId: args.serverId,
         name: args.name,
+        description: args.description,
         blocks: args.blocks,
       });
       return { created: true };
