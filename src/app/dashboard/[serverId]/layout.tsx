@@ -31,7 +31,6 @@ export default function DashboardLayout({
 
       <SidebarProvider>
         <div className="relative z-10 flex min-h-screen w-full">
-          <FloatingSidebar />
           <div className="flex-1 flex flex-col">
             <main className="flex-1">{children}</main>
           </div>

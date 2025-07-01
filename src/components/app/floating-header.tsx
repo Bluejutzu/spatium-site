@@ -94,12 +94,6 @@ export function FloatingHeader({ showSearch = true, title }: FloatingHeaderProps
                                 >
                                     {getPageTitle()}
                                 </motion.h1>
-
-                                {/* Breadcrumb indicator */}
-                                <div className="hidden md:flex items-center gap-2 text-discord-text text-sm">
-                                    <div className="w-1 h-1 bg-discord-text rounded-full" />
-                                    <span>Active Session</span>
-                                </div>
                             </div>
 
                             {/* Quick Actions Dropdown */}
