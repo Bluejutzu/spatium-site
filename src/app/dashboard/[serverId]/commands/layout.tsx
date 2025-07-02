@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 
-export default function CommandsLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
       <div className='min-h-screen relative'>

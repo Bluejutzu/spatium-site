@@ -15,6 +15,8 @@ export interface DiscordUser {
   discriminator: string;
   avatar: string | null;
   email?: string;
+  bot?: boolean;
+  system?: boolean;
 }
 
 export interface DiscordChannel {
@@ -23,7 +25,9 @@ export interface DiscordChannel {
   name: string;
   position: number;
   parent_id?: string;
-  permission_overwrites: DiscordPermissionOverwrite[];
+  permission_overwrites?: DiscordPermissionOverwrite[];
+  topic?: string;
+  nsfw?: boolean;
 }
 
 export interface DiscordPermissionOverwrite {
@@ -41,6 +45,8 @@ export interface DiscordMember {
   premium_since?: string;
   deaf: boolean;
   mute: boolean;
+  pending?: boolean;
+  permissions?: string;
 }
 
 export interface DiscordRole {
@@ -83,4 +89,49 @@ export interface CommandExecution {
   executionTime: number;
   timestamp: Date;
   error?: string;
+}
+
+export interface DiscordEmbed {
+  title?: string;
+  description?: string;
+  url?: string;
+  timestamp?: string;
+  color?: number;
+  footer?: {
+    text: string;
+    icon_url?: string;
+  };
+  image?: {
+    url: string;
+  };
+  thumbnail?: {
+    url: string;
+  };
+  video?: {
+    url: string;
+  };
+  provider?: {
+    name?: string;
+    url?: string;
+  };
+  author?: {
+    name: string;
+    url?: string;
+    icon_url?: string;
+  };
+  fields?: Array<{
+    name: string;
+    value: string;
+    inline?: boolean;
+  }>;
+}
+
+export interface DiscordMessage {
+  content?: string;
+  embeds?: DiscordEmbed[];
+  tts?: boolean;
+  ephemeral?: boolean;
+  components?: any[];
+  attachments?: any[];
+  flags?: number;
 }

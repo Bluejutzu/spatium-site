@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { FloatingSidebar } from "@/components/app/floating-sidebar" 
 import { useParams } from "next/navigation"
+import { FloatingSidebar } from "@/components/app/floating-sidebar"
 
 export default function DashboardLayout({
   children,
@@ -32,6 +32,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <div className="relative z-10 flex min-h-screen w-full">
           <div className="flex-1 flex flex-col">
+            <FloatingSidebar />
             <main className="flex-1">{children}</main>
           </div>
         </div>
