@@ -1,13 +1,18 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { useEffect } from 'react';
 import { api } from '../../../convex/_generated/api';
 
 export function SyncClerkToConvex() {
   const { user, isLoaded } = useUser();
   const syncUser = useMutation(api.users.syncUser);
+  // Fetch the current user from Convex by Clerk ID
+  const dbUser = useQuery(
+    api.users.getUserByClerkId,
+    user ? { clerkId: user.id } : 'skip'
+  );
 
   useEffect(() => {
     if (!isLoaded || !user) {
@@ -21,11 +26,12 @@ export function SyncClerkToConvex() {
     if (!discordAccount) {
       return console.log(
         'No discord account found on the user ' +
-          user.externalAccounts[0].provider
+        user.externalAccounts[0]?.provider
       );
     }
 
-    syncUser({
+    // Prepare the user data to sync
+    const userData = {
       clerkId: user.id,
       discordUserId: discordAccount.providerUserId,
       username: discordAccount.username || user.username || '',
@@ -34,10 +40,23 @@ export function SyncClerkToConvex() {
         user.primaryEmailAddress?.emailAddress ||
         '',
       avatarUrl: discordAccount.imageUrl || user.imageUrl,
-    });
+    };
 
-    syncDiscordData(user.id);
-  }, [isLoaded, user, syncUser]);
+    // Only sync if dbUser is undefined (no entry) or if any field is different
+    const shouldSync =
+      !dbUser ||
+      dbUser.discordUserId !== userData.discordUserId ||
+      dbUser.username !== userData.username ||
+      dbUser.email !== userData.email ||
+      dbUser.avatarUrl !== userData.avatarUrl;
+
+      console.log(shouldSync)
+
+    if (shouldSync) {
+      syncUser(userData);
+      syncDiscordData(user.id);
+    }
+  }, [isLoaded, user, dbUser, syncUser]);
 
   const syncDiscordData = async (userId: string) => {
     try {

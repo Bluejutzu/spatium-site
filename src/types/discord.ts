@@ -92,39 +92,33 @@ export interface CommandExecution {
 }
 
 export interface DiscordEmbed {
-  title?: string;
-  description?: string;
-  url?: string;
-  timestamp?: string;
-  color?: number;
-  footer?: {
-    text: string;
-    icon_url?: string;
-  };
-  image?: {
-    url: string;
-  };
-  thumbnail?: {
-    url: string;
-  };
-  video?: {
-    url: string;
-  };
-  provider?: {
-    name?: string;
-    url?: string;
-  };
-  author?: {
-    name: string;
-    url?: string;
-    icon_url?: string;
-  };
+  title?: string
+  description?: string
+  color?: number
   fields?: Array<{
-    name: string;
-    value: string;
-    inline?: boolean;
-  }>;
+    name: string
+    value: string
+    inline?: boolean
+  }>
+  author?: {
+    name?: string
+    url?: string
+    icon_url?: string
+  }
+  footer?: {
+    text?: string
+    icon_url?: string
+  }
+  image?: {
+    url?: string
+  }
+  thumbnail?: {
+    url?: string
+  }
+  url?: string
+  timestamp?: string
 }
+
 
 export interface DiscordMessage {
   content?: string;
