@@ -83,7 +83,7 @@ function AnimatedCounter({ end, duration = 2000 }: { end: number; duration?: num
 
 export default function ServersPage() {
   const { user } = useUser()
-  const servers = useQuery(api.discord.getUserServers, user ? { userId: user.id } : "skip")
+  const servers = useQuery(api.discord.getUserServers, user ? { userId: user.externalAccounts[0].providerUserId } : "skip")
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { scrollYProgress } = useScroll({

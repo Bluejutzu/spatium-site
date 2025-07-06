@@ -50,7 +50,7 @@ export function SyncClerkToConvex() {
       dbUser.email !== userData.email ||
       dbUser.avatarUrl !== userData.avatarUrl;
 
-      console.log(shouldSync)
+    console.log(`[SHOULDSYNC] ${shouldSync}`)
 
     if (shouldSync) {
       syncUser(userData);
@@ -59,6 +59,7 @@ export function SyncClerkToConvex() {
   }, [isLoaded, user, dbUser, syncUser]);
 
   const syncDiscordData = async (userId: string) => {
+    console.log(`[SYNCDISCORDATA:userId] ${userId}`)
     try {
       const response = await fetch('/api/discord/sync', {
         method: 'POST',

@@ -119,7 +119,6 @@ export interface DiscordEmbed {
   timestamp?: string
 }
 
-
 export interface DiscordMessage {
   content?: string;
   embeds?: DiscordEmbed[];
@@ -128,4 +127,4 @@ export interface DiscordMessage {
   components?: any[];
   attachments?: any[];
   flags?: number;
-}
+} 

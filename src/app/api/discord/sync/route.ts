@@ -8,12 +8,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId: clerkUserId } = await auth();
     const { userId } = await request.json();
-
-    if (!clerkUserId || clerkUserId !== userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const client = await clerkClient();
 
@@ -32,35 +27,39 @@ export async function POST(request: NextRequest) {
 
     const discordApi = new DiscordAPI(discordToken);
 
-    const [botGuilds, userGuilds] = await Promise.all([
+    const [botGuilds, userGuilds, discordUser] = await Promise.all([
       discordApi.getBotGuilds(),
       discordApi.getUserGuilds(),
+      discordApi.getCurrentUser()
     ]);
+
+    if (!discordUser) {
+      return console.error("Could not fetch user")
+    }
 
     const botGuildIds = new Set(botGuilds.map(g => g.id));
     const mutualGuilds = userGuilds.filter(guild => botGuildIds.has(guild.id));
-
     const ownedGuilds = mutualGuilds.filter(guild => guild.owner === true);
+
     const serverData = ownedGuilds.map(guild => ({
       serverId: guild.id,
       name: guild.name,
       icon: guild.icon,
-      ownerId: userId,
+      ownerId: discordUser.id,
       memberCount: guild.approximate_member_count,
       onlineCount: guild.approximate_presence_count,
       permissions: guild.permissions
         ? parseInt(guild.permissions)
-            .toString(2)
-            .split('')
-            .reverse()
-            .map((v, i) => (v === '1' ? `BIT_${i}` : null))
-            .filter(Boolean)
+          .toString(2)
+          .split('')
+          .reverse()
+          .map((v, i) => (v === '1' ? `BIT_${i}` : null))
+          .filter(Boolean)
         : [],
       features: guild.features,
     }));
 
     await convex.mutation(api.discord.syncDiscordServers, {
-      userId,
       servers: serverData.map(server => ({
         ...server,
         icon: server.icon ?? undefined,
@@ -85,10 +84,9 @@ export async function POST(request: NextRequest) {
       serversCount: serverData.length,
     });
   } catch (error) {
-    console.error('Discord sync error:', error);
     return NextResponse.json(
       {
-        error: 'Failed to sync Discord data',
+        error: error,
         message:
           'An error occurred while syncing your Discord servers. Please try again.',
       },

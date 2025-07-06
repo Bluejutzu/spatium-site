@@ -8,9 +8,6 @@ export default defineSchema({
     username: v.string(),
     email: v.string(),
     avatarUrl: v.optional(v.string()),
-    discordAccessToken: v.optional(v.string()),
-    discordRefreshToken: v.optional(v.string()),
-    tokenExpiresAt: v.optional(v.number()),
   })
     .index('by_clerk_id', ['clerkId'])
     .index('by_discord_id', ['discordUserId']),
@@ -23,7 +20,7 @@ export default defineSchema({
     memberCount: v.number(),
     onlineCount: v.number(),
     botJoinedAt: v.number(),
-    permissions: v.array(v.string()),
+    permissions: v.optional(v.array(v.string())),
     features: v.array(v.string()),
     lastUpdated: v.number(),
   })

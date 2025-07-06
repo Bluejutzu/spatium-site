@@ -1,4 +1,4 @@
-import type { DiscordGuild, DiscordUser, DiscordRole } from '@/types/discord';
+import { DiscordGuild, DiscordUser, DiscordRole, DiscordChannel, DiscordMember } from "@/types/discord";
 
 export class DiscordAPI {
   private accessToken: string;
@@ -8,7 +8,7 @@ export class DiscordAPI {
     this.accessToken = accessToken;
   }
 
-  private async request(endpoint: string, options: RequestInit = {}) {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...options,
       headers: {
@@ -17,22 +17,22 @@ export class DiscordAPI {
         ...options.headers,
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(
         `Discord API error: ${response.status} ${response.statusText}`
       );
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
   }
 
   async getCurrentUser(): Promise<DiscordUser> {
-    return this.request('/users/@me');
+    return this.request<DiscordUser>('/users/@me');
   }
 
   async getUserGuilds(with_counts = true): Promise<DiscordGuild[]> {
-    return this.request(
+    return this.request<DiscordGuild[]>(
       `/users/@me/guilds${with_counts ? '?with_counts=true' : ''}`
     );
   }
@@ -49,24 +49,24 @@ export class DiscordAPI {
         `Discord API error: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
-    return response.json();
+    return response.json() as Promise<DiscordGuild[]>;
   }
 
   async getGuild(guildId: string): Promise<DiscordGuild> {
-    return this.request(`/guilds/${guildId}?with_counts=true`);
+    return this.request<DiscordGuild>(`/guilds/${guildId}?with_counts=true`);
   }
 
-  async getGuildChannels(guildId: string) {
-    return this.request(`/guilds/${guildId}/channels`);
+  async getGuildChannels(guildId: string): Promise<DiscordChannel[]> {
+    return this.request<DiscordChannel[]>(`/guilds/${guildId}/channels`);
   }
 
-  async getGuildMembers(guildId: string, limit = 100) {
-    return this.request(`/guilds/${guildId}/members?limit=${limit}`);
+  async getGuildMembers(guildId: string, limit = 100): Promise<DiscordMember[]> {
+    return this.request<DiscordMember[]>(`/guilds/${guildId}/members?limit=${limit}`);
   }
 
-  async getGuildWithBotToken(guildId: string): Promise<DiscordGuild> {
+  async getGuildWithBotToken(guildId: string, withCounts: boolean): Promise<DiscordGuild> {
     const response = await fetch(
-      `${this.baseURL}/guilds/${guildId}?with_counts=true`,
+      `${this.baseURL}/guilds/${guildId}${withCounts ? "?with_counts=true" : ""}`,
       {
         headers: {
           Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
@@ -79,7 +79,7 @@ export class DiscordAPI {
         `Discord API error: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
-    return response.json();
+    return response.json() as Promise<DiscordGuild>;
   }
 
   async getGuildRolesWithBotToken(guildId: string): Promise<DiscordRole[]> {
@@ -97,7 +97,7 @@ export class DiscordAPI {
         `Discord API error: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
-    return response.json();
+    return response.json() as Promise<DiscordRole[]>;
   }
 }
 

@@ -28,7 +28,6 @@ import {
   Lock,
   Eye,
   Hash,
-  ArrowDown,
 } from "lucide-react"
 import { api } from "../../../../../convex/_generated/api"
 

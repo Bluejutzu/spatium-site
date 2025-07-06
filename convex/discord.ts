@@ -2,22 +2,19 @@ import {
   query,
   mutation,
   internalMutation,
-  internalQuery,
-  action,
 } from './_generated/server';
 import { v } from 'convex/values';
 import { DiscordAPI } from '@/features/discord';
-import { api, internal } from './_generated/api';
+import { api } from './_generated/api';
 
-export const getServers = internalQuery({
-  handler: async ctx => {
+export const getServers: any = query({
+  handler: async (ctx) => {
     return await ctx.db.query('discordServers').collect();
   },
 });
 
 export const syncDiscordServers = mutation({
   args: {
-    userId: v.string(),
     servers: v.array(
       v.object({
         serverId: v.string(),
@@ -26,7 +23,7 @@ export const syncDiscordServers = mutation({
         ownerId: v.string(),
         memberCount: v.number(),
         onlineCount: v.number(),
-        permissions: v.array(v.string()),
+        permissions: v.optional(v.array(v.string())),
         features: v.array(v.string()),
       })
     ),
@@ -170,7 +167,7 @@ export const _updateServerMetrics = internalMutation({
   handler: async (ctx, args) => {
     const discordAPI = new DiscordAPI('');
     try {
-      const guild = await discordAPI.getGuildWithBotToken(args.serverId);
+      const guild = await discordAPI.getGuildWithBotToken(args.serverId, true);
       await ctx.runMutation(api.discord.updateServerMetrics, {
         serverId: args.serverId,
         memberCount: guild.approximate_member_count ?? 0,
@@ -188,18 +185,6 @@ export const _updateServerMetrics = internalMutation({
   },
 });
 
-export const updateAllServerMetrics = internalMutation({
-  handler: async ctx => {
-    const servers = await ctx.runQuery(internal.discord.getServers);
-
-    for (const server of servers) {
-      await ctx.scheduler.runAfter(0, internal.discord._updateServerMetrics, {
-        serverId: server.serverId,
-      });
-    }
-  },
-});
-
 export const getCommands = query({
   args: { serverId: v.string() },
   handler: async (ctx, args) => {
@@ -209,6 +194,14 @@ export const getCommands = query({
       .collect();
   },
 });
+
+export const getAllCommands = query({
+  handler: async (ctx, args_0) => {
+    return await ctx.db
+      .query("commands")
+      .collect()
+  },
+})
 
 export const saveCommand = mutation({
   args: {
@@ -240,3 +233,27 @@ export const saveCommand = mutation({
     }
   },
 });
+
+
+export const dropServer = mutation({
+  args: {
+    serverId: v.string(),
+
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("discordServers")
+      .withIndex("by_server_id", q => q.eq("serverId", args.serverId))
+      .first()
+
+    if (!existing) {
+      return { dropped: false, existing: false, error: null }
+    }
+
+    await ctx.db.delete(existing._id).catch((e) => {
+      return { dropped: false, existing: true, error: e }
+    })
+
+    return { dropped: true, existing: true, error: null }
+  }
+})
