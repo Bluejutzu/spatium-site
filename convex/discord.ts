@@ -257,3 +257,24 @@ export const dropServer = mutation({
     return { dropped: true, existing: true, error: null }
   }
 })
+
+export const getAutoRoleData = query({
+  args: {
+    serverId: v.string()
+  },
+  handler: async (ctx, args) => {
+    const s = await ctx.db.query("serverSettings").withIndex("by_server", q => q.eq("serverId", args.serverId)).first()
+
+    if (!s || !s.autoRoleId) {
+      return {
+        error: true,
+        message: "Non-existent document"
+      }
+    }
+
+    return {
+      autoRole: s.autoRole,
+      roleId: s.autoRoleId
+    }
+  }
+})
