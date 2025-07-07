@@ -1,0 +1,218 @@
+/* Enhanced Clerk Pricing Table Discord Theme Styles */
+
+.clerk-pricing-discord-wrapper {
+  /* Container styling */
+  .cl-pricingTable {
+    @apply w-full max-w-7xl mx-auto;
+  }
+
+  .cl-pricingTableContainer {
+    @apply grid lg:grid-cols-2 gap-8 lg:gap-12;
+  }
+
+  /* Card styling with Discord theme */
+  .cl-card {
+    @apply discord-card border-2 border-discord-border hover:border-discord-border-hover transition-all duration-300 h-full relative overflow-hidden backdrop-blur-xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .cl-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Popular plan special styling */
+  .cl-card[data-plan='premium'] {
+    @apply border-discord-blurple/50 shadow-glow-blurple;
+    transform: scale(1.02);
+  }
+
+  .cl-card[data-plan='premium']:hover {
+    transform: scale(1.02) translateY(-4px);
+    box-shadow:
+      0 0 30px rgba(88, 101, 242, 0.4),
+      0 0 60px rgba(88, 101, 242, 0.2),
+      0 12px 48px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Header styling */
+  .cl-cardHeader {
+    @apply p-8 pb-6 bg-gradient-to-br from-discord-dark/50 to-transparent relative;
+  }
+
+  /* Popular badge */
+  .cl-badge {
+    @apply absolute -top-1 left-1/2 transform -translate-x-1/2 bg-discord-blurple text-white font-minecraft font-bold px-6 py-2 rounded-b-lg text-sm tracking-wide shadow-lg;
+    animation: pulse 2s infinite;
+  }
+
+  .cl-badge[data-plan='premium'] {
+    @apply bg-gradient-to-r from-discord-blurple to-discord-purple;
+  }
+
+  /* Plan name and description */
+  .cl-planName {
+    @apply text-3xl font-black text-white font-minecraft tracking-wide mb-2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .cl-planDescription {
+    @apply text-discord-text font-medium text-lg mb-6 leading-relaxed;
+  }
+
+  /* Plan icon */
+  .cl-planIcon {
+    @apply w-12 h-12 p-3 rounded-xl mb-4 transition-transform duration-300;
+  }
+
+  .cl-planIcon:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  .cl-planIcon[data-plan='starter'] {
+    @apply bg-discord-green/20 text-discord-green;
+  }
+
+  .cl-planIcon[data-plan='premium'] {
+    @apply bg-discord-blurple/20 text-discord-blurple;
+  }
+
+  /* Pricing display */
+  .cl-price {
+    @apply text-6xl font-black text-white mb-2 font-minecraft;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .cl-priceFrequency {
+    @apply text-discord-text font-medium text-lg tracking-wide;
+  }
+
+  /* Body content */
+  .cl-cardBody {
+    @apply p-8 pt-0 flex-1;
+  }
+
+  /* Feature list styling */
+  .cl-featureList {
+    @apply space-y-4 mb-8;
+  }
+
+  .cl-feature {
+    @apply flex items-center gap-4 p-4 rounded-lg hover:bg-white/5 transition-all duration-200;
+  }
+
+  .cl-feature:hover {
+    transform: translateX(4px);
+  }
+
+  .cl-featureIcon {
+    @apply w-6 h-6 text-discord-green flex-shrink-0 p-1 rounded-full bg-discord-green/20;
+  }
+
+  .cl-featureText {
+    @apply text-white font-medium text-base;
+  }
+
+  /* Button styling */
+  .cl-cardFooter {
+    @apply p-8 pt-0;
+  }
+
+  .cl-button {
+    @apply w-full py-4 px-8 font-minecraft font-bold text-lg tracking-wide transition-all duration-300 rounded-lg;
+  }
+
+  .cl-buttonPrimary {
+    @apply discord-button-primary shadow-glow-blurple;
+  }
+
+  .cl-buttonPrimary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 32px rgba(88, 101, 242, 0.5);
+  }
+
+  .cl-buttonSecondary {
+    @apply discord-button-outline;
+  }
+
+  .cl-buttonSecondary:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Loading states */
+  .cl-loadingSpinner {
+    @apply text-discord-blurple;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .cl-pricingTableContainer {
+      @apply grid-cols-1 gap-8;
+    }
+
+    .cl-card[data-plan='premium'] {
+      transform: none;
+    }
+
+    .cl-card[data-plan='premium']:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cl-planName {
+      @apply text-2xl;
+    }
+
+    .cl-price {
+      @apply text-4xl;
+    }
+
+    .cl-cardHeader,
+    .cl-cardBody,
+    .cl-cardFooter {
+      @apply p-6;
+    }
+
+    .cl-cardBody {
+      @apply pt-0;
+    }
+
+    .cl-cardFooter {
+      @apply pt-0;
+    }
+  }
+}
+
+/* Additional animations */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Glow effect for premium plan */
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(88, 101, 242, 0.4),
+      0 0 40px rgba(88, 101, 242, 0.2);
+  }
+
+  50% {
+    box-shadow:
+      0 0 30px rgba(88, 101, 242, 0.6),
+      0 0 60px rgba(88, 101, 242, 0.3);
+  }
+}
+
+.shadow-glow-blurple {
+  animation: glow 3s ease-in-out infinite;
+}

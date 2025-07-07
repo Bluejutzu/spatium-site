@@ -1,0 +1,409 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('/fonts/Minecraft-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-minecraft: 'Minecraft', 'Orbitron', monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Discord Color Palette */
+  --color-discord-dark: #1e1f22;
+  --color-discord-darker: #111214;
+  --color-discord-blurple: #5865f2;
+  --color-discord-blurple-hover: #4752c4;
+  --color-discord-green: #23a55a;
+  --color-discord-yellow: #f0b232;
+  --color-discord-red: #f23f43;
+  --color-discord-purple: #a855f7;
+  --color-discord-orange: #f97316;
+  --color-discord-text: #b5bac1;
+  --color-discord-border: #2b2d31;
+  --color-discord-border-hover: #404249;
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.21 0.006 285.885);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.705 0.015 286.067);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: oklch(0.21 0.006 285.885);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.705 0.015 286.067);
+}
+
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.92 0.004 286.32);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.552 0.016 285.938);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.552 0.016 285.938);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Font Classes */
+.font-minecraft {
+  font-family: var(--font-minecraft);
+}
+
+/* Discord Color Classes */
+.bg-discord-dark {
+  background-color: var(--color-discord-dark);
+}
+
+.bg-discord-darker {
+  background-color: var(--color-discord-darker);
+}
+
+.bg-discord-blurple {
+  background-color: var(--color-discord-blurple);
+}
+
+.bg-discord-blurple-hover {
+  background-color: var(--color-discord-blurple-hover);
+}
+
+.bg-discord-green {
+  background-color: var(--color-discord-green);
+}
+
+.bg-discord-yellow {
+  background-color: var(--color-discord-yellow);
+}
+
+.bg-discord-red {
+  background-color: var(--color-discord-red);
+}
+
+.bg-discord-purple {
+  background-color: var(--color-discord-purple);
+}
+
+.bg-discord-orange {
+  background-color: var(--color-discord-orange);
+}
+
+.text-discord-dark {
+  color: var(--color-discord-dark);
+}
+
+.text-discord-darker {
+  color: var(--color-discord-darker);
+}
+
+.text-discord-blurple {
+  color: var(--color-discord-blurple);
+}
+
+.text-discord-green {
+  color: var(--color-discord-green);
+}
+
+.text-discord-yellow {
+  color: var(--color-discord-yellow);
+}
+
+.text-discord-red {
+  color: var(--color-discord-red);
+}
+
+.text-discord-purple {
+  color: var(--color-discord-purple);
+}
+
+.text-discord-orange {
+  color: var(--color-discord-orange);
+}
+
+.text-discord-text {
+  color: var(--color-discord-text);
+}
+
+.border-discord-border {
+  border-color: var(--color-discord-border);
+}
+
+.border-discord-border-hover {
+  border-color: var(--color-discord-border-hover);
+}
+
+.border-discord-blurple {
+  border-color: var(--color-discord-blurple);
+}
+
+.border-discord-green {
+  border-color: var(--color-discord-green);
+}
+
+/* Component Styles */
+.discord-card {
+  @apply bg-discord-dark/80 backdrop-blur-xl border border-discord-border;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.discord-button-primary {
+  @apply bg-discord-blurple hover:bg-discord-blurple-hover text-white font-bold rounded-lg transition-all duration-300;
+  box-shadow: 0 4px 16px rgba(88, 101, 242, 0.3);
+}
+
+.discord-button-primary:hover {
+  box-shadow: 0 8px 24px rgba(88, 101, 242, 0.5);
+}
+
+.discord-button-outline {
+  @apply border-2 border-discord-border text-discord-text hover:text-white hover:border-discord-border-hover bg-transparent font-bold rounded-lg transition-all duration-300;
+}
+
+.discord-button-outline:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Glow Effects */
+.glow-text {
+  text-shadow:
+    0 0 20px currentColor,
+    0 0 40px currentColor,
+    0 0 60px currentColor;
+}
+
+.shadow-glow-blurple {
+  box-shadow:
+    0 0 20px rgba(88, 101, 242, 0.4),
+    0 0 40px rgba(88, 101, 242, 0.2);
+}
+
+/* Grid Pattern */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Floating Orbs */
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  animation: float 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.floating-orb-1 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    rgba(88, 101, 242, 0.3) 0%,
+    transparent 70%
+  );
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.floating-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(35, 165, 90, 0.2) 0%,
+    transparent 70%
+  );
+  top: 60%;
+  right: 10%;
+  animation-delay: -3s;
+}
+
+.floating-orb-3 {
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(
+    circle,
+    rgba(240, 178, 50, 0.25) 0%,
+    transparent 70%
+  );
+  bottom: 20%;
+  left: 50%;
+  animation-delay: -6s;
+}
+
+/* Animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-15px) rotate(90deg);
+  }
+
+  50% {
+    transform: translateY(-30px) rotate(180deg);
+  }
+
+  75% {
+    transform: translateY(-15px) rotate(270deg);
+  }
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  .text-6xl {
+    font-size: 3rem;
+  }
+
+  .text-8xl {
+    font-size: 4rem;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-discord-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-discord-blurple);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-discord-blurple-hover);
+}
+
+/* Selection Styling */
+::selection {
+  background: var(--color-discord-blurple);
+  color: white;
+}
+
+/* Focus Styles */
+.focus-visible\:ring-discord-blurple:focus-visible {
+  --tw-ring-color: var(--color-discord-blurple);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
