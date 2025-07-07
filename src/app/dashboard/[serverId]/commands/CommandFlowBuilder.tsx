@@ -53,10 +53,16 @@ import { useToast } from "@/hooks/use-toast"
 import type { DiscordEmbed } from "@/types/discord"
 import { EmbedBuilder } from "@/components/app/embed-builder"
 import { useMutation } from "convex/react"
+import { Roboto } from "next/font/google"
 import { api } from "../../../../../convex/_generated/api"
+
+const roboto = Roboto({
+    subsets: ["latin"]
+})
 
 const ROOT_NODE_ID = "root"
 const ERROR_NODE_ID = "error-handler"
+const INPUT_FONT = roboto.className
 
 // Enhanced Node Components with Discord API features
 const RootNode = ({ data, selected }: NodeProps) => (
@@ -198,9 +204,9 @@ const nodeTypes = {
     "delete-role": createDiscordNode(Crown, "red", "Delete Role"),
     "modify-role": createDiscordNode(Crown, "blue", "Modify Role"),
     "audit-log": createDiscordNode(Database, "blue", "Audit Log"),
-    wait: createDiscordNode(Clock, "yellow", "Wait/Delay"),
-    random: createDiscordNode(Zap, "purple", "Random"),
-    variable: createDiscordNode(Database, "green", "Variable"),
+    "wait": createDiscordNode(Clock, "yellow", "Wait/Delay"),
+    "random": createDiscordNode(Zap, "purple", "Random"),
+    "variable": createDiscordNode(Database, "green", "Variable"),
 }
 
 const initialNodes: Node[] = [
@@ -564,7 +570,15 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
             return
         }
 
-        const name = rootNode.data.config?.name || "unnamed"
+        const name = rootNode.data.config?.name
+
+        if (!name) {
+            toast.error(
+                "Missing command name",
+                "A name is required for the command."
+            )
+        }
+
         const description = rootNode.data.config?.description || ""
         const blocks = JSON.stringify({ nodes, edges })
         const commandData = { name: name, description: description, blocks: blocks, serverId: serverId }
@@ -623,7 +637,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div>
                             <Label className="text-foreground font-medium">Command Name</Label>
                             <Input
-                                className="mt-1"
+                                className={"mt-1 " + INPUT_FONT}
                                 value={config.name || ""}
                                 onChange={(e) => updateNodeConfig(selectedNode.id, { name: e.target.value })}
                                 placeholder="e.g., /hello"
@@ -632,7 +646,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div>
                             <Label className="text-foreground font-medium">Description</Label>
                             <Textarea
-                                className="mt-1"
+                                className={"mt-1 " + INPUT_FONT}
                                 value={config.description || ""}
                                 onChange={(e) => updateNodeConfig(selectedNode.id, { description: e.target.value })}
                                 placeholder="What does this command do?"
@@ -650,7 +664,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                             <Input
                                 type="number"
                                 min={0}
-                                className="mt-1"
+                                className={"mt-1 " + INPUT_FONT}
                                 value={config.cooldown || 0}
                                 onChange={(e) => updateNodeConfig(selectedNode.id, { cooldown: Number(e.target.value) })}
                             />
@@ -684,7 +698,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                             <div>
                                 <Label className="text-foreground font-medium">Channel (Optional)</Label>
                                 <Input
-                                    className="mt-1"
+                                    className={"mt-1 " + INPUT_FONT}
                                     value={config.channelId || ""}
                                     onChange={(e) => updateNodeConfig(selectedNode.id, { channelId: e.target.value })}
                                     placeholder="Channel ID (leave empty for current channel)"
@@ -752,7 +766,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                                 value={config.conditionType || ""}
                                 onValueChange={(value) => updateNodeConfig(selectedNode.id, { conditionType: value })}
                             >
-                                <SelectTrigger className="mt-1">
+                                <SelectTrigger className={"mt-1 " + INPUT_FONT}>
                                     <SelectValue placeholder="Select condition type..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -769,7 +783,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                             <div>
                                 <Label className="text-foreground font-medium">Role ID</Label>
                                 <Input
-                                    className="mt-1"
+                                    className={"mt-1 " + INPUT_FONT}
                                     value={config.roleId || ""}
                                     onChange={(e) => updateNodeConfig(selectedNode.id, { roleId: e.target.value })}
                                     placeholder="123456789012345678"
@@ -780,7 +794,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                             <div>
                                 <Label className="text-foreground font-medium">Custom Condition</Label>
                                 <Textarea
-                                    className="mt-1"
+                                    className={"mt-1 " + INPUT_FONT}
                                     value={config.condition || ""}
                                     onChange={(e) => updateNodeConfig(selectedNode.id, { condition: e.target.value })}
                                     placeholder="Enter JavaScript condition..."
@@ -797,7 +811,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div>
                             <Label className="text-foreground font-medium">Role ID</Label>
                             <Input
-                                className="mt-1"
+                                className={"mt-1 " + INPUT_FONT}
                                 value={config.roleId || ""}
                                 onChange={(e) => updateNodeConfig(selectedNode.id, { roleId: e.target.value })}
                                 placeholder="123456789012345678"
@@ -809,7 +823,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                                 value={config.userId || "command-user"}
                                 onValueChange={(value) => updateNodeConfig(selectedNode.id, { userId: value })}
                             >
-                                <SelectTrigger className="mt-1">
+                                <SelectTrigger className={"mt-1 " + INPUT_FONT}>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -823,7 +837,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                             <div>
                                 <Label className="text-foreground font-medium">User ID</Label>
                                 <Input
-                                    className="mt-1"
+                                    className={"mt-1 " + INPUT_FONT}
                                     value={config.customUserId || ""}
                                     onChange={(e) => updateNodeConfig(selectedNode.id, { customUserId: e.target.value })}
                                     placeholder="123456789012345678"
@@ -833,10 +847,23 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div>
                             <Label className="text-foreground font-medium">Reason</Label>
                             <Input
-                                className="mt-1"
+                                className={"mt-1 " + INPUT_FONT}
                                 value={config.reason || ""}
                                 onChange={(e) => updateNodeConfig(selectedNode.id, { reason: e.target.value })}
                                 placeholder="Optional reason for audit log"
+                            />
+                        </div>
+                    </div>
+                )
+            case "wait":
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="text-foreground font-medium">Time (ms)</Label>
+                            <Input
+                                className={"mt-1 " + INPUT_FONT}
+                                onChange={(e) => updateNodeConfig(selectedNode.id, { duration: e.target.value })}
+                                placeholder="Yield time of the thread (max 10s)"
                             />
                         </div>
                     </div>

@@ -262,7 +262,7 @@ export function FloatingSidebar() {
                                 >
                                   <span className="font-medium">{item.label}</span>
                                   {item.badge && (
-                                    <Badge className="bg-green-500 text-white text-xs">{item.badge}</Badge>
+                                    <Badge className="bg-green-500 text-white text-xs">{totalServers}</Badge>
                                   )}
                                 </motion.div>
                               )}

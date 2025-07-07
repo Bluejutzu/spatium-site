@@ -1,11 +1,13 @@
 import type React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ConvexClientProvider, SyncClerkToConvex } from '@/features/auth';
 import { Toaster } from '@/components/ui/sonner';
+
+import './styles/globals.css';
+import './styles/clerk-pricing.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
