@@ -92,31 +92,31 @@ export interface CommandExecution {
 }
 
 export interface DiscordEmbed {
-  title?: string
-  description?: string
-  color?: number
+  title?: string;
+  description?: string;
+  color?: number;
   fields?: Array<{
-    name: string
-    value: string
-    inline?: boolean
-  }>
+    name: string;
+    value: string;
+    inline?: boolean;
+  }>;
   author?: {
-    name?: string
-    url?: string
-    icon_url?: string
-  }
+    name?: string;
+    url?: string;
+    icon_url?: string;
+  };
   footer?: {
-    text?: string
-    icon_url?: string
-  }
+    text?: string;
+    icon_url?: string;
+  };
   image?: {
-    url?: string
-  }
+    url?: string;
+  };
   thumbnail?: {
-    url?: string
-  }
-  url?: string
-  timestamp?: string
+    url?: string;
+  };
+  url?: string;
+  timestamp?: string;
 }
 
 export interface DiscordMessage {
@@ -127,4 +127,4 @@ export interface DiscordMessage {
   components?: any[];
   attachments?: any[];
   flags?: number;
-} 
+}

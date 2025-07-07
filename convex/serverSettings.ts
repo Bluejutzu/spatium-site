@@ -39,4 +39,4 @@ export const updateServerSettings = mutation({
       return { created: true };
     }
   },
-}); 
+});

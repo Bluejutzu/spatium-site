@@ -79,7 +79,7 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     blocks: v.string(), // JSON serialized block structure
-    _creationTime: v.optional(v.number()),
-    _lastUpdateTime: v.optional(v.number()),
+    creationTime: v.optional(v.number()),
+    lastUpdateTime: v.optional(v.number()),
   }).index('by_server', ['serverId']),
 });

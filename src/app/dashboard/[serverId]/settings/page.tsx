@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
-import { useState, useEffect, useCallback } from "react"
-import { useQuery, useMutation } from "convex/react"
-import React from "react"
-import { useUser } from "@clerk/nextjs"
-import { motion } from "framer-motion"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import React from 'react';
+import { useUser } from '@clerk/nextjs';
+import { motion } from 'framer-motion';
 import {
   Settings,
   Shield,
@@ -28,134 +28,116 @@ import {
   Lock,
   Eye,
   Hash,
-} from "lucide-react"
-import { api } from "../../../../../convex/_generated/api"
-
-interface SettingsPageProps {
-  params: { serverId: string }
-}
+} from 'lucide-react';
+import { api } from '../../../../../convex/_generated/api';
 
 function isPromise<T>(value: any): value is Promise<T> {
-  return value && typeof value.then === "function"
+  return value && typeof value.then === 'function';
 }
 
-const settingsSections = [
-  {
-    id: "general",
-    title: "GENERAL CONFIGURATION",
-    subtitle: "Core bot settings and behavior",
-    icon: Settings,
-    accent: "discord-blurple",
-  },
-  {
-    id: "moderation",
-    title: "SECURITY & MODERATION",
-    subtitle: "Automated protection systems",
-    icon: Shield,
-    accent: "discord-green",
-  },
-  {
-    id: "notifications",
-    title: "NOTIFICATION CENTER",
-    subtitle: "Member activity alerts",
-    icon: Bell,
-    accent: "discord-yellow",
-  },
-]
+export default function SettingsPage({
+  params,
+}: {
+  params: Promise<{ serverId: string }>;
+}) {
+  const { user, isLoaded } = useUser();
+  const toast = useToast();
+  const serverId = React.use(params).serverId;
 
-export default function SettingsPage({ params }: SettingsPageProps) {
-  const { user, isLoaded } = useUser()
-  const toast = useToast()
-  const unwrappedParams = isPromise<{ serverId: string }>(params) ? React.use(params) : params
-  const serverId = (unwrappedParams as { serverId: string }).serverId
-
-  const settings = useQuery(api.serverSettings.getServerSettings, { serverId })
-  const updateSettings = useMutation(api.serverSettings.updateServerSettings)
+  const settings = useQuery(api.serverSettings.getServerSettings, { serverId });
+  const updateSettings = useMutation(api.serverSettings.updateServerSettings);
 
   const [form, setForm] = useState({
-    prefix: "",
-    welcomeMessage: "",
+    prefix: '',
+    welcomeMessage: '',
     autoRole: false,
     moderationEnabled: false,
     spamFilter: false,
     linkFilter: false,
     joinNotifications: false,
     leaveNotifications: false,
-    logChannelId: "",
-    autoRoleId: "",
-  })
+    logChannelId: '',
+    autoRoleId: '',
+  });
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [roles, setRoles] = useState<import("@/types/discord").DiscordRole[]>([])
-  const [rolesLoading, setRolesLoading] = useState(false)
-  const [rolesError, setRolesError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false);
+  const [roles, setRoles] = useState<import('@/types/discord').DiscordRole[]>(
+    []
+  );
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [rolesError, setRolesError] = useState<string | null>(null);
 
   const fetchRoles = useCallback(async () => {
     if (!isLoaded || !user) {
-      return console.log("No user or loading state is false ", isLoaded)
+      return console.log('No user or loading state is false ', isLoaded);
     }
 
-    setRolesLoading(true)
-    setRolesError(null)
+    setRolesLoading(true);
+    setRolesError(null);
 
     try {
-      const res = await fetch("/api/discord/roles?serverId=" + serverId + "&userId=" + user?.id)
-      if (!res.ok) throw new Error("Failed to fetch roles")
-      const data = await res.json()
-      setRoles(data)
+      const res = await fetch(
+        '/api/discord/roles?serverId=' + serverId + '&userId=' + user?.id
+      );
+      if (!res.ok) throw new Error('Failed to fetch roles');
+      const data = await res.json();
+      setRoles(data);
     } catch (err: any) {
-      setRolesError(err.message)
+      setRolesError(err.message);
     } finally {
-      setRolesLoading(false)
+      setRolesLoading(false);
     }
-  }, [serverId, isLoaded, user])
+  }, [serverId, isLoaded, user]);
 
   useEffect(() => {
     if (form.autoRole) {
-      fetchRoles()
+      fetchRoles();
     }
-  }, [form.autoRole, fetchRoles])
+  }, [form.autoRole, fetchRoles]);
 
   // Sync form state with loaded settings
   useEffect(() => {
     if (settings) {
       setForm({
-        prefix: settings.prefix || "!",
-        welcomeMessage: settings.welcomeMessage || "",
+        prefix: settings.prefix || '!',
+        welcomeMessage: settings.welcomeMessage || '',
         autoRole: settings.autoRole || false,
         moderationEnabled: settings.moderationEnabled || false,
         spamFilter: settings.spamFilter || false,
         linkFilter: settings.linkFilter || false,
         joinNotifications: settings.joinNotifications || false,
         leaveNotifications: settings.leaveNotifications || false,
-        logChannelId: settings.logChannelId || "",
-        autoRoleId: "autoRoleId" in settings ? (settings as any).autoRoleId || "" : "",
-      })
+        logChannelId: settings.logChannelId || '',
+        autoRoleId:
+          'autoRoleId' in settings ? (settings as any).autoRoleId || '' : '',
+      });
     }
-  }, [settings])
+  }, [settings]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value, type } = e.target
-    let newValue: string | boolean = value
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value, type } = e.target;
+    let newValue: string | boolean = value;
 
-    if (type === "checkbox" && e.target instanceof HTMLInputElement) {
-      newValue = e.target.checked
+    if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
+      newValue = e.target.checked;
     }
 
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       [id]: newValue,
-    }))
-  }
+    }));
+  };
 
   const handleSwitch = (id: string, value: boolean) => {
-    setForm((prev) => ({ ...prev, [id]: value }))
-  }
+    setForm(prev => ({ ...prev, [id]: value }));
+  };
 
   const handleSaveSettings = async () => {
-    if (isLoading) return
+    if (isLoading) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     toast.loading('Saving settings...', 'Your changes are being applied');
 
     try {
@@ -171,62 +153,74 @@ export default function SettingsPage({ params }: SettingsPageProps) {
         leaveNotifications: form.leaveNotifications,
         logChannelId: form.logChannelId,
         ...(form.autoRoleId ? { autoRoleId: form.autoRoleId } : {}),
-      })
+      });
 
       toast.dismiss();
-      toast.success('Settings saved successfully!', 'Your bot configuration has been updated');
+      toast.success(
+        'Settings saved successfully!',
+        'Your bot configuration has been updated'
+      );
     } catch (_error) {
       toast.dismiss();
-      toast.error('Failed to save settings', 'Please try again or contact support');
+      toast.error(
+        'Failed to save settings',
+        'Please try again or contact support'
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const selectedRole = roles.find((role) => role.id === form.autoRoleId)
+  const selectedRole = roles.find(role => role.id === form.autoRoleId);
   const isRiskyRole =
     selectedRole &&
-    (/admin|administrator|moderate|manage|ban|kick|mod/i.test(selectedRole.name) ||
-      (BigInt(selectedRole.permissions) & (BigInt(0x8) | BigInt(0x20) | BigInt(0x10) | BigInt(0x4))) !== BigInt(0))
+    (/admin|administrator|moderate|manage|ban|kick|mod/i.test(
+      selectedRole.name
+    ) ||
+      (BigInt(selectedRole.permissions) &
+        (BigInt(0x8) | BigInt(0x20) | BigInt(0x10) | BigInt(0x4))) !==
+        BigInt(0));
 
   return (
-    <div className="bg-discord-dark min-h-screen font-minecraft">
+    <div className='bg-discord-dark min-h-screen font-minecraft'>
       {/* Atmospheric Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-        <div className="floating-orb floating-orb-1" />
-        <div className="floating-orb floating-orb-2" />
-        <div className="floating-orb floating-orb-3" />
+      <div className='fixed inset-0 z-0'>
+        <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
+        <div className='absolute inset-0 bg-grid-pattern opacity-5' />
+        <div className='floating-orb floating-orb-1' />
+        <div className='floating-orb floating-orb-2' />
+        <div className='floating-orb floating-orb-3' />
       </div>
 
-      <div className="relative z-10">
+      <div className='relative z-10'>
         {/* Hero Section */}
-        <section className="max-h-screen flex items-center justify-center pt-20">
-          <div className="container mx-auto px-6">
+        <section className='max-h-screen flex items-center justify-center pt-20'>
+          <div className='container mx-auto px-6'>
             <motion.div
-              className="text-center"
+              className='text-center'
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <Badge className="mb-8 bg-discord-green/20 text-discord-green border-discord-green/30 px-4 py-2 font-bold">
-                <Crown className="mr-2 h-4 w-4" />
+              <Badge className='mb-8 bg-discord-green/20 text-discord-green border-discord-green/30 px-4 py-2 font-bold'>
+                <Crown className='mr-2 h-4 w-4' />
                 CONFIGURATION CENTER
               </Badge>
 
-              <h1 className="text-6xl md:text-8xl font-black text-white leading-tight tracking-tight">
-                <span className="block mb-4">SERVER</span>
-                <span className="block text-discord-blurple glow-text">SETTINGS</span>
+              <h1 className='text-6xl md:text-8xl font-black text-white leading-tight tracking-tight'>
+                <span className='block mb-4'>SERVER</span>
+                <span className='block text-discord-blurple glow-text'>
+                  SETTINGS
+                </span>
               </h1>
             </motion.div>
           </div>
         </section>
 
         {/* Settings Sections */}
-        <section className="min-h-screen flex items-center justify-center py-20 bg-discord-darker/50">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <div className="space-y-12">
+        <section className='min-h-screen flex items-center justify-center py-20 bg-discord-darker/50'>
+          <div className='container mx-auto px-6 max-w-6xl'>
+            <div className='space-y-12'>
               {/* General Settings */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -234,153 +228,191 @@ export default function SettingsPage({ params }: SettingsPageProps) {
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
               >
-                <Card className="discord-card border-2 border-white/10">
-                  <CardHeader className="border-b border-discord-border p-8">
-                    <div className="flex items-center gap-4">
+                <Card className='discord-card border-2 border-white/10'>
+                  <CardHeader className='border-b border-discord-border p-8'>
+                    <div className='flex items-center gap-4'>
                       <motion.div
-                        className="p-4 bg-discord-blurple/20 rounded-xl"
+                        className='p-4 bg-discord-blurple/20 rounded-xl'
                         whileHover={{ scale: 1.05, rotate: 5 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 17,
+                        }}
                       >
-                        <Settings className="h-8 w-8 text-discord-blurple" />
+                        <Settings className='h-8 w-8 text-discord-blurple' />
                       </motion.div>
                       <div>
-                        <CardTitle className="text-3xl font-black text-white tracking-wide font-minecraft">
+                        <CardTitle className='text-3xl font-black text-white tracking-wide font-minecraft'>
                           GENERAL CONFIGURATION
                         </CardTitle>
-                        <p className="text-discord-text text-lg">Core bot settings and behavior</p>
+                        <p className='text-discord-text text-lg'>
+                          Core bot settings and behavior
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-8 space-y-8">
-                    <div className="grid md:grid-cols-2 gap-8">
-                      <div className="space-y-3">
-                        <Label htmlFor="prefix" className="text-white font-bold text-lg flex items-center gap-2">
-                          <Hash className="h-4 w-4 text-discord-blurple" />
+                  <CardContent className='p-8 space-y-8'>
+                    <div className='grid md:grid-cols-2 gap-8'>
+                      <div className='space-y-3'>
+                        <Label
+                          htmlFor='prefix'
+                          className='text-white font-bold text-lg flex items-center gap-2'
+                        >
+                          <Hash className='h-4 w-4 text-discord-blurple' />
                           COMMAND PREFIX
                         </Label>
                         <Input
-                          id="prefix"
-                          placeholder="!"
+                          id='prefix'
+                          placeholder='!'
                           value={form.prefix}
                           onChange={handleChange}
-                          className="bg-white/5 border-white/20 text-white placeholder:text-discord-text h-12 text-lg"
+                          className='bg-white/5 border-white/20 text-white placeholder:text-discord-text h-12 text-lg'
                         />
-                        <p className="text-sm text-discord-text">Character that triggers bot commands</p>
+                        <p className='text-sm text-discord-text'>
+                          Character that triggers bot commands
+                        </p>
                       </div>
 
-                      <div className="space-y-3">
-                        <Label htmlFor="logChannelId" className="text-white font-bold text-lg flex items-center gap-2">
-                          <Eye className="h-4 w-4 text-discord-green" />
+                      <div className='space-y-3'>
+                        <Label
+                          htmlFor='logChannelId'
+                          className='text-white font-bold text-lg flex items-center gap-2'
+                        >
+                          <Eye className='h-4 w-4 text-discord-green' />
                           LOG CHANNEL
                         </Label>
                         <Input
-                          id="logChannelId"
-                          placeholder="#bot-logs"
+                          id='logChannelId'
+                          placeholder='#bot-logs'
                           value={form.logChannelId}
                           onChange={handleChange}
-                          className="bg-white/5 border-white/20 text-white placeholder:text-discord-text h-12 text-lg"
+                          className='bg-white/5 border-white/20 text-white placeholder:text-discord-text h-12 text-lg'
                         />
-                        <p className="text-sm text-discord-text">Channel for bot activity logs</p>
+                        <p className='text-sm text-discord-text'>
+                          Channel for bot activity logs
+                        </p>
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label htmlFor="welcomeMessage" className="text-white font-bold text-lg flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-discord-purple" />
+                    <div className='space-y-3'>
+                      <Label
+                        htmlFor='welcomeMessage'
+                        className='text-white font-bold text-lg flex items-center gap-2'
+                      >
+                        <MessageSquare className='h-4 w-4 text-discord-purple' />
                         WELCOME MESSAGE
                       </Label>
                       <Textarea
-                        id="welcomeMessage"
-                        placeholder="Welcome to our server, {user}! Please read the rules and enjoy your stay."
+                        id='welcomeMessage'
+                        placeholder='Welcome to our server, {user}! Please read the rules and enjoy your stay.'
                         value={form.welcomeMessage}
                         onChange={handleChange}
-                        className="bg-white/5 border-white/20 text-white placeholder:text-discord-text min-h-[120px] text-lg"
+                        className='bg-white/5 border-white/20 text-white placeholder:text-discord-text min-h-[120px] text-lg'
                       />
-                      <p className="text-sm text-discord-text">
-                        Message sent to new members. Use {"{user}"} for mentions.
+                      <p className='text-sm text-discord-text'>
+                        Message sent to new members. Use {'{user}'} for
+                        mentions.
                       </p>
                     </div>
 
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between p-6 bg-white/5 rounded-xl border border-white/10">
-                        <div className="flex items-center gap-4">
-                          <Users className="h-6 w-6 text-discord-orange" />
+                    <div className='space-y-6'>
+                      <div className='flex items-center justify-between p-6 bg-white/5 rounded-xl border border-white/10'>
+                        <div className='flex items-center gap-4'>
+                          <Users className='h-6 w-6 text-discord-orange' />
                           <div>
-                            <Label htmlFor="autoRole" className="text-white font-bold text-lg">
+                            <Label
+                              htmlFor='autoRole'
+                              className='text-white font-bold text-lg'
+                            >
                               AUTO-ROLE ASSIGNMENT
                             </Label>
-                            <p className="text-discord-text">Automatically assign roles to new members</p>
+                            <p className='text-discord-text'>
+                              Automatically assign roles to new members
+                            </p>
                           </div>
                         </div>
                         <Switch
-                          id="autoRole"
+                          id='autoRole'
                           checked={form.autoRole}
-                          onCheckedChange={(v) => handleSwitch("autoRole", v)}
-                          className="scale-125"
+                          onCheckedChange={v => handleSwitch('autoRole', v)}
+                          className='scale-125'
                         />
                       </div>
 
                       {form.autoRole && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
+                          animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="space-y-4 p-6 bg-discord-orange/10 rounded-xl border border-discord-orange/20"
+                          className='space-y-4 p-6 bg-discord-orange/10 rounded-xl border border-discord-orange/20'
                         >
-                          <div className="flex items-center justify-between">
-                            <Label className="text-white font-bold flex items-center gap-2">
-                              <Crown className="h-4 w-4 text-discord-orange" />
+                          <div className='flex items-center justify-between'>
+                            <Label className='text-white font-bold flex items-center gap-2'>
+                              <Crown className='h-4 w-4 text-discord-orange' />
                               SELECT ROLE
                             </Label>
                             <Button
-                              size="sm"
-                              variant="outline"
+                              size='sm'
+                              variant='outline'
                               onClick={fetchRoles}
                               disabled={rolesLoading}
-                              className="discord-button-outline bg-transparent"
+                              className='discord-button-outline bg-transparent'
                             >
-                              <RefreshCw className={`h-4 w-4 mr-2 ${rolesLoading ? "animate-spin" : ""}`} />
-                              {rolesLoading ? "REFRESHING..." : "REFRESH ROLES"}
+                              <RefreshCw
+                                className={`h-4 w-4 mr-2 ${rolesLoading ? 'animate-spin' : ''}`}
+                              />
+                              {rolesLoading ? 'REFRESHING...' : 'REFRESH ROLES'}
                             </Button>
                           </div>
 
                           {rolesError && (
-                            <div className="bg-red-900/20 border border-red-500/30 text-red-400 p-4 rounded-lg">
-                              <AlertTriangle className="h-4 w-4 inline mr-2" />
+                            <div className='bg-red-900/20 border border-red-500/30 text-red-400 p-4 rounded-lg'>
+                              <AlertTriangle className='h-4 w-4 inline mr-2' />
                               {rolesError}
                             </div>
                           )}
 
                           <select
-                            id="autoRoleDropdown"
-                            value={form.autoRoleId || ""}
-                            onChange={(e) => setForm((prev) => ({ ...prev, autoRoleId: e.target.value }))}
-                            className="w-full bg-white/5 border border-white/20 text-white rounded-lg px-4 py-3 text-lg"
+                            id='autoRoleDropdown'
+                            value={form.autoRoleId || ''}
+                            onChange={e =>
+                              setForm(prev => ({
+                                ...prev,
+                                autoRoleId: e.target.value,
+                              }))
+                            }
+                            className='w-full bg-white/5 border border-white/20 text-white rounded-lg px-4 py-3 text-lg'
                             disabled={rolesLoading || roles.length === 0}
                           >
-                            <option value="" disabled>
+                            <option value='' disabled>
                               Select a role...
                             </option>
-                            {roles.map((role) => {
+                            {roles.map(role => {
                               const risky =
-                                /admin|administrator|moderate|manage|ban|kick|mod/i.test(role.name) ||
+                                /admin|administrator|moderate|manage|ban|kick|mod/i.test(
+                                  role.name
+                                ) ||
                                 (BigInt(role.permissions) &
-                                  (BigInt(0x8) | BigInt(0x20) | BigInt(0x10) | BigInt(0x4))) !==
-                                BigInt(0)
+                                  (BigInt(0x8) |
+                                    BigInt(0x20) |
+                                    BigInt(0x10) |
+                                    BigInt(0x4))) !==
+                                  BigInt(0);
                               return (
                                 <option key={role.id} value={role.id}>
-                                  {role.name} {risky ? "⚠️" : ""}
+                                  {role.name} {risky ? '⚠️' : ''}
                                 </option>
-                              )
+                              );
                             })}
                           </select>
 
                           {isRiskyRole && (
-                            <div className="bg-yellow-900/20 border border-yellow-500/30 text-yellow-400 p-4 rounded-lg">
-                              <AlertTriangle className="h-4 w-4 inline mr-2" />
-                              <strong>RISKY ROLE:</strong> This role has administrative or moderation permissions.
+                            <div className='bg-yellow-900/20 border border-yellow-500/30 text-yellow-400 p-4 rounded-lg'>
+                              <AlertTriangle className='h-4 w-4 inline mr-2' />
+                              <strong>RISKY ROLE:</strong> This role has
+                              administrative or moderation permissions.
                               Assigning it automatically can be dangerous!
                             </div>
                           )}
@@ -398,45 +430,54 @@ export default function SettingsPage({ params }: SettingsPageProps) {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <Card className="discord-card border-2 border-white/10">
-                  <CardHeader className="border-b border-discord-border p-8">
-                    <div className="flex items-center gap-4">
+                <Card className='discord-card border-2 border-white/10'>
+                  <CardHeader className='border-b border-discord-border p-8'>
+                    <div className='flex items-center gap-4'>
                       <motion.div
-                        className="p-4 bg-discord-green/20 rounded-xl"
+                        className='p-4 bg-discord-green/20 rounded-xl'
                         whileHover={{ scale: 1.05, rotate: 5 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 17,
+                        }}
                       >
-                        <Shield className="h-8 w-8 text-discord-green" />
+                        <Shield className='h-8 w-8 text-discord-green' />
                       </motion.div>
                       <div>
-                        <CardTitle className="text-3xl font-black text-white tracking-wide font-minecraft">
+                        <CardTitle className='text-3xl font-black text-white tracking-wide font-minecraft'>
                           SECURITY & MODERATION
                         </CardTitle>
-                        <p className="text-discord-text text-lg">Automated protection systems</p>
+                        <p className='text-discord-text text-lg'>
+                          Automated protection systems
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-8 space-y-6">
+                  <CardContent className='p-8 space-y-6'>
                     {[
                       {
-                        id: "moderationEnabled",
+                        id: 'moderationEnabled',
                         icon: Bot,
-                        title: "AUTO-MODERATION",
-                        description: "Enable intelligent content filtering and automated moderation",
+                        title: 'AUTO-MODERATION',
+                        description:
+                          'Enable intelligent content filtering and automated moderation',
                         checked: form.moderationEnabled,
                       },
                       {
-                        id: "spamFilter",
+                        id: 'spamFilter',
                         icon: Shield,
-                        title: "SPAM PROTECTION",
-                        description: "Automatically detect and prevent spam messages",
+                        title: 'SPAM PROTECTION',
+                        description:
+                          'Automatically detect and prevent spam messages',
                         checked: form.spamFilter,
                       },
                       {
-                        id: "linkFilter",
+                        id: 'linkFilter',
                         icon: Lock,
-                        title: "LINK FILTERING",
-                        description: "Block external links from untrusted sources",
+                        title: 'LINK FILTERING',
+                        description:
+                          'Block external links from untrusted sources',
                         checked: form.linkFilter,
                       },
                     ].map((setting, index) => (
@@ -446,20 +487,24 @@ export default function SettingsPage({ params }: SettingsPageProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
                         viewport={{ once: true }}
-                        className="flex items-center justify-between p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+                        className='flex items-center justify-between p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors'
                       >
-                        <div className="flex items-center gap-4">
-                          <setting.icon className="h-6 w-6 text-discord-green" />
+                        <div className='flex items-center gap-4'>
+                          <setting.icon className='h-6 w-6 text-discord-green' />
                           <div>
-                            <Label className="text-white font-bold text-lg">{setting.title}</Label>
-                            <p className="text-discord-text">{setting.description}</p>
+                            <Label className='text-white font-bold text-lg'>
+                              {setting.title}
+                            </Label>
+                            <p className='text-discord-text'>
+                              {setting.description}
+                            </p>
                           </div>
                         </div>
                         <Switch
                           id={setting.id}
                           checked={setting.checked}
-                          onCheckedChange={(v) => handleSwitch(setting.id, v)}
-                          className="scale-125"
+                          onCheckedChange={v => handleSwitch(setting.id, v)}
+                          className='scale-125'
                         />
                       </motion.div>
                     ))}
@@ -474,38 +519,45 @@ export default function SettingsPage({ params }: SettingsPageProps) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                <Card className="discord-card border-2 border-white/10">
-                  <CardHeader className="border-b border-discord-border p-8">
-                    <div className="flex items-center gap-4">
+                <Card className='discord-card border-2 border-white/10'>
+                  <CardHeader className='border-b border-discord-border p-8'>
+                    <div className='flex items-center gap-4'>
                       <motion.div
-                        className="p-4 bg-discord-yellow/20 rounded-xl"
+                        className='p-4 bg-discord-yellow/20 rounded-xl'
                         whileHover={{ scale: 1.05, rotate: 5 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 17,
+                        }}
                       >
-                        <Bell className="h-8 w-8 text-discord-yellow" />
+                        <Bell className='h-8 w-8 text-discord-yellow' />
                       </motion.div>
                       <div>
-                        <CardTitle className="text-3xl font-black text-white tracking-wide font-minecraft">
+                        <CardTitle className='text-3xl font-black text-white tracking-wide font-minecraft'>
                           NOTIFICATION CENTER
                         </CardTitle>
-                        <p className="text-discord-text text-lg">Member activity alerts and logging</p>
+                        <p className='text-discord-text text-lg'>
+                          Member activity alerts and logging
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-8 space-y-6">
+                  <CardContent className='p-8 space-y-6'>
                     {[
                       {
-                        id: "joinNotifications",
+                        id: 'joinNotifications',
                         icon: Users,
-                        title: "JOIN NOTIFICATIONS",
-                        description: "Announce when new members join the server",
+                        title: 'JOIN NOTIFICATIONS',
+                        description:
+                          'Announce when new members join the server',
                         checked: form.joinNotifications,
                       },
                       {
-                        id: "leaveNotifications",
+                        id: 'leaveNotifications',
                         icon: Users,
-                        title: "LEAVE NOTIFICATIONS",
-                        description: "Announce when members leave the server",
+                        title: 'LEAVE NOTIFICATIONS',
+                        description: 'Announce when members leave the server',
                         checked: form.leaveNotifications,
                       },
                     ].map((setting, index) => (
@@ -515,20 +567,24 @@ export default function SettingsPage({ params }: SettingsPageProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
                         viewport={{ once: true }}
-                        className="flex items-center justify-between p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+                        className='flex items-center justify-between p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors'
                       >
-                        <div className="flex items-center gap-4">
-                          <setting.icon className="h-6 w-6 text-discord-yellow" />
+                        <div className='flex items-center gap-4'>
+                          <setting.icon className='h-6 w-6 text-discord-yellow' />
                           <div>
-                            <Label className="text-white font-bold text-lg">{setting.title}</Label>
-                            <p className="text-discord-text">{setting.description}</p>
+                            <Label className='text-white font-bold text-lg'>
+                              {setting.title}
+                            </Label>
+                            <p className='text-discord-text'>
+                              {setting.description}
+                            </p>
                           </div>
                         </div>
                         <Switch
                           id={setting.id}
                           checked={setting.checked}
-                          onCheckedChange={(v) => handleSwitch(setting.id, v)}
-                          className="scale-125"
+                          onCheckedChange={v => handleSwitch(setting.id, v)}
+                          className='scale-125'
                         />
                       </motion.div>
                     ))}
@@ -538,7 +594,7 @@ export default function SettingsPage({ params }: SettingsPageProps) {
 
               {/* Save Button */}
               <motion.div
-                className="text-center pt-8"
+                className='text-center pt-8'
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
@@ -547,29 +603,29 @@ export default function SettingsPage({ params }: SettingsPageProps) {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
                   <Button
                     onClick={handleSaveSettings}
                     disabled={isLoading}
-                    className="discord-button-primary text-xl px-12 py-6 min-w-[200px]"
+                    className='discord-button-primary text-xl px-12 py-6 min-w-[200px]'
                   >
                     {isLoading ? (
                       <>
-                        <RefreshCw className="mr-2 h-6 w-6 animate-spin" />
+                        <RefreshCw className='mr-2 h-6 w-6 animate-spin' />
                         SAVING...
                       </>
                     ) : (
                       <>
-                        <Save className="mr-2 h-6 w-6" />
+                        <Save className='mr-2 h-6 w-6' />
                         SAVE CONFIGURATION
                       </>
                     )}
                   </Button>
                 </motion.div>
 
-                <div className="mt-6 flex items-center justify-center gap-2 text-discord-text">
-                  <CheckCircle className="h-4 w-4 text-discord-green" />
+                <div className='mt-6 flex items-center justify-center gap-2 text-discord-text'>
+                  <CheckCircle className='h-4 w-4 text-discord-green' />
                   <span>Changes are applied instantly across your server</span>
                 </div>
               </motion.div>
@@ -578,5 +634,5 @@ export default function SettingsPage({ params }: SettingsPageProps) {
         </section>
       </div>
     </div>
-  )
+  );
 }

@@ -26,7 +26,7 @@ export function SyncClerkToConvex() {
     if (!discordAccount) {
       return console.log(
         'No discord account found on the user ' +
-        user.externalAccounts[0]?.provider
+          user.externalAccounts[0]?.provider
       );
     }
 
@@ -50,7 +50,7 @@ export function SyncClerkToConvex() {
       dbUser.email !== userData.email ||
       dbUser.avatarUrl !== userData.avatarUrl;
 
-    console.log(`[SHOULDSYNC] ${shouldSync}`)
+    console.log(`[SHOULDSYNC] ${shouldSync}`);
 
     if (shouldSync) {
       syncUser(userData);
@@ -59,7 +59,7 @@ export function SyncClerkToConvex() {
   }, [isLoaded, user, dbUser, syncUser]);
 
   const syncDiscordData = async (userId: string) => {
-    console.log(`[SYNCDISCORDATA:userId] ${userId}`)
+    console.log(`[SYNCDISCORDATA:userId] ${userId}`);
     try {
       const response = await fetch('/api/discord/sync', {
         method: 'POST',

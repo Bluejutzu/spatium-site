@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/nextjs/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../../convex/_generated/api';
 import { DiscordAPI } from '@/features/discord';
@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
     const [botGuilds, userGuilds, discordUser] = await Promise.all([
       discordApi.getBotGuilds(),
       discordApi.getUserGuilds(),
-      discordApi.getCurrentUser()
+      discordApi.getCurrentUser(),
     ]);
 
     if (!discordUser) {
-      console.error("Could not fetch user");
+      console.error('Could not fetch user');
       return NextResponse.json(
-        { error: "Could not fetch Discord user data" },
+        { error: 'Could not fetch Discord user data' },
         { status: 500 }
       );
     }
@@ -54,11 +54,11 @@ export async function POST(request: NextRequest) {
       onlineCount: guild.approximate_presence_count,
       permissions: guild.permissions
         ? parseInt(guild.permissions)
-          .toString(2)
-          .split('')
-          .reverse()
-          .map((v, i) => (v === '1' ? `BIT_${i}` : null))
-          .filter(Boolean)
+            .toString(2)
+            .split('')
+            .reverse()
+            .map((v, i) => (v === '1' ? `BIT_${i}` : null))
+            .filter(Boolean)
         : [],
       features: guild.features,
     }));
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         ),
 
         features: (server.features ?? []).filter(
-          (f: any): f is string => typeof f === 'string'
+          (f: string): f is string => typeof f === 'string'
         ),
         memberCount: Number(server.memberCount) || 0,
         onlineCount: Number(server.onlineCount) || 0,

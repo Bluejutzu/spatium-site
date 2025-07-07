@@ -1,4 +1,10 @@
-import { DiscordGuild, DiscordUser, DiscordRole, DiscordChannel, DiscordMember } from "@/types/discord";
+import {
+  DiscordGuild,
+  DiscordUser,
+  DiscordRole,
+  DiscordChannel,
+  DiscordMember,
+} from '@/types/discord';
 
 export class DiscordAPI {
   private accessToken: string;
@@ -8,7 +14,10 @@ export class DiscordAPI {
     this.accessToken = accessToken;
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...options,
       headers: {
@@ -60,13 +69,21 @@ export class DiscordAPI {
     return this.request<DiscordChannel[]>(`/guilds/${guildId}/channels`);
   }
 
-  async getGuildMembers(guildId: string, limit = 100): Promise<DiscordMember[]> {
-    return this.request<DiscordMember[]>(`/guilds/${guildId}/members?limit=${limit}`);
+  async getGuildMembers(
+    guildId: string,
+    limit = 100
+  ): Promise<DiscordMember[]> {
+    return this.request<DiscordMember[]>(
+      `/guilds/${guildId}/members?limit=${limit}`
+    );
   }
 
-  async getGuildWithBotToken(guildId: string, withCounts: boolean): Promise<DiscordGuild> {
+  async getGuildWithBotToken(
+    guildId: string,
+    withCounts: boolean
+  ): Promise<DiscordGuild> {
     const response = await fetch(
-      `${this.baseURL}/guilds/${guildId}${withCounts ? "?with_counts=true" : ""}`,
+      `${this.baseURL}/guilds/${guildId}${withCounts ? '?with_counts=true' : ''}`,
       {
         headers: {
           Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
@@ -83,14 +100,11 @@ export class DiscordAPI {
   }
 
   async getGuildRolesWithBotToken(guildId: string): Promise<DiscordRole[]> {
-    const response = await fetch(
-      `${this.baseURL}/guilds/${guildId}/roles`,
-      {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      }
-    );
+    const response = await fetch(`${this.baseURL}/guilds/${guildId}/roles`, {
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      },
+    });
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(

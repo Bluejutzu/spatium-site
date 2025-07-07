@@ -1,14 +1,10 @@
-import {
-  query,
-  mutation,
-  internalMutation,
-} from './_generated/server';
+import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { DiscordAPI } from '@/features/discord';
 import { api } from './_generated/api';
 
 export const getServers = query({
-  handler: async (ctx) => {
+  handler: async ctx => {
     return await ctx.db.query('discordServers').collect();
   },
 });
@@ -196,12 +192,10 @@ export const getCommands = query({
 });
 
 export const getAllCommands = query({
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("commands")
-      .collect()
+  handler: async ctx => {
+    return await ctx.db.query('commands').collect();
   },
-})
+});
 
 export const saveCommand = mutation({
   args: {
@@ -219,7 +213,7 @@ export const saveCommand = mutation({
     if (match) {
       await ctx.db.patch(match._id, {
         blocks: args.blocks,
-        _lastUpdateTime: Date.now(),
+        lastUpdateTime: Date.now(),
       });
       return { updated: true };
     } else {
@@ -234,52 +228,53 @@ export const saveCommand = mutation({
   },
 });
 
-
 export const dropServer = mutation({
   args: {
     serverId: v.string(),
-
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
-      .query("discordServers")
-      .withIndex("by_server_id", q => q.eq("serverId", args.serverId))
-      .first()
+      .query('discordServers')
+      .withIndex('by_server_id', q => q.eq('serverId', args.serverId))
+      .first();
 
     if (!existing) {
-      return { dropped: false, existing: false, error: null }
+      return { dropped: false, existing: false, error: null };
     }
 
     try {
-      await ctx.db.delete(existing._id)
-      return { dropped: true, existing: true, error: null }
+      await ctx.db.delete(existing._id);
+      return { dropped: true, existing: true, error: null };
     } catch (error) {
       return {
         dropped: false,
         existing: true,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
-  }
-})
+  },
+});
 
 export const getAutoRoleData = query({
   args: {
-    serverId: v.string()
+    serverId: v.string(),
   },
   handler: async (ctx, args) => {
-    const s = await ctx.db.query("serverSettings").withIndex("by_server", q => q.eq("serverId", args.serverId)).first()
+    const s = await ctx.db
+      .query('serverSettings')
+      .withIndex('by_server', q => q.eq('serverId', args.serverId))
+      .first();
 
     if (!s || !s.autoRoleId) {
       return {
         error: true,
-        message: "Non-existent document"
-      }
+        message: 'Non-existent document',
+      };
     }
 
     return {
       autoRole: s.autoRole,
-      roleId: s.autoRoleId
-    }
-  }
-})
+      roleId: s.autoRoleId,
+    };
+  },
+});
