@@ -224,7 +224,7 @@ export default function ServersPage() {
                                   <div className='relative'>
                                     <div className='w-12 h-12 bg-gradient-to-br from-discord-blurple to-discord-purple rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden'>
                                       {server.icon ? (
-                                        <Image
+                                        <img
                                           src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`}
                                           alt={server.name}
                                           className='w-12 h-12 rounded-lg object-cover'

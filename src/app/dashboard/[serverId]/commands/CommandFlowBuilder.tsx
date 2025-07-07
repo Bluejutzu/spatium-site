@@ -73,9 +73,8 @@ const INPUT_FONT = roboto.className;
 // Enhanced Node Components with Discord API features
 const RootNode = ({ data, selected }: NodeProps) => (
   <div
-    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${
-      selected ? 'border-blue-500 shadow-blue-500/20' : 'border-yellow-500'
-    } bg-yellow-500 text-black font-bold`}
+    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${selected ? 'border-blue-500 shadow-blue-500/20' : 'border-yellow-500'
+      } bg-yellow-500 text-black font-bold`}
   >
     <div className='flex items-center justify-between'>
       <Settings className='w-4 h-4' />
@@ -94,9 +93,8 @@ const RootNode = ({ data, selected }: NodeProps) => (
 
 const ErrorNode = ({ data, selected }: NodeProps) => (
   <div
-    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${
-      selected ? 'border-blue-500 shadow-blue-500/20' : 'border-red-500'
-    } bg-red-500 text-white font-bold`}
+    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${selected ? 'border-blue-500 shadow-blue-500/20' : 'border-red-500'
+      } bg-red-500 text-white font-bold`}
   >
     <div className='flex items-center justify-between'>
       <X className='w-4 h-4' />
@@ -115,9 +113,8 @@ const ErrorNode = ({ data, selected }: NodeProps) => (
 
 const ConditionNode = ({ data, selected }: NodeProps) => (
   <div
-    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${
-      selected ? 'border-blue-500 shadow-blue-500/20' : 'border-purple-500'
-    } bg-purple-500 text-white font-bold relative`}
+    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${selected ? 'border-blue-500 shadow-blue-500/20' : 'border-purple-500'
+      } bg-purple-500 text-white font-bold relative`}
   >
     <Handle
       type='target'
@@ -154,9 +151,8 @@ const ConditionNode = ({ data, selected }: NodeProps) => (
 
 const MessageNode = ({ data, selected }: NodeProps) => (
   <div
-    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${
-      selected ? 'border-blue-500 shadow-blue-500/20' : 'border-blue-400'
-    } bg-blue-400 text-white font-bold`}
+    className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${selected ? 'border-blue-500 shadow-blue-500/20' : 'border-blue-400'
+      } bg-blue-400 text-white font-bold`}
   >
     <Handle
       type='target'
@@ -185,36 +181,35 @@ const MessageNode = ({ data, selected }: NodeProps) => (
 // Create node components for all Discord API operations
 const createDiscordNode =
   (icon: React.ComponentType<any>, color: string, label: string) =>
-  ({ data, selected }: NodeProps) => {
-    const IconComponent = icon;
-    return (
-      <div
-        className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${
-          selected
+    ({ data, selected }: NodeProps) => {
+      const IconComponent = icon;
+      return (
+        <div
+          className={`px-4 py-3 shadow-lg rounded-lg border-2 min-w-[200px] ${selected
             ? 'border-blue-500 shadow-blue-500/20'
             : `border-${color}-500`
-        } bg-${color}-500 text-white font-bold`}
-      >
-        <Handle
-          type='target'
-          position={Position.Top}
-          className={`w-3 h-3 bg-${color}-500`}
-        />
-        <div className='text-center'>
-          <IconComponent className='w-4 h-4 mx-auto mb-1' />
-          <span>{label}</span>
-          <div className='text-xs mt-1 opacity-80'>
-            {data.config?.configured ? 'Configured' : 'Not configured'}
+            } bg-${color}-500 text-white font-bold`}
+        >
+          <Handle
+            type='target'
+            position={Position.Top}
+            className={`w-3 h-3 bg-${color}-500`}
+          />
+          <div className='text-center'>
+            <IconComponent className='w-4 h-4 mx-auto mb-1' />
+            <span>{label}</span>
+            <div className='text-xs mt-1 opacity-80'>
+              {data.config?.configured ? 'Configured' : 'Not configured'}
+            </div>
           </div>
+          <Handle
+            type='source'
+            position={Position.Bottom}
+            className={`w-3 h-3 bg-${color}-500`}
+          />
         </div>
-        <Handle
-          type='source'
-          position={Position.Bottom}
-          className={`w-3 h-3 bg-${color}-500`}
-        />
-      </div>
-    );
-  };
+      );
+    };
 
 const nodeTypes = {
   root: RootNode,
@@ -647,6 +642,17 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           tts: false,
           channelId: '',
           components: [],
+          storeIdAs: ''
+        };
+      case 'edit-message':
+        return {
+          message_ref: '',
+          content: '',
+          embeds: [],
+          tts: false,
+          channelId: '',
+          components: [],
+          storeIdAs: ''
         };
       case 'send-dm':
         return { content: '', embeds: [], userId: '' };
@@ -708,9 +714,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         nds.map(n =>
           n.id === nodeId
             ? {
-                ...n,
-                data: { ...n.data, config: { ...n.data.config, ...config } },
-              }
+              ...n,
+              data: { ...n.data, config: { ...n.data.config, ...config } },
+            }
             : n
         )
       );
@@ -718,12 +724,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         setSelectedNode(prev =>
           prev
             ? {
-                ...prev,
-                data: {
-                  ...prev.data,
-                  config: { ...prev.data.config, ...config },
-                },
-              }
+              ...prev,
+              data: {
+                ...prev.data,
+                config: { ...prev.data.config, ...config },
+              },
+            }
             : null
         );
       }
@@ -881,6 +887,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         );
 
       case 'send-message':
+      case 'edit-message':
         return (
           <Tabs defaultValue='content' className='space-y-4'>
             <TabsList className='grid w-full grid-cols-3'>
@@ -891,6 +898,24 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
 
             <TabsContent value='content' className='space-y-4'>
               <div>
+                {
+                  selectedNode.data.type == "edit-message" ? (
+                    <>
+                      <Label className='text-foreground font-medium'>
+                        Message Reference (ID)
+                      </Label>
+                      <Input
+                        className={'mt-1 mb-3 ' + INPUT_FONT}
+                        value={config.message_ref || ''}
+                        onChange={e =>
+                          updateNodeConfig(selectedNode.id, {
+                            message_ref: e.target.value,
+                          })
+                        }
+                        placeholder='ID of the message'
+                      /></>
+                  ) : <></>
+                }
                 <Label className='text-foreground font-medium'>
                   Message Content
                 </Label>
@@ -923,6 +948,22 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   }
                   placeholder='Channel ID (leave empty for current channel)'
                 />
+                <Label className='text-foreground font-medium pt-3'>
+                  Save Message ID As (Optional)
+                </Label>
+                <Input
+                  className={'mt-1 ' + INPUT_FONT}
+                  value={config.storeIdAs || ''}
+                  onChange={e =>
+                    updateNodeConfig(selectedNode.id, {
+                      storeIdAs: e.target.value,
+                    })
+                  }
+                  placeholder='e.g., first-message'
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  This will save the sent message ID as a variable for later use.
+                </p>
               </div>
             </TabsContent>
 
@@ -969,10 +1010,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                     )}
                   </Card>
                 )) || (
-                  <div className='text-center py-4 text-muted-foreground'>
-                    No embeds added yet. Click "Add Embed" to get started.
-                  </div>
-                )}
+                    <div className='text-center py-4 text-muted-foreground'>
+                      No embeds added yet. Click "Add Embed" to get started.
+                    </div>
+                  )}
               </div>
             </TabsContent>
 

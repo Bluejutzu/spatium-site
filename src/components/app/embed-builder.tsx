@@ -152,7 +152,7 @@ export function EmbedBuilder({
         {embed.author?.name && (
           <div className='flex items-center gap-2 text-sm'>
             {embed.author.icon_url && (
-              <Image
+              <img
                 src={
                   embed.author.icon_url || '/placeholder.svg?height=20&width=20'
                 }
@@ -187,7 +187,7 @@ export function EmbedBuilder({
           </div>
         )}
         {embed.image?.url && (
-          <Image
+          <img
             src={embed.image.url || '/placeholder.svg?height=200&width=400'}
             alt=''
             className='max-w-full rounded'
@@ -195,7 +195,7 @@ export function EmbedBuilder({
         )}
         <div className='flex items-center justify-between'>
           {embed.thumbnail?.url && (
-            <Image
+            <img
               src={embed.thumbnail.url || '/placeholder.svg?height=80&width=80'}
               alt=''
               className='w-20 h-20 rounded ml-auto'
@@ -205,7 +205,7 @@ export function EmbedBuilder({
         {embed.footer?.text && (
           <div className='flex items-center gap-2 text-xs text-slate-400'>
             {embed.footer.icon_url && (
-              <Image
+              <img
                 src={
                   embed.footer.icon_url || '/placeholder.svg?height=16&width=16'
                 }
@@ -239,7 +239,7 @@ export function EmbedBuilder({
             <DialogTitle
               className={`font-bold flex items-center gap-2 ${isMobile ? 'text-lg' : 'text-2xl'}`}
             >
-              <ImageIcon
+              <imgIcon
                 className={`text-blue-500 ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`}
               />
               Embed Builder
