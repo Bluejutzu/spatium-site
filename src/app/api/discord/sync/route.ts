@@ -34,7 +34,11 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (!discordUser) {
-      return console.error("Could not fetch user")
+      console.error("Could not fetch user");
+      return NextResponse.json(
+        { error: "Could not fetch Discord user data" },
+        { status: 500 }
+      );
     }
 
     const botGuildIds = new Set(botGuilds.map(g => g.id));

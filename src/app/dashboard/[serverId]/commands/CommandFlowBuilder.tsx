@@ -571,12 +571,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         }
 
         const name = rootNode.data.config?.name
-
         if (!name) {
             toast.error(
                 "Missing command name",
                 "A name is required for the command."
             )
+            return
         }
 
         const description = rootNode.data.config?.description || ""
@@ -584,9 +584,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         const commandData = { name: name, description: description, blocks: blocks, serverId: serverId }
 
         try {
-            console.log(commandData)
-            await saveCommandMutation(commandData);
-            toast.success(
+            await saveCommandMutation(commandData);            toast.success(
                 "Command Saved Successfully!",
                 "Your command flow has been saved and is ready to use.",
             )
@@ -861,10 +859,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div>
                             <Label className="text-foreground font-medium">Time (ms)</Label>
                             <Input
+                                type="number"
+                                min="0"
+                                max="10000"
                                 className={"mt-1 " + INPUT_FONT}
-                                onChange={(e) => updateNodeConfig(selectedNode.id, { duration: e.target.value })}
+                                onChange={(e) => updateNodeConfig(selectedNode.id, { duration: parseInt(e.target.value) || 0 })}
+                                value={config.duration || ""}
                                 placeholder="Yield time of the thread (max 10s)"
-                            />
+                            />                            
                         </div>
                     </div>
                 )

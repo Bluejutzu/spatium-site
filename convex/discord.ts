@@ -7,7 +7,7 @@ import { v } from 'convex/values';
 import { DiscordAPI } from '@/features/discord';
 import { api } from './_generated/api';
 
-export const getServers: any = query({
+export const getServers = query({
   handler: async (ctx) => {
     return await ctx.db.query('discordServers').collect();
   },
@@ -196,7 +196,7 @@ export const getCommands = query({
 });
 
 export const getAllCommands = query({
-  handler: async (ctx, args_0) => {
+  handler: async (ctx) => {
     return await ctx.db
       .query("commands")
       .collect()
@@ -250,11 +250,16 @@ export const dropServer = mutation({
       return { dropped: false, existing: false, error: null }
     }
 
-    await ctx.db.delete(existing._id).catch((e) => {
-      return { dropped: false, existing: true, error: e }
-    })
-
-    return { dropped: true, existing: true, error: null }
+    try {
+      await ctx.db.delete(existing._id)
+      return { dropped: true, existing: true, error: null }
+    } catch (error) {
+      return {
+        dropped: false,
+        existing: true,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }
   }
 })
 

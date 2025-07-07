@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
         userId,
         'discord'
     );
-    const discordToken = OauthData.data[0].token;
 
     if (!OauthData.data?.length || !OauthData.data[0]?.token) {
         return NextResponse.json(
@@ -26,6 +25,7 @@ export async function GET(req: NextRequest) {
         );
     }
 
+    const discordToken = OauthData.data[0].token;
     if (!serverId) {
         return NextResponse.json({ error: "Missing serverId" }, { status: 400 });
     }
