@@ -1,5 +1,5 @@
 {
-  "name": "yurrrr",
+  "name": "spatium-site",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "check-all": "pnpm typecheck && pnpm lint && pnpm format:check"
+    "check-all": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/spatium-types --allowJs false"
   },
   "dependencies": {
     "@clerk/backend": "^2.4.1",
