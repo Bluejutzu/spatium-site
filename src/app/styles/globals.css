@@ -85,7 +85,20 @@
   }
 }
 
-/* Enhanced Block Gradient Styling - Tailwind v4 Compatible */
+.glow-text {
+  text-shadow:
+    0 0 20px currentColor,
+    0 0 40px currentColor,
+    0 0 60px currentColor;
+}
+
+.shadow-glow-blurple {
+  box-shadow:
+    0 0 20px rgba(88, 101, 242, 0.4),
+    0 0 40px rgba(88, 101, 242, 0.2);
+}
+
+/* Block Gradient Styling - Tailwind v4 Compatible */
 .block-gradient-base {
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -238,4 +251,74 @@
 
 .border-custom {
   border-color: var(--color-border);
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(-30px) rotate(120deg);
+  }
+
+  66% {
+    transform: translateY(10px) rotate(240deg);
+  }
+}
+
+@keyframes float-reverse {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(20px) rotate(-120deg);
+  }
+
+  66% {
+    transform: translateY(-15px) rotate(-240deg);
+  }
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #5865f2, #a855f7);
+  opacity: 0.1;
+  filter: blur(1px);
+}
+
+.floating-orb-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 10%;
+  animation: float 20s ease-in-out infinite;
+}
+
+.floating-orb-2 {
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: 10%;
+  animation: float-reverse 25s ease-in-out infinite;
+}
+
+.floating-orb-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 20%;
+  left: 60%;
+  animation: float 30s ease-in-out infinite;
+}
+
+.bg-grid-pattern {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
 }

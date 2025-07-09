@@ -661,7 +661,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     if (existingCommand && !isLoading) {
       try {
         const parsedBlocks = JSON.parse(existingCommand.blocks)
-        if (parsedBlocks.nodes && parsedBlocks.edges) {
+        if (
+          parsedBlocks.nodes &&
+          parsedBlocks.edges &&
+          (JSON.stringify(parsedBlocks.nodes) !== JSON.stringify(nodes) ||
+            JSON.stringify(parsedBlocks.edges) !== JSON.stringify(edges))
+        ) {
           setNodes(parsedBlocks.nodes)
           setEdges(parsedBlocks.edges)
         }
@@ -670,7 +675,8 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         toast.error("Load Error", "Failed to load existing command data.")
       }
     }
-  }, [existingCommand, isLoading, setNodes, setEdges, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingCommand, isLoading])
 
   const generateID = (s: string) => {
     return `${Date.now()}-${Math.random()}-${s}`

@@ -172,7 +172,7 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                   Monitor, manage, and optimize your Discord community with
                   <br />
                   <span className='text-white font-bold'>
-                    real-time insights and enterprise-grade tools.
+                    real-time insights and moderation tools.
                   </span>
                 </p>
 

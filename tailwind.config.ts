@@ -53,7 +53,6 @@ const config: Config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
-                // Discord colors from your globals.css
                 discord: {
                     dark: "#1e1f22",
                     darker: "#111214",

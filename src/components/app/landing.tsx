@@ -64,7 +64,7 @@ const fullScreenFeatures = [
     title: 'FORTRESS SECURITY',
     subtitle: 'Multi-layered protection systems',
     description:
-      'Enterprise-grade security with advanced threat detection, automated moderation, and comprehensive audit trails. Your community, secured and contained with military-grade precision.',
+      'Threat detection, automated moderation, and comprehensive audit trails. Your community, secured and contained with military-grade precision.',
     icon: Shield,
     accent: 'discord-green',
     features: [

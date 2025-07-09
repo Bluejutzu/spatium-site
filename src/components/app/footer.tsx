@@ -70,7 +70,6 @@ const footerSections = [
       { name: 'Feature Requests', href: '/features' },
       { name: 'Training', href: '/training' },
       { name: 'Webinars', href: '/webinars' },
-      { name: 'Enterprise', href: '/enterprise' },
     ],
   },
 ];

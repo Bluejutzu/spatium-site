@@ -175,7 +175,7 @@ export default function ServersPage() {
                 Monitor, manage, and optimize your Discord empire with
                 <br />
                 <span className='text-white font-bold'>
-                  enterprise-grade precision and control.
+                  maintained up-to-date moderation
                 </span>
               </p>
             </motion.div>
@@ -303,7 +303,7 @@ export default function ServersPage() {
                       <p className='text-discord-text mb-8 max-w-2xl mx-auto text-lg'>
                         Your empire awaits expansion. Add our bot to your
                         Discord servers to begin managing your communities with
-                        enterprise-grade tools and analytics.
+                        moderation tools and analytics.
                       </p>
 
                       <div className='space-y-6'>

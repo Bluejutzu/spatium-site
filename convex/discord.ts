@@ -187,11 +187,32 @@ export const getCommands = query({
 })
 
 export const getCommand = query({
-  args: { commandId: v.id("commands") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.commandId)
+  args: {
+    commandId: v.id("commands"),
   },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("commands")
+      .withIndex("by_id", q => q.eq("_id", args.commandId))
+      .first()
+  }
 })
+
+export const getCommandViaName = query({
+  args: {
+    name: v.string(),
+    serverId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("commands")
+      .withIndex("by_server", q => q.eq("serverId", args.serverId as string))
+      .filter(q => q.eq(q.field("name"), args.name))
+      .first()
+  }
+}
+)
+
 
 export const getAllCommands = query({
   handler: async (ctx) => {

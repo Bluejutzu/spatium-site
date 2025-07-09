@@ -221,7 +221,7 @@ export function FloatingSidebar() {
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -50, opacity: 0 }}
-            className='fixed left-0 top-1/2 -translate-y-1/2 z-40'
+            className='fixed left-0 top-1/2 -translate-y-1/2 z-40 '
           >
             <Tooltip>
               <TooltipTrigger asChild>
