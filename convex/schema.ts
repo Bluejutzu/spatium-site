@@ -25,7 +25,7 @@ const schema = defineSchema({
     lastUpdated: v.number(),
   })
     .index("by_server_id", ["serverId"])
-    .index("by_owner", ["ownerId"]),
+    .index("by_owner_id", ["ownerId"]),
 
   serverMetrics: defineTable({
     serverId: v.string(),
@@ -45,7 +45,7 @@ const schema = defineSchema({
     success: v.boolean(),
     executionTime: v.number(),
   })
-    .index("by_server", ["serverId"])
+    .index("by_server_id", ["serverId"])
     .index("by_timestamp", ["timestamp"]),
 
   serverSettings: defineTable({
@@ -60,7 +60,7 @@ const schema = defineSchema({
     logChannelId: v.optional(v.string()),
     joinNotifications: v.boolean(),
     leaveNotifications: v.boolean(),
-  }).index("by_server", ["serverId"]),
+  }).index("by_server_id", ["serverId"]),
 
   alerts: defineTable({
     serverId: v.string(),
@@ -71,7 +71,7 @@ const schema = defineSchema({
     dismissed: v.boolean(),
     userId: v.optional(v.string()),
   })
-    .index("by_server", ["serverId"])
+    .index("by_server_id", ["serverId"])
     .index("by_timestamp", ["timestamp"]),
 
   commands: defineTable({
@@ -82,7 +82,7 @@ const schema = defineSchema({
     enabled: v.optional(v.boolean()), // New field for enabling/disabling commands
     creationTime: v.optional(v.number()),
     lastUpdateTime: v.optional(v.number()),
-  }).index("by_server", ["serverId"]),
+  }).index("by_server_id", ["serverId"]),
 })
 
 export default schema;

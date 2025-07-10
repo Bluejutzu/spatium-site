@@ -76,7 +76,7 @@ export const getUserServers = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("discordServers")
-      .withIndex("by_owner", (q) => q.eq("ownerId", args.userId))
+      .withIndex("by_owner_id", (q) => q.eq("ownerId", args.userId))
       .collect()
   },
 })
@@ -97,7 +97,7 @@ export const getServerMetrics = query({
 
     const recentCommands = await ctx.db
       .query("botCommands")
-      .withIndex("by_server", (q) => q.eq("serverId", args.serverId))
+      .withIndex("by_server_id", (q) => q.eq("serverId", args.serverId))
       .order("desc")
       .take(100)
 
@@ -131,7 +131,7 @@ export const getServerAlerts = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("alerts")
-      .withIndex("by_server", (q) => q.eq("serverId", args.serverId))
+      .withIndex("by_server_id", (q) => q.eq("serverId", args.serverId))
       .filter((q) => q.eq(q.field("dismissed"), false))
       .order("desc")
       .take(10)
@@ -181,7 +181,7 @@ export const getCommands = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("commands")
-      .withIndex("by_server", (q) => q.eq("serverId", args.serverId))
+      .withIndex("by_server_id", (q) => q.eq("serverId", args.serverId))
       .collect()
   },
 })
@@ -206,7 +206,7 @@ export const getCommandViaName = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("commands")
-      .withIndex("by_server", q => q.eq("serverId", args.serverId as string))
+      .withIndex("by_server_id", q => q.eq("serverId", args.serverId as string))
       .filter(q => q.eq(q.field("name"), args.name))
       .first()
   }
@@ -243,7 +243,7 @@ export const saveCommand = mutation({
     // Otherwise, check if command with same name exists
     const existing = await ctx.db
       .query("commands")
-      .withIndex("by_server", (q) => q.eq("serverId", args.serverId))
+      .withIndex("by_server_id", (q) => q.eq("serverId", args.serverId))
       .collect()
     const match = existing.find((cmd) => cmd.name === args.name)
 
@@ -325,7 +325,7 @@ export const getAutoRoleData = query({
   handler: async (ctx, args) => {
     const s = await ctx.db
       .query("serverSettings")
-      .withIndex("by_server", (q) => q.eq("serverId", args.serverId))
+      .withIndex("by_server_id", (q) => q.eq("serverId", args.serverId))
       .first()
 
     if (!s || !s.autoRoleId) {
