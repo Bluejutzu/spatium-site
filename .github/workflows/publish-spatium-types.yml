@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'spatium-site/convex/schema.ts'
 
 jobs:
   publish:
