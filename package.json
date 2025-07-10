@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "check-all": "pnpm typecheck && pnpm lint && pnpm format:check",
-    "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/spatium-types --allowJs false"
+    "generateTypes": "node scripts/generate-types.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^2.4.1",

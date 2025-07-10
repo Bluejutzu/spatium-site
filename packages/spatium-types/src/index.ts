@@ -1,5 +1,16 @@
 
 import { ButtonStyle, Embed } from "discord.js";
+import { Doc } from "./schema";
+
+export * from "./schema";
+
+export type User = Doc<"users">;
+export type DiscordServer = Doc<"discordServers">;
+export type ServerMetric = Doc<"serverMetrics">;
+export type BotCommand = Doc<"botCommands">;
+export type ServerSettings = Doc<"serverSettings">;
+export type Alert = Doc<"alerts">;
+export type Commands = Doc<"commands">;
 
 export type CommandType = {
     serverId: string;
