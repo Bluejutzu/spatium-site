@@ -23,9 +23,9 @@ async function main() {
 
         let content = await readFile(sourceFile, "utf-8");
         content = content.replace(/from "..\/schema.js";/g, 'from "../../../convex/schema.js";');
-        
+
         await writeFile(destinationFile, content);
-        
+
         console.log("Types copied and modified successfully.");
     } catch (error) {
         const logFile = join(LOGS_DIR, "generate-types-error.txt");
@@ -35,6 +35,7 @@ async function main() {
             await mkdir(LOGS_DIR, { recursive: true });
             await writeFile(logFile, errorMessage, "utf-8");
             console.error(`Error generating or copying types. See ${logFile} for details.`);
+            console.error(errorMessage);
         } catch (logError) {
             console.error("Failed to write to log file:", logError);
             console.error("Original error:", error);
