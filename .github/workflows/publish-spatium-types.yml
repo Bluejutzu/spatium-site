@@ -1,0 +1,38 @@
+name: Publish Spatium Types
+
+on:
+  push:
+    branches:
+      - main # or your default branch
+    paths:
+      - 'spatium-site/packages/spatium-types/**'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your preferred Node.js version
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --filter spatium-types
+        working-directory: spatium-site/packages/spatium-types
+
+      - name: Build Spatium Types
+        run: pnpm build
+        working-directory: spatium-site/packages/spatium-types
+
+      - name: Publish to npm
+        run: npm publish --access public
+        working-directory: spatium-site/packages/spatium-types
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
