@@ -34,7 +34,7 @@ const schema = defineSchema({
     onlineCount: v.number(),
     commandsUsed: v.number(),
     activeChannels: v.number(),
-  }).index("by_server_timestamp", ["serverId", "timestamp"]),
+  }).index("by_server_timestamp", ["serverId", "timestamp"]).index("by_server_id", ["serverId"]),
 
   botCommands: defineTable({
     serverId: v.string(),
