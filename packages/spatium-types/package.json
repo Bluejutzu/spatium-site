@@ -4,7 +4,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "tsc -w",
+    "lint": "echo \"No lint script for spatium-types\"",
+    "test": "echo \"No test script for spatium-types\""
   },
   "dependencies": {
     "convex": "^1.25.2",

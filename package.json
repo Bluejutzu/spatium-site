@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "check-all": "pnpm typecheck && pnpm lint && pnpm format:check",
-    "generateTypes": "node scripts/generate-types.mjs"
+    "generateTypes": "node scripts/generate-types.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@clerk/backend": "^2.4.1",
