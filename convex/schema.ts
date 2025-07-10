@@ -1,7 +1,7 @@
 import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
 
-const schema = defineSchema({
+export default defineSchema({
   users: defineTable({
     clerkId: v.string(),
     discordUserId: v.string(),
@@ -78,11 +78,9 @@ const schema = defineSchema({
     serverId: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
-    blocks: v.string(), // JSON serialized block structure
-    enabled: v.optional(v.boolean()), // New field for enabling/disabling commands
+    blocks: v.string(),
+    enabled: v.optional(v.boolean()), 
     creationTime: v.optional(v.number()),
     lastUpdateTime: v.optional(v.number()),
   }).index("by_server_id", ["serverId"]),
 })
-
-export default schema;
