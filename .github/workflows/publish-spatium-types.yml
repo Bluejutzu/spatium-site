@@ -22,7 +22,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Generate types
-        run: node spatium-site/scripts/generate-types.mjs
+        run: node /scripts/generate-types.mjs
 
       - name: Install dependencies
         run: pnpm install --filter spatium-types
