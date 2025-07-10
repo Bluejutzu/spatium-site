@@ -3,7 +3,7 @@ name: Publish Spatium Types
 on:
   push:
     branches:
-      - main 
+      - master 
     paths:
       - 'spatium-site/packages/spatium-types/**'
 
