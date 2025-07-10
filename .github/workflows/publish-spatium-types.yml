@@ -3,9 +3,7 @@ name: Publish Spatium Types
 on:
   push:
     branches:
-      - main # or your default branch
-    paths:
-      - 'spatium-site/packages/spatium-types/**'
+      - main
 
 jobs:
   publish:
@@ -17,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your preferred Node.js version
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Install pnpm
@@ -25,10 +23,10 @@ jobs:
 
       - name: Generate types
         run: node scripts/generate-types.mjs
-        working-directory: spatium-site
 
       - name: Install dependencies
         run: pnpm install --filter spatium-types
+        working-directory: spatium-site/packages/spatium-types
 
       - name: Build Spatium Types
         run: pnpm build
