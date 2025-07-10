@@ -3,7 +3,7 @@ name: Publish Spatium Types
 on:
   push:
     branches:
-      - main # or your default branch
+      - main 
     paths:
       - 'spatium-site/packages/spatium-types/**'
 
@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your preferred Node.js version
+          node-version: '20' 
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Install pnpm
