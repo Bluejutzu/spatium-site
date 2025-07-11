@@ -1,7 +1,7 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-family-minecraft: "Minecraft", "Orbitron", monospace;
+  --font-family-minecraft: 'Minecraft', 'Orbitron', monospace;
 
   /* Base colors */
   --color-background: oklch(0.141 0.005 285.823);
@@ -54,15 +54,14 @@
 }
 
 @font-face {
-  font-family: "Minecraft";
-  src: url("/fonts/Minecraft-Regular.woff") format("woff");
+  font-family: 'Minecraft';
+  src: url('/fonts/Minecraft-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @keyframes gradient-shift {
-
   0%,
   100% {
     background-position: 0% 50%;
@@ -74,7 +73,6 @@
 }
 
 @keyframes pulse-glow {
-
   0%,
   100% {
     opacity: 0.8;
@@ -105,7 +103,7 @@
 }
 
 .block-gradient-base::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: -2px;
   border-radius: calc(0.75rem + 2px);
@@ -113,10 +111,12 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   z-index: -1;
-  background: linear-gradient(135deg,
-      var(--gradient-color, var(--color-discord-blurple)) 0%,
-      transparent 50%,
-      var(--gradient-color, var(--color-discord-blurple)) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--gradient-color, var(--color-discord-blurple)) 0%,
+    transparent 50%,
+    var(--gradient-color, var(--color-discord-blurple)) 100%
+  );
 }
 
 .block-gradient-base:hover::before {
@@ -126,7 +126,7 @@
 }
 
 .block-gradient-base::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: 0.75rem;
@@ -134,10 +134,22 @@
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   z-index: -1;
-  background: linear-gradient(135deg,
-      color-mix(in srgb, var(--gradient-color, var(--color-discord-blurple)) 10%, transparent) 0%,
-      transparent 50%,
-      color-mix(in srgb, var(--gradient-color, var(--color-discord-blurple)) 5%, transparent) 100%);
+  background: linear-gradient(
+    135deg,
+    color-mix(
+        in srgb,
+        var(--gradient-color, var(--color-discord-blurple)) 10%,
+        transparent
+      )
+      0%,
+    transparent 50%,
+    color-mix(
+        in srgb,
+        var(--gradient-color, var(--color-discord-blurple)) 5%,
+        transparent
+      )
+      100%
+  );
 }
 
 .block-gradient-base:hover::after {
@@ -183,29 +195,59 @@
 
 /* Animated gradient for selected blocks */
 .block-gradient-animated::before {
-  background: linear-gradient(135deg,
-      var(--gradient-color, var(--color-discord-blurple)) 0%,
-      color-mix(in srgb, var(--gradient-color, var(--color-discord-blurple)) 80%, white) 25%,
-      transparent 50%,
-      color-mix(in srgb, var(--gradient-color, var(--color-discord-blurple)) 80%, white) 75%,
-      var(--gradient-color, var(--color-discord-blurple)) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--gradient-color, var(--color-discord-blurple)) 0%,
+    color-mix(
+        in srgb,
+        var(--gradient-color, var(--color-discord-blurple)) 80%,
+        white
+      )
+      25%,
+    transparent 50%,
+    color-mix(
+        in srgb,
+        var(--gradient-color, var(--color-discord-blurple)) 80%,
+        white
+      )
+      75%,
+    var(--gradient-color, var(--color-discord-blurple)) 100%
+  );
   background-size: 200% 200%;
   animation: var(--animate-gradient-shift);
 }
 
 /* Glow effects */
 .block-glow {
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gradient-color, var(--color-discord-blurple)) 30%, transparent));
+  filter: drop-shadow(
+    0 0 8px
+      color-mix(
+        in srgb,
+        var(--gradient-color, var(--color-discord-blurple)) 30%,
+        transparent
+      )
+  );
   transition: filter 0.3s ease-out;
 }
 
 .block-glow:hover {
-  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--gradient-color, var(--color-discord-blurple)) 50%, transparent));
+  filter: drop-shadow(
+    0 0 16px
+      color-mix(
+        in srgb,
+        var(--gradient-color, var(--color-discord-blurple)) 50%,
+        transparent
+      )
+  );
 }
 
 /* Discord component styles */
 .discord-card {
-  background-color: color-mix(in srgb, var(--color-discord-dark) 80%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--color-discord-dark) 80%,
+    transparent
+  );
   backdrop-filter: blur(12px);
   border: 1px solid var(--color-discord-border);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -217,12 +259,14 @@
   font-weight: bold;
   border-radius: 0.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-discord-blurple) 30%, transparent);
+  box-shadow: 0 4px 16px
+    color-mix(in srgb, var(--color-discord-blurple) 30%, transparent);
 }
 
 .discord-button-primary:hover {
   background-color: var(--color-discord-blurple-hover);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-discord-blurple) 50%, transparent);
+  box-shadow: 0 8px 24px
+    color-mix(in srgb, var(--color-discord-blurple) 50%, transparent);
 }
 
 .discord-button-outline {
@@ -254,7 +298,6 @@
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
@@ -270,7 +313,6 @@
 }
 
 @keyframes float-reverse {
-
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
@@ -318,7 +360,8 @@
 }
 
 .bg-grid-pattern {
-  background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 50px 50px;
 }
