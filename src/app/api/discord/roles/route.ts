@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DiscordAPI } from '@/features/discord';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/nextjs/server';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const serverId = searchParams.get('serverId');
   const userId = searchParams.get('userId');
-  const { userId: clerkUserId } = await auth();
   const client = await clerkClient();
 
-  if (!clerkUserId || clerkUserId !== userId) {
+  if (!userId) {
     return NextResponse.json(
-      { error: 'Unauthorized - No User ID or unequal' },
+      { error: 'Unauthorized - No User ID' },
       { status: 401 }
     );
   }

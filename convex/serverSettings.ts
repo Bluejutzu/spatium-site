@@ -6,7 +6,7 @@ export const getServerSettings = query({
   handler: async (ctx, args) => {
     const settings = await ctx.db
       .query('serverSettings')
-      .withIndex('by_server', q => q.eq('serverId', args.serverId))
+      .withIndex('by_server_id', q => q.eq('serverId', args.serverId))
       .first();
     return settings;
   },
@@ -29,7 +29,7 @@ export const updateServerSettings = mutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query('serverSettings')
-      .withIndex('by_server', q => q.eq('serverId', args.serverId))
+      .withIndex('by_server_id', q => q.eq('serverId', args.serverId))
       .first();
     if (existing) {
       await ctx.db.patch(existing._id, { ...args });

@@ -239,7 +239,7 @@ export function EmbedBuilder({
             <DialogTitle
               className={`font-bold flex items-center gap-2 ${isMobile ? 'text-lg' : 'text-2xl'}`}
             >
-              <imgIcon
+              <ImageIcon
                 className={`text-blue-500 ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`}
               />
               Embed Builder
@@ -526,8 +526,8 @@ export function EmbedBuilder({
                               </Card>
                             )) || (
                               <div className='text-center py-8 text-slate-400'>
-                                No fields added yet. Click `&quot;`Add Field`&quot;` to get
-                                started.
+                                No fields added yet. Click `&quot;`Add
+                                Field`&quot;` to get started.
                               </div>
                             )}
                           </CardContent>

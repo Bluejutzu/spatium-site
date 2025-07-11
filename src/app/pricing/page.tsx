@@ -113,8 +113,8 @@ export default function PricingPage() {
               className='mt-12'
             >
               <p className='text-discord-text text-lg'>
-                Thank you for your patience. We`&lsquo;`ll be back soon with exciting
-                new plans!
+                Thank you for your patience. We`&lsquo;`ll be back soon with
+                exciting new plans!
               </p>
             </motion.div>
           </motion.div>
