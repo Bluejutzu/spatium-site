@@ -27,7 +27,7 @@ jobs:
         run: node scripts/generate-types.mjs
 
       - name: Install & Build
-        run: pnpm install && pnpm build
+        run: pnpm install && pnpm install discord.js && pnpm build
         working-directory: ./packages/spatium-types
 
       - name: Publish to npm
