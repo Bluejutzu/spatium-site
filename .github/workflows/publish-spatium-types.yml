@@ -28,7 +28,7 @@ jobs:
 
       - name: Install & Build
         run: pnpm install && pnpm build
-        working-directory: packages/spatium-types
+        working-directory: ./packages/spatium-types
 
       - name: Publish to npm
         run: npm publish --access public
