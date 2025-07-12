@@ -208,10 +208,7 @@ export default function ServersPage() {
                   {servers && servers.length > 0 ? (
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
                       {servers.map((server, index) => (
-                        <div
-                          key={server._id}
-                          className='w-full max-w-sm'
-                        >
+                        <div key={server._id} className='w-full max-w-sm'>
                           <Link href={`/dashboard/${server.serverId}`}>
                             <Card className='discord-card hover:border-discord-border-hover transition-all duration-300 cursor-pointer group h-full'>
                               <CardContent className='p-6'>

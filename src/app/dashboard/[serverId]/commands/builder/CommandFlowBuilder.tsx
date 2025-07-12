@@ -94,7 +94,9 @@ const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
   });
 
   const layers = new Map<string, number>();
-  const queue = nodes.filter(n => (reverseAdj.get(n.id) || []).length === 0).map(n => n.id);
+  const queue = nodes
+    .filter(n => (reverseAdj.get(n.id) || []).length === 0)
+    .map(n => n.id);
   const visited = new Set(queue);
 
   let q = [...queue];
@@ -132,7 +134,7 @@ const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
     const l = layers.get(node.id);
     if (l !== undefined) {
       const layerCount = layerCounts.get(l) || 1;
-      const xOffset = -(layerCount - 1) * (nodeWidth + horizontalGap) / 2;
+      const xOffset = (-(layerCount - 1) * (nodeWidth + horizontalGap)) / 2;
       const currentOffset = layerOffsets.get(l) || 0;
 
       const x = xOffset + currentOffset;
@@ -150,8 +152,13 @@ const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
 const RootNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -160,8 +167,8 @@ const RootNode = ({ data, selected }: NodeProps) => {
         className='w-3 h-3 shadow-lg'
         style={{ backgroundColor: 'var(--color-discord-green)' }}
       />
-      <div className="h-2 bg-yellow-500" />
-      <div className="p-4">
+      <div className='h-2 bg-yellow-500' />
+      <div className='p-4'>
         <div className='flex items-center justify-between relative z-10'>
           <Settings className='w-4 h-4' />
           <span>Command Settings</span>
@@ -183,12 +190,17 @@ const RootNode = ({ data, selected }: NodeProps) => {
 const ErrorNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
-      <div className="h-2 bg-red-500" />
-      <div className="p-4">
+      <div className='h-2 bg-red-500' />
+      <div className='p-4'>
         <div className='flex items-center justify-between relative z-10'>
           <X className='w-4 h-4' />
           <span>Error Handler</span>
@@ -211,12 +223,17 @@ const ConditionNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
-      <div className="h-2" style={{ backgroundColor: color }} />
-      <div className="p-4">
+      <div className='h-2' style={{ backgroundColor: color }} />
+      <div className='p-4'>
         <Handle
           type='target'
           position={Position.Top}
@@ -267,12 +284,17 @@ const MessageNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
-      <div className="h-2" style={{ backgroundColor: color }} />
-      <div className="p-4">
+      <div className='h-2' style={{ backgroundColor: color }} />
+      <div className='p-4'>
         <Handle
           type='target'
           position={Position.Top}
@@ -303,87 +325,93 @@ const MessageNode = ({ data, selected }: NodeProps) => {
 
 const createCommandOptionNode =
   (icon: React.ComponentType<any>, label: string) =>
-    ({ data, selected }: NodeProps) => {
-      const color = 'var(--color-discord-green)';
-      const IconComponent = icon;
-      return (
-        <div
-          className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : ''
-            }`}
-          style={{ backgroundColor: 'var(--color-discord-darker)' }}
-        >
-          <div className="h-2" style={{ backgroundColor: color }} />
-          <div className="p-3">
-            <div className='text-center relative z-10'>
-              <IconComponent className='w-4 h-4 mx-auto mb-1' />
-              <span>{label}</span>
-              <div className='text-xs mt-1 opacity-80'>
-                {data.config?.name || 'Unnamed Option'}
-              </div>
+  ({ data, selected }: NodeProps) => {
+    const color = 'var(--color-discord-green)';
+    const IconComponent = icon;
+    return (
+      <div
+        className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+          selected ? 'outline-2 outline-discord-blurple' : ''
+        }`}
+        style={{ backgroundColor: 'var(--color-discord-darker)' }}
+      >
+        <div className='h-2' style={{ backgroundColor: color }} />
+        <div className='p-3'>
+          <div className='text-center relative z-10'>
+            <IconComponent className='w-4 h-4 mx-auto mb-1' />
+            <span>{label}</span>
+            <div className='text-xs mt-1 opacity-80'>
+              {data.config?.name || 'Unnamed Option'}
             </div>
-            <Handle
-              type='source'
-              position={Position.Bottom}
-              className='w-3 h-3 shadow-lg'
-              style={{ backgroundColor: color }}
-            />
           </div>
+          <Handle
+            type='source'
+            position={Position.Bottom}
+            className='w-3 h-3 shadow-lg'
+            style={{ backgroundColor: color }}
+          />
         </div>
-      );
-    };
+      </div>
+    );
+  };
 
 const createDiscordNode =
   (icon: React.ComponentType<any>, defaultCategory: string, label: string) =>
-    ({ data, selected }: NodeProps) => {
-      const blockType = BLOCK_TYPES.find(b => b.type === data.type);
-      const category = blockType?.category || defaultCategory;
-      const IconComponent = icon;
+  ({ data, selected }: NodeProps) => {
+    const blockType = BLOCK_TYPES.find(b => b.type === data.type);
+    const category = blockType?.category || defaultCategory;
+    const IconComponent = icon;
 
-      const colorMap: Record<string, string> = {
-        messaging: 'var(--color-discord-blurple)',
-        moderation: 'var(--color-discord-red)',
-        roles: 'var(--color-discord-orange)',
-        channels: 'var(--color-discord-green)',
-        members: 'var(--color-discord-purple)',
-        voice: 'var(--color-discord-yellow)',
-        webhooks: 'var(--color-discord-green)',
-        logic: 'var(--color-discord-blurple)',
-        utilities: 'var(--color-discord-purple)',
-      };
-
-      const color = colorMap[category] || 'var(--color-discord-blurple)';
-
-      return (
-        <div
-          className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
-            }`}
-          style={{ backgroundColor: 'var(--color-discord-darker)' }}
-        >
-          <div className="h-2" style={{ backgroundColor: color }} />
-          <div className="p-4">
-            <Handle
-              type='target'
-              position={Position.Top}
-              className='w-3 h-3 shadow-lg'
-              style={{ backgroundColor: color }}
-            />
-            <div className='text-center relative z-10'>
-              <IconComponent className='w-4 h-4 mx-auto mb-1' />
-              <span>{label}</span>
-              <div className='text-xs mt-1 opacity-80'>
-                {data.config?.configured ? 'Configured' : 'Not configured'}
-              </div>
-            </div>
-            <Handle
-              type='source'
-              position={Position.Bottom}
-              className='w-3 h-3 shadow-lg'
-              style={{ backgroundColor: color }}
-            />
-          </div>
-        </div>
-      );
+    const colorMap: Record<string, string> = {
+      messaging: 'var(--color-discord-blurple)',
+      moderation: 'var(--color-discord-red)',
+      roles: 'var(--color-discord-orange)',
+      channels: 'var(--color-discord-green)',
+      members: 'var(--color-discord-purple)',
+      voice: 'var(--color-discord-yellow)',
+      webhooks: 'var(--color-discord-green)',
+      logic: 'var(--color-discord-blurple)',
+      utilities: 'var(--color-discord-purple)',
     };
+
+    const color = colorMap[category] || 'var(--color-discord-blurple)';
+
+    return (
+      <div
+        className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+          selected
+            ? 'outline-2 outline-discord-blurple'
+            : data.isHovered
+              ? 'outline-2 outline-discord-purple'
+              : ''
+        }`}
+        style={{ backgroundColor: 'var(--color-discord-darker)' }}
+      >
+        <div className='h-2' style={{ backgroundColor: color }} />
+        <div className='p-4'>
+          <Handle
+            type='target'
+            position={Position.Top}
+            className='w-3 h-3 shadow-lg'
+            style={{ backgroundColor: color }}
+          />
+          <div className='text-center relative z-10'>
+            <IconComponent className='w-4 h-4 mx-auto mb-1' />
+            <span>{label}</span>
+            <div className='text-xs mt-1 opacity-80'>
+              {data.config?.configured ? 'Configured' : 'Not configured'}
+            </div>
+          </div>
+          <Handle
+            type='source'
+            position={Position.Bottom}
+            className='w-3 h-3 shadow-lg'
+            style={{ backgroundColor: color }}
+          />
+        </div>
+      </div>
+    );
+  };
 
 const nodeTypes = {
   root: RootNode,
@@ -931,9 +959,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         x: rootNode
           ? rootNode.position.x - 100 + Math.random() * 200
           : 200 + Math.random() * 600,
-        y: rootNode && isOption
-          ? rootNode.position.y - 200
-          : 100 + Math.random() * 400,
+        y:
+          rootNode && isOption
+            ? rootNode.position.y - 200
+            : 100 + Math.random() * 400,
       };
 
       const newNode: Node = {
@@ -1066,10 +1095,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   )}
                 </Card>
               )) || (
-                  <div className='text-center py-4 text-gray-400'>
-                    No embeds added yet. Click "Add Embed" to get started.
-                  </div>
-                )}
+                <div className='text-center py-4 text-gray-400'>
+                  No embeds added yet. Click "Add Embed" to get started.
+                </div>
+              )}
             </div>
           </div>
         );
@@ -1114,7 +1143,13 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       case 'fetch-role':
         return { roleId: '', storeIdAs: '' };
       case 'create-invite':
-        return { channelId: '', maxUses: 0, maxAge: 0, temporary: false, unique: false };
+        return {
+          channelId: '',
+          maxUses: 0,
+          maxAge: 0,
+          temporary: false,
+          unique: false,
+        };
       case 'delete-invite':
         return { inviteCode: '', reason: '' };
       case 'add-reaction':
@@ -1130,16 +1165,31 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       case 'bulk-delete':
         return { channelId: '', count: 0, reason: '' };
       case 'create-role':
-        return { name: '', color: 0, permissions: '0', hoist: false, mentionable: false };
+        return {
+          name: '',
+          color: 0,
+          permissions: '0',
+          hoist: false,
+          mentionable: false,
+        };
       case 'delete-role':
         return { roleId: '', reason: '' };
       case 'modify-role':
-        return { roleId: '', name: '', color: 0, permissions: '0', hoist: false, mentionable: false };
+        return {
+          roleId: '',
+          name: '',
+          color: 0,
+          permissions: '0',
+          hoist: false,
+          mentionable: false,
+        };
       case 'audit-log':
         return (
           <div className='space-y-4'>
             <div>
-              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                User ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.userId || ''}
@@ -1150,14 +1200,18 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Action Type (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Action Type (Optional)
+              </Label>
               <Input
                 type='number'
                 min={0}
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.actionType || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { actionType: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    actionType: Number(e.target.value),
+                  })
                 }
                 placeholder='e.g., 1 (Guild Update)'
               />
@@ -1174,7 +1228,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.limit || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { limit: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    limit: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -1184,7 +1240,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., audit-logs'
               />
@@ -1204,7 +1262,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.min || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { min: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    min: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -1215,7 +1275,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.max || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { max: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    max: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -1225,7 +1287,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., random-number'
               />
@@ -1346,9 +1410,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         nds.map(n =>
           n.id === nodeId
             ? {
-              ...n,
-              data: { ...n.data, config: { ...n.data.config, ...config } },
-            }
+                ...n,
+                data: { ...n.data, config: { ...n.data.config, ...config } },
+              }
             : n
         )
       );
@@ -1356,12 +1420,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         setSelectedNode(prev =>
           prev
             ? {
-              ...prev,
-              data: {
-                ...prev.data,
-                config: { ...prev.data.config, ...config },
-              },
-            }
+                ...prev,
+                data: {
+                  ...prev.data,
+                  config: { ...prev.data.config, ...config },
+                },
+              }
             : null
         );
       }
@@ -1385,14 +1449,21 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     }
   }, [selectedNode, setNodes, setEdges]);
 
-  const removeEdge = useCallback((edgeId: string) => {
-    setEdges(eds => eds.filter(e => e.id !== edgeId));
-  }, [setEdges]);
+  const removeEdge = useCallback(
+    (edgeId: string) => {
+      setEdges(eds => eds.filter(e => e.id !== edgeId));
+    },
+    [setEdges]
+  );
 
   const getConnectedNodeLabel = (nodeId: string) => {
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return 'Unknown Block';
-    return node.data.config?.name || node.data.label || `Block ${node.id.substring(0, 4)}`;
+    return (
+      node.data.config?.name ||
+      node.data.label ||
+      `Block ${node.id.substring(0, 4)}`
+    );
   };
 
   const saveCommand = useCallback(async () => {
@@ -1737,10 +1808,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                     )}
                   </Card>
                 )) || (
-                    <div className='text-center py-4 text-gray-400'>
-                      No embeds added yet. Click "Add Embed" to get started.
-                    </div>
-                  )}
+                  <div className='text-center py-4 text-gray-400'>
+                    No embeds added yet. Click "Add Embed" to get started.
+                  </div>
+                )}
               </div>
             </TabsContent>
 
@@ -1920,7 +1991,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Delete Message Days</Label>
+              <Label className='text-white font-medium'>
+                Delete Message Days
+              </Label>
               <Input
                 type='number'
                 min={0}
@@ -1951,7 +2024,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Duration (seconds)</Label>
+              <Label className='text-white font-medium'>
+                Duration (seconds)
+              </Label>
               <Input
                 type='number'
                 min={0}
@@ -1997,7 +2072,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.nickname || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { nickname: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    nickname: e.target.value,
+                  })
                 }
                 placeholder='New nickname'
               />
@@ -2050,12 +2127,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               </Select>
             </div>
             <div>
-              <Label className='text-white font-medium'>Category ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Category ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.categoryId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { categoryId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    categoryId: e.target.value,
+                  })
                 }
                 placeholder='Category ID'
               />
@@ -2091,7 +2172,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2118,13 +2201,17 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>New Name (Optional)</Label>
+              <Label className='text-white font-medium'>
+                New Name (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.name || ''}
@@ -2135,7 +2222,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>New Topic (Optional)</Label>
+              <Label className='text-white font-medium'>
+                New Topic (Optional)
+              </Label>
               <Textarea
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.topic || ''}
@@ -2227,10 +2316,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   )}
                 </Card>
               )) || (
-                  <div className='text-center py-4 text-gray-400'>
-                    No embeds added yet. Click "Add Embed" to get started.
-                  </div>
-                )}
+                <div className='text-center py-4 text-gray-400'>
+                  No embeds added yet. Click "Add Embed" to get started.
+                </div>
+              )}
             </div>
           </div>
         );
@@ -2243,7 +2332,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2260,7 +2351,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Avatar URL (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Avatar URL (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.avatar || ''}
@@ -2281,7 +2374,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.webhookId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { webhookId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    webhookId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2319,7 +2414,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2357,8 +2454,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 checked={config.mute || config.deafen || false}
                 onCheckedChange={checked =>
                   updateNodeConfig(selectedNode.id, {
-                    mute: selectedNode.data.type === 'mute-member' ? checked : undefined,
-                    deafen: selectedNode.data.type === 'deafen-member' ? checked : undefined,
+                    mute:
+                      selectedNode.data.type === 'mute-member'
+                        ? checked
+                        : undefined,
+                    deafen:
+                      selectedNode.data.type === 'deafen-member'
+                        ? checked
+                        : undefined,
                   })
                 }
               />
@@ -2400,7 +2503,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., fetched-user'
               />
@@ -2419,7 +2524,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2430,7 +2537,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., fetched-channel'
               />
@@ -2460,7 +2569,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., fetched-role'
               />
@@ -2479,32 +2590,42 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Max Uses (0 for unlimited)</Label>
+              <Label className='text-white font-medium'>
+                Max Uses (0 for unlimited)
+              </Label>
               <Input
                 type='number'
                 min={0}
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.maxUses || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { maxUses: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    maxUses: Number(e.target.value),
+                  })
                 }
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Max Age (seconds, 0 for never)</Label>
+              <Label className='text-white font-medium'>
+                Max Age (seconds, 0 for never)
+              </Label>
               <Input
                 type='number'
                 min={0}
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.maxAge || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { maxAge: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    maxAge: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -2537,7 +2658,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.inviteCode || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { inviteCode: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    inviteCode: e.target.value,
+                  })
                 }
                 placeholder='e.g., abcdef'
               />
@@ -2564,7 +2687,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.messageId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    messageId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2581,12 +2706,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Channel ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='Channel ID (leave empty for current channel)'
               />
@@ -2602,7 +2731,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.messageId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    messageId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
@@ -2619,7 +2750,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                User ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.userId || ''}
@@ -2630,12 +2763,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Channel ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='Channel ID (leave empty for current channel)'
               />
@@ -2652,18 +2789,24 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.messageId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    messageId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Channel ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='Channel ID (leave empty for current channel)'
               />
@@ -2679,18 +2822,24 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.messageId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    messageId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Channel ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='Channel ID (leave empty for current channel)'
               />
@@ -2717,13 +2866,17 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.channelId || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    channelId: e.target.value,
+                  })
                 }
                 placeholder='123456789012345678'
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Number of Messages (2-100)</Label>
+              <Label className='text-white font-medium'>
+                Number of Messages (2-100)
+              </Label>
               <Input
                 type='number'
                 min={2}
@@ -2731,7 +2884,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.count || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { count: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    count: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -2763,7 +2918,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Color (Hex or Integer)</Label>
+              <Label className='text-white font-medium'>
+                Color (Hex or Integer)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.color || ''}
@@ -2774,12 +2931,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Permissions (Bitfield)</Label>
+              <Label className='text-white font-medium'>
+                Permissions (Bitfield)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.permissions || '0'}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { permissions: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    permissions: e.target.value,
+                  })
                 }
                 placeholder='e.g., 8 (Administrator)'
               />
@@ -2794,7 +2955,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   updateNodeConfig(selectedNode.id, { hoist: checked })
                 }
               />
-              <Label className='text-white'>Display role members separately</Label>
+              <Label className='text-white'>
+                Display role members separately
+              </Label>
             </div>
             <div className='flex items-center space-x-2'>
               <Switch
@@ -2803,7 +2966,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   updateNodeConfig(selectedNode.id, { mentionable: checked })
                 }
               />
-              <Label className='text-white'>Allow anyone to @mention this role</Label>
+              <Label className='text-white'>
+                Allow anyone to @mention this role
+              </Label>
             </div>
           </div>
         );
@@ -2849,7 +3014,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>New Name (Optional)</Label>
+              <Label className='text-white font-medium'>
+                New Name (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.name || ''}
@@ -2860,7 +3027,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>New Color (Hex or Integer, Optional)</Label>
+              <Label className='text-white font-medium'>
+                New Color (Hex or Integer, Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.color || ''}
@@ -2871,12 +3040,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>New Permissions (Bitfield, Optional)</Label>
+              <Label className='text-white font-medium'>
+                New Permissions (Bitfield, Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.permissions || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { permissions: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    permissions: e.target.value,
+                  })
                 }
                 placeholder='e.g., 8 (Administrator)'
               />
@@ -2888,7 +3061,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   updateNodeConfig(selectedNode.id, { hoist: checked })
                 }
               />
-              <Label className='text-white'>Display role members separately</Label>
+              <Label className='text-white'>
+                Display role members separately
+              </Label>
             </div>
             <div className='flex items-center space-x-2'>
               <Switch
@@ -2897,7 +3072,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   updateNodeConfig(selectedNode.id, { mentionable: checked })
                 }
               />
-              <Label className='text-white'>Allow anyone to @mention this role</Label>
+              <Label className='text-white'>
+                Allow anyone to @mention this role
+              </Label>
             </div>
           </div>
         );
@@ -2905,7 +3082,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         return (
           <div className='space-y-4'>
             <div>
-              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                User ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.userId || ''}
@@ -2916,14 +3095,18 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Action Type (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Action Type (Optional)
+              </Label>
               <Input
                 type='number'
                 min={0}
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.actionType || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { actionType: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    actionType: Number(e.target.value),
+                  })
                 }
                 placeholder='e.g., 1 (Guild Update)'
               />
@@ -2940,7 +3123,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.limit || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { limit: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    limit: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -2950,7 +3135,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., audit-logs'
               />
@@ -2970,7 +3157,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.min || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { min: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    min: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -2981,7 +3170,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.max || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { max: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    max: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -2991,7 +3182,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., random-number'
               />
@@ -3484,9 +3677,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   </CardHeader>
                   <CardContent className='space-y-3'>
                     <div>
-                      <h4 className='text-xs font-bold uppercase text-slate-400 mb-2'>Incoming</h4>
-                      {edges.filter(e => e.target === selectedNode.id).length === 0 ? (
-                        <p className='text-slate-400 text-xs'>No incoming connections.</p>
+                      <h4 className='text-xs font-bold uppercase text-slate-400 mb-2'>
+                        Incoming
+                      </h4>
+                      {edges.filter(e => e.target === selectedNode.id)
+                        .length === 0 ? (
+                        <p className='text-slate-400 text-xs'>
+                          No incoming connections.
+                        </p>
                       ) : (
                         <div className='space-y-2'>
                           {edges
@@ -3495,13 +3693,20 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                               <div
                                 key={edge.id}
                                 className='flex items-center justify-between bg-slate-800/50 p-2 rounded-md transition-all duration-200 hover:bg-slate-700/50'
-                                onMouseEnter={() => setHoveredNodeId(edge.source)}
+                                onMouseEnter={() =>
+                                  setHoveredNodeId(edge.source)
+                                }
                                 onMouseLeave={() => setHoveredNodeId(null)}
                               >
                                 <span className='text-sm text-white truncate'>
                                   From: {getConnectedNodeLabel(edge.source)}
                                 </span>
-                                <Button variant='ghost' size='sm' onClick={() => removeEdge(edge.id)} className='p-1 h-auto'>
+                                <Button
+                                  variant='ghost'
+                                  size='sm'
+                                  onClick={() => removeEdge(edge.id)}
+                                  className='p-1 h-auto'
+                                >
                                   <X className='w-3 h-3 text-slate-400 hover:text-white' />
                                 </Button>
                               </div>
@@ -3510,9 +3715,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                       )}
                     </div>
                     <div>
-                      <h4 className='text-xs font-bold uppercase text-slate-400 mb-2'>Outgoing</h4>
-                      {edges.filter(e => e.source === selectedNode.id).length === 0 ? (
-                        <p className='text-slate-400 text-xs'>No outgoing connections.</p>
+                      <h4 className='text-xs font-bold uppercase text-slate-400 mb-2'>
+                        Outgoing
+                      </h4>
+                      {edges.filter(e => e.source === selectedNode.id)
+                        .length === 0 ? (
+                        <p className='text-slate-400 text-xs'>
+                          No outgoing connections.
+                        </p>
                       ) : (
                         <div className='space-y-2'>
                           {edges
@@ -3521,13 +3731,20 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                               <div
                                 key={edge.id}
                                 className='flex items-center justify-between bg-slate-800/50 p-2 rounded-md transition-all duration-200 hover:bg-slate-700/50'
-                                onMouseEnter={() => setHoveredNodeId(edge.target)}
+                                onMouseEnter={() =>
+                                  setHoveredNodeId(edge.target)
+                                }
                                 onMouseLeave={() => setHoveredNodeId(null)}
                               >
                                 <span className='text-sm text-white truncate'>
                                   To: {getConnectedNodeLabel(edge.target)}
                                 </span>
-                                <Button variant='ghost' size='sm' onClick={() => removeEdge(edge.id)} className='p-1 h-auto'>
+                                <Button
+                                  variant='ghost'
+                                  size='sm'
+                                  onClick={() => removeEdge(edge.id)}
+                                  className='p-1 h-auto'
+                                >
                                   <X className='w-3 h-3 text-slate-400 hover:text-white' />
                                 </Button>
                               </div>
