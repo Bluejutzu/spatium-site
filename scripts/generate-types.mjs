@@ -4,7 +4,10 @@ import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
-const __dirname = new URL('.', import.meta.url).pathname.replace(/^\//, '');
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONVEX_DIR = join(__dirname, '..', 'convex');
 const TYPES_PACKAGE_DIR = join(__dirname, '..', 'packages', 'spatium-types');
 const CONVEX_GENERATED_DIR = join(CONVEX_DIR, '_generated');
