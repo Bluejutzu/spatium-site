@@ -1,7 +1,6 @@
 'use client';
 
-import type React from 'react';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReactFlow, {
   addEdge,
@@ -57,6 +56,7 @@ import {
   ImageIcon,
   Link,
   ArrowLeft,
+  ToggleRight,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { DiscordEmbed } from '@/types/discord';
@@ -65,6 +65,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { Roboto } from 'next/font/google';
 import { api } from '../../../../../../convex/_generated/api';
 import { useRouter } from 'next/navigation';
+import { BlockCategory, BlockType } from '@/types/common';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -74,34 +75,107 @@ const ROOT_NODE_ID = 'root';
 const ERROR_NODE_ID = 'error-handler';
 const INPUT_FONT = roboto.className;
 
-// Helper to get category from type
-const getCategoryForType = (type: string) => {
-  const block = BLOCK_TYPES.find(b => b.type === type);
-  return block?.category || 'utilities';
+// Auto-layouting function
+const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
+  if (nodes.length === 0) return [];
+
+  const nodeMap = new Map(nodes.map(n => [n.id, { ...n }]));
+  const adj = new Map<string, string[]>();
+  const reverseAdj = new Map<string, string[]>();
+
+  nodes.forEach(node => {
+    adj.set(node.id, []);
+    reverseAdj.set(node.id, []);
+  });
+
+  edges.forEach(edge => {
+    adj.get(edge.source)?.push(edge.target);
+    reverseAdj.get(edge.target)?.push(edge.source);
+  });
+
+  const layers = new Map<string, number>();
+  const queue = nodes.filter(n => (reverseAdj.get(n.id) || []).length === 0).map(n => n.id);
+  const visited = new Set(queue);
+
+  let q = [...queue];
+  let layer = 0;
+  while (q.length > 0) {
+    const nextQ: string[] = [];
+    q.forEach(u => {
+      layers.set(u, layer);
+      (adj.get(u) || []).forEach(v => {
+        if (!visited.has(v)) {
+          visited.add(v);
+          nextQ.push(v);
+        }
+      });
+    });
+    q = nextQ;
+    layer++;
+  }
+
+  const layerCounts = new Map<number, number>();
+  nodes.forEach(n => {
+    const l = layers.get(n.id);
+    if (l !== undefined) {
+      layerCounts.set(l, (layerCounts.get(l) || 0) + 1);
+    }
+  });
+
+  const layerOffsets = new Map<number, number>();
+  const nodeWidth = 280; // Increased width
+  const nodeHeight = 30;
+  const horizontalGap = 100;
+  const verticalGap = 150;
+
+  return nodes.map(node => {
+    const l = layers.get(node.id);
+    if (l !== undefined) {
+      const layerCount = layerCounts.get(l) || 1;
+      const xOffset = -(layerCount - 1) * (nodeWidth + horizontalGap) / 2;
+      const currentOffset = layerOffsets.get(l) || 0;
+
+      const x = xOffset + currentOffset;
+      const y = l * (nodeHeight + verticalGap);
+
+      layerOffsets.set(l, currentOffset + nodeWidth + horizontalGap);
+
+      return { ...node, position: { x, y } };
+    }
+    return node;
+  });
 };
 
-// Enhanced Node Components with compatible gradients
+// Enhanced Node Components
 const RootNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`block-gradient-base block-gradient-utilities block-glow ${
-        selected ? 'block-gradient-animated' : ''
-      } px-4 py-3 shadow-lg rounded-lg min-w-[200px] text-white font-bold relative`}
-      style={{ backgroundColor: 'var(--color-discord-dark)' }}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
+        }`}
+      style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
-      <div className='flex items-center justify-between relative z-10'>
-        <Settings className='w-4 h-4' />
-        <span>Command Settings</span>
-      </div>
-      <div className='text-xs mt-1 opacity-80 relative z-10'>
-        {data.config?.name || 'Unnamed Command'}
-      </div>
       <Handle
-        type='source'
-        position={Position.Bottom}
+        type='target'
+        position={Position.Top}
         className='w-3 h-3 shadow-lg'
-        style={{ backgroundColor: 'var(--color-discord-purple)' }}
+        style={{ backgroundColor: 'var(--color-discord-green)' }}
       />
+      <div className="h-2 bg-yellow-500" />
+      <div className="p-4">
+        <div className='flex items-center justify-between relative z-10'>
+          <Settings className='w-4 h-4' />
+          <span>Command Settings</span>
+        </div>
+        <div className='text-xs mt-1 opacity-80 relative z-10'>
+          {data.config?.name || 'Unnamed Command'}
+        </div>
+        <Handle
+          type='source'
+          position={Position.Bottom}
+          className='w-3 h-3 shadow-lg'
+          style={{ backgroundColor: 'var(--color-discord-purple)' }}
+        />
+      </div>
     </div>
   );
 };
@@ -109,146 +183,40 @@ const RootNode = ({ data, selected }: NodeProps) => {
 const ErrorNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`block-gradient-base block-gradient-moderation block-glow ${
-        selected ? 'block-gradient-animated' : ''
-      } px-4 py-3 shadow-lg rounded-lg min-w-[200px] text-white font-bold relative`}
-      style={{ backgroundColor: 'var(--color-discord-dark)' }}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
+        }`}
+      style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
-      <div className='flex items-center justify-between relative z-10'>
-        <X className='w-4 h-4' />
-        <span>Error Handler</span>
+      <div className="h-2 bg-red-500" />
+      <div className="p-4">
+        <div className='flex items-center justify-between relative z-10'>
+          <X className='w-4 h-4' />
+          <span>Error Handler</span>
+        </div>
+        <div className='text-xs mt-1 opacity-80 relative z-10'>
+          {data.config?.message || 'Default error message'}
+        </div>
+        <Handle
+          type='target'
+          position={Position.Top}
+          className='w-3 h-3 shadow-lg'
+          style={{ backgroundColor: 'var(--color-discord-red)' }}
+        />
       </div>
-      <div className='text-xs mt-1 opacity-80 relative z-10'>
-        {data.config?.message || 'Default error message'}
-      </div>
-      <Handle
-        type='target'
-        position={Position.Top}
-        className='w-3 h-3 shadow-lg'
-        style={{ backgroundColor: 'var(--color-discord-red)' }}
-      />
     </div>
   );
 };
 
 const ConditionNode = ({ data, selected }: NodeProps) => {
+  const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`block-gradient-base block-gradient-logic block-glow ${
-        selected ? 'block-gradient-animated' : ''
-      } px-4 py-3 shadow-lg rounded-lg min-w-[200px] text-white font-bold relative`}
-      style={{ backgroundColor: 'var(--color-discord-dark)' }}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
+        }`}
+      style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
-      <Handle
-        type='target'
-        position={Position.Top}
-        className='w-3 h-3 shadow-lg'
-        style={{ backgroundColor: 'var(--color-discord-blurple)' }}
-      />
-      <div className='text-center relative z-10'>
-        <GitBranch className='w-4 h-4 mx-auto mb-1' />
-        <span>Condition</span>
-        <div className='text-xs mt-1 opacity-80'>
-          {data.config?.condition || 'No condition set'}
-        </div>
-      </div>
-      <Handle
-        type='source'
-        position={Position.Bottom}
-        id='true'
-        style={{ left: '25%', backgroundColor: 'var(--color-discord-green)' }}
-        className='w-3 h-3 shadow-lg'
-      />
-      <Handle
-        type='source'
-        position={Position.Bottom}
-        id='false'
-        style={{ left: '75%', backgroundColor: 'var(--color-discord-red)' }}
-        className='w-3 h-3 shadow-lg'
-      />
-      <div className='absolute -bottom-6 left-0 right-0 flex justify-between text-xs z-10'>
-        <Badge
-          className='text-white text-xs shadow-lg'
-          style={{ backgroundColor: 'var(--color-discord-green)' }}
-        >
-          True
-        </Badge>
-        <Badge
-          className='text-white text-xs shadow-lg'
-          style={{ backgroundColor: 'var(--color-discord-red)' }}
-        >
-          False
-        </Badge>
-      </div>
-    </div>
-  );
-};
-
-const MessageNode = ({ data, selected }: NodeProps) => {
-  return (
-    <div
-      className={`block-gradient-base block-gradient-messaging block-glow ${
-        selected ? 'block-gradient-animated' : ''
-      } px-4 py-3 shadow-lg rounded-lg min-w-[200px] text-white font-bold relative`}
-      style={{ backgroundColor: 'var(--color-discord-dark)' }}
-    >
-      <Handle
-        type='target'
-        position={Position.Top}
-        className='w-3 h-3 shadow-lg'
-        style={{ backgroundColor: 'var(--color-discord-blurple)' }}
-      />
-      <div className='text-center relative z-10'>
-        <MessageSquare className='w-4 h-4 mx-auto mb-1' />
-        <span>Send Message</span>
-        <div className='text-xs mt-1 opacity-80'>
-          {data.config?.content
-            ? `"${data.config.content.substring(0, 20)}..."`
-            : data.config?.embeds?.length
-              ? `${data.config.embeds.length} embed(s)`
-              : 'No content set'}
-        </div>
-      </div>
-      <Handle
-        type='source'
-        position={Position.Bottom}
-        className='w-3 h-3 shadow-lg'
-        style={{ backgroundColor: 'var(--color-discord-blurple)' }}
-      />
-    </div>
-  );
-};
-
-// Update the createDiscordNode function
-const createDiscordNode =
-  (icon: React.ComponentType<any>, defaultCategory: string, label: string) =>
-  ({ data, selected }: NodeProps) => {
-    const blockType = BLOCK_TYPES.find(b => b.type === data.type);
-    const category = blockType?.category || defaultCategory;
-    const IconComponent = icon;
-
-    // Map category to Discord color
-    const colorMap: Record<string, string> = {
-      messaging: 'var(--color-discord-blurple)',
-      moderation: 'var(--color-discord-red)',
-      roles: 'var(--color-discord-orange)',
-      channels: 'var(--color-discord-green)',
-      members: 'var(--color-discord-purple)',
-      voice: 'var(--color-discord-yellow)',
-      webhooks: 'var(--color-discord-green)',
-      logic: 'var(--color-discord-blurple)',
-      utilities: 'var(--color-discord-purple)',
-    };
-
-    const color = colorMap[category] || 'var(--color-discord-blurple)';
-
-    return (
-      <div
-        className={`block-gradient-base block-gradient-${category} block-glow ${
-          selected ? 'block-gradient-animated' : ''
-        } px-4 py-3 shadow-lg rounded-lg min-w-[200px] text-white font-bold relative`}
-        style={{ backgroundColor: 'var(--color-discord-dark)' }}
-      >
+      <div className="h-2" style={{ backgroundColor: color }} />
+      <div className="p-4">
         <Handle
           type='target'
           position={Position.Top}
@@ -256,10 +224,70 @@ const createDiscordNode =
           style={{ backgroundColor: color }}
         />
         <div className='text-center relative z-10'>
-          <IconComponent className='w-4 h-4 mx-auto mb-1' />
-          <span>{label}</span>
+          <GitBranch className='w-4 h-4 mx-auto mb-1' />
+          <span>Condition</span>
           <div className='text-xs mt-1 opacity-80'>
-            {data.config?.configured ? 'Configured' : 'Not configured'}
+            {data.config?.condition || 'No condition set'}
+          </div>
+        </div>
+        <Handle
+          type='source'
+          position={Position.Bottom}
+          id='true'
+          style={{ left: '25%', backgroundColor: 'var(--color-discord-green)' }}
+          className='w-3 h-3 shadow-lg'
+        />
+        <Handle
+          type='source'
+          position={Position.Bottom}
+          id='false'
+          style={{ left: '75%', backgroundColor: 'var(--color-discord-red)' }}
+          className='w-3 h-3 shadow-lg'
+        />
+        <div className='absolute -bottom-6 left-0 right-0 flex justify-between text-xs z-10 px-4'>
+          <Badge
+            className='text-white text-xs shadow-lg'
+            style={{ backgroundColor: 'var(--color-discord-green)' }}
+          >
+            True
+          </Badge>
+          <Badge
+            className='text-white text-xs shadow-lg'
+            style={{ backgroundColor: 'var(--color-discord-red)' }}
+          >
+            False
+          </Badge>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MessageNode = ({ data, selected }: NodeProps) => {
+  const color = 'var(--color-discord-blurple)';
+  return (
+    <div
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
+        }`}
+      style={{ backgroundColor: 'var(--color-discord-darker)' }}
+    >
+      <div className="h-2" style={{ backgroundColor: color }} />
+      <div className="p-4">
+        <Handle
+          type='target'
+          position={Position.Top}
+          className='w-3 h-3 shadow-lg'
+          style={{ backgroundColor: color }}
+        />
+        <div className='text-center relative z-10'>
+          <MessageSquare className='w-4 h-4 mx-auto mb-1' />
+          <span>Send Message</span>
+          <div className='text-xs mt-1 opacity-80'>
+            {data.config?.content
+              ? `"${data.config.content.substring(0, 20)}..."`
+              : data.config?.embeds?.length
+                ? `${data.config.embeds.length} embed(s)`
+                : 'No content set'}
           </div>
         </div>
         <Handle
@@ -269,14 +297,104 @@ const createDiscordNode =
           style={{ backgroundColor: color }}
         />
       </div>
-    );
-  };
+    </div>
+  );
+};
+
+const createCommandOptionNode =
+  (icon: React.ComponentType<any>, label: string) =>
+    ({ data, selected }: NodeProps) => {
+      const color = 'var(--color-discord-green)';
+      const IconComponent = icon;
+      return (
+        <div
+          className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : ''
+            }`}
+          style={{ backgroundColor: 'var(--color-discord-darker)' }}
+        >
+          <div className="h-2" style={{ backgroundColor: color }} />
+          <div className="p-3">
+            <div className='text-center relative z-10'>
+              <IconComponent className='w-4 h-4 mx-auto mb-1' />
+              <span>{label}</span>
+              <div className='text-xs mt-1 opacity-80'>
+                {data.config?.name || 'Unnamed Option'}
+              </div>
+            </div>
+            <Handle
+              type='source'
+              position={Position.Bottom}
+              className='w-3 h-3 shadow-lg'
+              style={{ backgroundColor: color }}
+            />
+          </div>
+        </div>
+      );
+    };
+
+const createDiscordNode =
+  (icon: React.ComponentType<any>, defaultCategory: string, label: string) =>
+    ({ data, selected }: NodeProps) => {
+      const blockType = BLOCK_TYPES.find(b => b.type === data.type);
+      const category = blockType?.category || defaultCategory;
+      const IconComponent = icon;
+
+      const colorMap: Record<string, string> = {
+        messaging: 'var(--color-discord-blurple)',
+        moderation: 'var(--color-discord-red)',
+        roles: 'var(--color-discord-orange)',
+        channels: 'var(--color-discord-green)',
+        members: 'var(--color-discord-purple)',
+        voice: 'var(--color-discord-yellow)',
+        webhooks: 'var(--color-discord-green)',
+        logic: 'var(--color-discord-blurple)',
+        utilities: 'var(--color-discord-purple)',
+      };
+
+      const color = colorMap[category] || 'var(--color-discord-blurple)';
+
+      return (
+        <div
+          className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : data.isHovered ? 'outline-2 outline-discord-purple' : ''
+            }`}
+          style={{ backgroundColor: 'var(--color-discord-darker)' }}
+        >
+          <div className="h-2" style={{ backgroundColor: color }} />
+          <div className="p-4">
+            <Handle
+              type='target'
+              position={Position.Top}
+              className='w-3 h-3 shadow-lg'
+              style={{ backgroundColor: color }}
+            />
+            <div className='text-center relative z-10'>
+              <IconComponent className='w-4 h-4 mx-auto mb-1' />
+              <span>{label}</span>
+              <div className='text-xs mt-1 opacity-80'>
+                {data.config?.configured ? 'Configured' : 'Not configured'}
+              </div>
+            </div>
+            <Handle
+              type='source'
+              position={Position.Bottom}
+              className='w-3 h-3 shadow-lg'
+              style={{ backgroundColor: color }}
+            />
+          </div>
+        </div>
+      );
+    };
 
 const nodeTypes = {
   root: RootNode,
   error: ErrorNode,
   condition: ConditionNode,
   'send-message': MessageNode,
+  'option-user': createCommandOptionNode(Users, 'User Option'),
+  'option-role': createCommandOptionNode(Crown, 'Role Option'),
+  'option-channel': createCommandOptionNode(Hash, 'Channel Option'),
+  'option-text': createCommandOptionNode(MessageSquare, 'Text Option'),
+  'option-boolean': createCommandOptionNode(ToggleRight, 'Boolean Option'),
   'add-role': createDiscordNode(Crown, 'roles', 'Add Role'),
   'remove-role': createDiscordNode(Crown, 'roles', 'Remove Role'),
   'kick-member': createDiscordNode(UserX, 'moderation', 'Kick Member'),
@@ -350,7 +468,13 @@ const initialNodes: Node[] = [
 const initialEdges: Edge[] = [];
 
 // Comprehensive Discord API Block Types
-const BLOCK_CATEGORIES = [
+const BLOCK_CATEGORIES: BlockCategory[] = [
+  {
+    id: 'options',
+    label: 'Command Options',
+    icon: Settings,
+    description: 'Define command options/parameters',
+  },
   {
     id: 'messaging',
     label: 'Messaging',
@@ -407,7 +531,43 @@ const BLOCK_CATEGORIES = [
   },
 ];
 
-const BLOCK_TYPES = [
+const BLOCK_TYPES: BlockType[] = [
+  // Command Options
+  {
+    type: 'option-user',
+    label: 'User Option',
+    category: 'options',
+    icon: Users,
+    description: 'A user command option.',
+  },
+  {
+    type: 'option-role',
+    label: 'Role Option',
+    category: 'options',
+    icon: Crown,
+    description: 'A role command option.',
+  },
+  {
+    type: 'option-channel',
+    label: 'Channel Option',
+    category: 'options',
+    icon: Hash,
+    description: 'A channel command option.',
+  },
+  {
+    type: 'option-text',
+    label: 'Text Option',
+    category: 'options',
+    icon: MessageSquare,
+    description: 'A text command option.',
+  },
+  {
+    type: 'option-boolean',
+    label: 'Boolean Option',
+    category: 'options',
+    icon: ToggleRight,
+    description: 'A boolean command option.',
+  },
   // Messaging
   {
     type: 'send-message',
@@ -677,14 +837,25 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showPalette, setShowPalette] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('messaging');
+  const [selectedCategory, setSelectedCategory] = useState('options');
   const [embedBuilderOpen, setEmbedBuilderOpen] = useState(false);
   const [currentEmbedIndex, setCurrentEmbedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const toast = useToast();
   const [rfInstance, setRfInstance] = useState<ReturnType<
     typeof useReactFlow
   > | null>(null);
+
+  const memoizedNodes = useMemo(() => {
+    return nodes.map(n => ({
+      ...n,
+      data: {
+        ...n.data,
+        isHovered: n.id === hoveredNodeId,
+      },
+    }));
+  }, [nodes, hoveredNodeId]);
 
   // Fetch existing command if editing
   const existingCommand = useQuery(
@@ -699,14 +870,20 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     if (existingCommand && !isLoading) {
       try {
         const parsedBlocks = JSON.parse(existingCommand.blocks);
-        if (
-          parsedBlocks.nodes &&
-          parsedBlocks.edges &&
-          (JSON.stringify(parsedBlocks.nodes) !== JSON.stringify(nodes) ||
-            JSON.stringify(parsedBlocks.edges) !== JSON.stringify(edges))
-        ) {
-          setNodes(parsedBlocks.nodes);
+        if (parsedBlocks.nodes && parsedBlocks.edges) {
+          const layoutedNodes = getLayoutedNodes(
+            parsedBlocks.nodes,
+            parsedBlocks.edges
+          );
+          setNodes(layoutedNodes);
           setEdges(parsedBlocks.edges);
+
+          if (rfInstance) {
+            // Fit view after layout
+            setTimeout(() => {
+              rfInstance.fitView({ duration: 400, padding: 0.1 });
+            }, 100);
+          }
         }
       } catch (error) {
         console.error('Failed to parse existing command blocks:', error);
@@ -714,7 +891,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingCommand, isLoading]);
+  }, [existingCommand, isLoading, rfInstance]);
 
   const generateID = (s: string) => {
     return `${Date.now()}-${Math.random()}-${s}`;
@@ -743,15 +920,26 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
 
   const addNode = useCallback(
     (type: string) => {
+      if (!rfInstance) return;
       const blockType = BLOCK_TYPES.find(b => b.type === type);
       const id = generateID(type);
+
+      const rootNode = rfInstance.getNode(ROOT_NODE_ID);
+      const isOption = type.startsWith('option-');
+
+      const position = {
+        x: rootNode
+          ? rootNode.position.x - 100 + Math.random() * 200
+          : 200 + Math.random() * 600,
+        y: rootNode && isOption
+          ? rootNode.position.y - 200
+          : 100 + Math.random() * 400,
+      };
+
       const newNode: Node = {
         id,
         type,
-        position: {
-          x: 200 + Math.random() * 600,
-          y: 1 + Math.random() * 400,
-        },
+        position,
         data: {
           label: blockType?.label || type,
           type,
@@ -759,12 +947,28 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         },
       };
       setNodes(nds => [...nds, newNode]);
+
+      if (isOption && rootNode) {
+        const newEdge = {
+          id: `e-${id}-${rootNode.id}`,
+          source: id,
+          target: rootNode.id,
+          type: 'smoothstep',
+        };
+        setEdges(eds => addEdge(newEdge, eds));
+      }
     },
-    [setNodes]
+    [rfInstance, setNodes, setEdges]
   );
 
   const getDefaultConfig = (type: string) => {
     switch (type) {
+      case 'option-user':
+      case 'option-role':
+      case 'option-channel':
+      case 'option-text':
+      case 'option-boolean':
+        return { name: '', description: '', required: true };
       case 'send-message':
         return {
           name: 'Send Message',
@@ -792,41 +996,332 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           storeIdAs: '',
         };
       case 'send-dm':
-        return { content: '', embeds: [], userId: '' };
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Message Content</Label>
+              <Textarea
+                className='mt-1 min-h-[100px]'
+                value={config.content || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { content: e.target.value })
+                }
+                placeholder='Enter your message content here...'
+                maxLength={2000}
+              />
+              <div className='text-xs text-gray-400 mt-1'>
+                {(config.content || '').length}/2000 characters
+              </div>
+            </div>
+            <div className='flex items-center justify-between'>
+              <Label className='text-white font-medium'>Embeds</Label>
+              <Button
+                onClick={addEmbed}
+                size='sm'
+                disabled={(config.embeds?.length || 0) >= 10}
+              >
+                <Plus className='w-4 h-4 mr-2' />
+                Add Embed
+              </Button>
+            </div>
+            <div className='space-y-2'>
+              {config.embeds?.map((embed: any, index: number) => (
+                <Card key={index} className='p-3'>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-sm font-medium'>
+                      Embed {index + 1}
+                    </span>
+                    <div className='flex gap-2'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => openEmbedBuilder(index)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant='destructive'
+                        size='sm'
+                        onClick={() => removeEmbed(index)}
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </Button>
+                    </div>
+                  </div>
+                  {embed.title && (
+                    <div className='text-xs text-gray-400 mt-1'>
+                      Title: {embed.title}
+                    </div>
+                  )}
+                </Card>
+              )) || (
+                  <div className='text-center py-4 text-gray-400'>
+                    No embeds added yet. Click "Add Embed" to get started.
+                  </div>
+                )}
+            </div>
+          </div>
+        );
       case 'condition':
         return { condition: '', operator: 'equals', value: '' };
       case 'add-role':
+        return { roleId: '', userId: 'command-user', reason: '' };
       case 'remove-role':
         return { roleId: '', userId: 'command-user', reason: '' };
       case 'kick-member':
+        return { userId: '', reason: '', deleteMessageDays: 0 };
       case 'ban-member':
         return { userId: '', reason: '', deleteMessageDays: 0 };
       case 'timeout-member':
         return { userId: '', duration: 60, reason: '' };
+      case 'set-nickname':
+        return { userId: '', nickname: '', reason: '' };
       case 'create-channel':
         return { name: '', type: 0, categoryId: '', topic: '', nsfw: false };
+      case 'delete-channel':
+        return { channelId: '', reason: '' };
+      case 'modify-channel':
+        return { channelId: '', name: '', topic: '', nsfw: false };
+      case 'send-dm':
+        return { userId: '', content: '', embeds: [] };
+      case 'create-webhook':
+        return { channelId: '', name: '', avatar: '' };
+      case 'delete-webhook':
+        return { webhookId: '', reason: '' };
+      case 'move-member':
+        return { userId: '', channelId: '', reason: '' };
+      case 'mute-member':
+        return { userId: '', mute: true, reason: '' };
+      case 'deafen-member':
+        return { userId: '', deafen: true, reason: '' };
+      case 'fetch-user':
+        return { userId: '', storeIdAs: '' };
+      case 'fetch-member':
+        return { userId: '', storeIdAs: '' };
+      case 'fetch-channel':
+        return { channelId: '', storeIdAs: '' };
+      case 'fetch-role':
+        return { roleId: '', storeIdAs: '' };
+      case 'create-invite':
+        return { channelId: '', maxUses: 0, maxAge: 0, temporary: false, unique: false };
+      case 'delete-invite':
+        return { inviteCode: '', reason: '' };
+      case 'add-reaction':
+        return { messageId: '', emoji: '', channelId: '' };
+      case 'remove-reaction':
+        return { messageId: '', emoji: '', userId: '', channelId: '' };
+      case 'pin-message':
+        return { messageId: '', channelId: '' };
+      case 'unpin-message':
+        return { messageId: '', channelId: '' };
+      case 'delete-message':
+        return { messageId: '', channelId: '', reason: '' };
+      case 'bulk-delete':
+        return { channelId: '', count: 0, reason: '' };
       case 'create-role':
-        return {
-          name: '',
-          color: 0,
-          permissions: '0',
-          hoist: false,
-          mentionable: false,
-        };
+        return { name: '', color: 0, permissions: '0', hoist: false, mentionable: false };
+      case 'delete-role':
+        return { roleId: '', reason: '' };
+      case 'modify-role':
+        return { roleId: '', name: '', color: 0, permissions: '0', hoist: false, mentionable: false };
+      case 'audit-log':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Action Type (Optional)</Label>
+              <Input
+                type='number'
+                min={0}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.actionType || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { actionType: Number(e.target.value) })
+                }
+                placeholder='e.g., 1 (Guild Update)'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                Use a Discord audit log action type.
+              </p>
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Limit (1-100)</Label>
+              <Input
+                type='number'
+                min={1}
+                max={100}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.limit || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { limit: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., audit-logs'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The fetched audit log entries will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
+      case 'random':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Minimum Value</Label>
+              <Input
+                type='number'
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.min || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { min: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Maximum Value</Label>
+              <Input
+                type='number'
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.max || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { max: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., random-number'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The generated random number will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
       case 'wait':
-        return { duration: 1000, unit: 'milliseconds' };
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Time (ms)</Label>
+              <Input
+                type='number'
+                min='0'
+                max='10000'
+                className={'mt-1 ' + INPUT_FONT}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    duration: Number.parseInt(e.target.value) || 0,
+                  })
+                }
+                value={config.duration || ''}
+                placeholder='Yield time of the thread (max 10s)'
+              />
+            </div>
+          </div>
+        );
       case 'unq-variable':
-        return { name: '', value: '', operation: 'set' };
+        return (
+          <div className='space-y-1'>
+            <div>
+              <Label className='text-white font-medium'>Variable Name</Label>
+              <Input
+                type='text'
+                className={'mt-1 ' + INPUT_FONT}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    name: e.target.value,
+                  })
+                }
+                value={config.name || ''}
+                placeholder='Name of the unique variable'
+              />
+              <Label className='text-white font-medium pt-3'>
+                Variable Value
+              </Label>
+              <Input
+                type='text'
+                className={'mt-1 ' + INPUT_FONT}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    value: e.target.value,
+                  })
+                }
+                value={config.value || ''}
+                placeholder='Value of the unique variable'
+              />
+            </div>
+            <p className='text-xs text-gray-400 mt-1'>
+              You can use use that variable with {'{variable-name}'} in other
+              blocks.
+            </p>
+          </div>
+        );
+
       default:
-        return { configured: false };
+        return (
+          <div className='text-center py-8 text-gray-400'>
+            <Settings className='w-12 h-12 mx-auto mb-4 opacity-50' />
+            <p>Configuration for {selectedNode.data.label} coming soon...</p>
+          </div>
+        );
     }
   };
 
   const onConnect = useCallback(
     (params: Edge | Connection) => {
+      const sourceNode = rfInstance?.getNode(params.source!);
+      const targetNode = rfInstance?.getNode(params.target!);
+
+      if (sourceNode && targetNode) {
+        const isSourceOption = sourceNode.type?.startsWith('option-');
+        if (isSourceOption && targetNode.type !== 'root') {
+          toast.error(
+            'Invalid Connection',
+            'Command options can only connect to the Command Settings block.'
+          );
+          return;
+        }
+      }
       setEdges(eds => addEdge(params, eds));
     },
-    [setEdges]
+    [rfInstance, setEdges, toast]
   );
 
   const onNodesDelete = useCallback(
@@ -851,9 +1346,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         nds.map(n =>
           n.id === nodeId
             ? {
-                ...n,
-                data: { ...n.data, config: { ...n.data.config, ...config } },
-              }
+              ...n,
+              data: { ...n.data, config: { ...n.data.config, ...config } },
+            }
             : n
         )
       );
@@ -861,12 +1356,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         setSelectedNode(prev =>
           prev
             ? {
-                ...prev,
-                data: {
-                  ...prev.data,
-                  config: { ...prev.data.config, ...config },
-                },
-              }
+              ...prev,
+              data: {
+                ...prev.data,
+                config: { ...prev.data.config, ...config },
+              },
+            }
             : null
         );
       }
@@ -889,6 +1384,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       setSelectedNode(null);
     }
   }, [selectedNode, setNodes, setEdges]);
+
+  const removeEdge = useCallback((edgeId: string) => {
+    setEdges(eds => eds.filter(e => e.id !== edgeId));
+  }, [setEdges]);
+
+  const getConnectedNodeLabel = (nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return 'Unknown Block';
+    return node.data.config?.name || node.data.label || `Block ${node.id.substring(0, 4)}`;
+  };
 
   const saveCommand = useCallback(async () => {
     setIsLoading(true);
@@ -1036,6 +1541,49 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   })
                 }
               />
+            </div>
+          </div>
+        );
+
+      case 'option-user':
+      case 'option-role':
+      case 'option-channel':
+      case 'option-text':
+      case 'option-boolean':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Option Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., user'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Description</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.description || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    description: e.target.value,
+                  })
+                }
+                placeholder='What is this option for?'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.required !== false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { required: checked })
+                }
+              />
+              <Label className='text-white'>Required</Label>
             </div>
           </div>
         );
@@ -1189,10 +1737,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                     )}
                   </Card>
                 )) || (
-                  <div className='text-center py-4 text-gray-400'>
-                    No embeds added yet. Click "Add Embed" to get started.
-                  </div>
-                )}
+                    <div className='text-center py-4 text-gray-400'>
+                      No embeds added yet. Click "Add Embed" to get started.
+                    </div>
+                  )}
               </div>
             </TabsContent>
 
@@ -1343,6 +1891,1172 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 placeholder='Optional reason for audit log'
               />
             </div>
+          </div>
+        );
+      case 'kick-member':
+      case 'ban-member':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Delete Message Days</Label>
+              <Input
+                type='number'
+                min={0}
+                max={7}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.deleteMessageDays || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    deleteMessageDays: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+          </div>
+        );
+      case 'timeout-member':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Duration (seconds)</Label>
+              <Input
+                type='number'
+                min={0}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.duration || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    duration: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'set-nickname':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Nickname</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.nickname || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { nickname: e.target.value })
+                }
+                placeholder='New nickname'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'create-channel':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., general'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Channel Type</Label>
+              <Select
+                value={config.type || 0}
+                onValueChange={value =>
+                  updateNodeConfig(selectedNode.id, { type: Number(value) })
+                }
+              >
+                <SelectTrigger className={'mt-1 ' + INPUT_FONT}>
+                  <SelectValue placeholder='Select channel type...' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={0}>Text</SelectItem>
+                  <SelectItem value={2}>Voice</SelectItem>
+                  <SelectItem value={4}>Category</SelectItem>
+                  <SelectItem value={5}>News</SelectItem>
+                  <SelectItem value={13}>Stage</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Category ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.categoryId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { categoryId: e.target.value })
+                }
+                placeholder='Category ID'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Topic (Optional)</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.topic || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { topic: e.target.value })
+                }
+                placeholder='Channel topic'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.nsfw || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { nsfw: checked })
+                }
+              />
+              <Label className='text-white'>NSFW</Label>
+            </div>
+          </div>
+        );
+      case 'delete-channel':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'modify-channel':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>New Name (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='New channel name'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>New Topic (Optional)</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.topic || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { topic: e.target.value })
+                }
+                placeholder='New channel topic'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.nsfw || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { nsfw: checked })
+                }
+              />
+              <Label className='text-white'>NSFW</Label>
+            </div>
+          </div>
+        );
+      case 'send-dm':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Message Content</Label>
+              <Textarea
+                className='mt-1 min-h-[100px]'
+                value={config.content || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { content: e.target.value })
+                }
+                placeholder='Enter your message content here...'
+                maxLength={2000}
+              />
+              <div className='text-xs text-gray-400 mt-1'>
+                {(config.content || '').length}/2000 characters
+              </div>
+            </div>
+            <div className='flex items-center justify-between'>
+              <Label className='text-white font-medium'>Embeds</Label>
+              <Button
+                onClick={addEmbed}
+                size='sm'
+                disabled={(config.embeds?.length || 0) >= 10}
+              >
+                <Plus className='w-4 h-4 mr-2' />
+                Add Embed
+              </Button>
+            </div>
+            <div className='space-y-2'>
+              {config.embeds?.map((embed: any, index: number) => (
+                <Card key={index} className='p-3'>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-sm font-medium'>
+                      Embed {index + 1}
+                    </span>
+                    <div className='flex gap-2'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => openEmbedBuilder(index)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant='destructive'
+                        size='sm'
+                        onClick={() => removeEmbed(index)}
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </Button>
+                    </div>
+                  </div>
+                  {embed.title && (
+                    <div className='text-xs text-gray-400 mt-1'>
+                      Title: {embed.title}
+                    </div>
+                  )}
+                </Card>
+              )) || (
+                  <div className='text-center py-4 text-gray-400'>
+                    No embeds added yet. Click "Add Embed" to get started.
+                  </div>
+                )}
+            </div>
+          </div>
+        );
+      case 'create-webhook':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Webhook Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., My Webhook'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Avatar URL (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.avatar || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { avatar: e.target.value })
+                }
+                placeholder='https://example.com/avatar.png'
+              />
+            </div>
+          </div>
+        );
+      case 'delete-webhook':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Webhook ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.webhookId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { webhookId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'move-member':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'mute-member':
+      case 'deafen-member':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.mute || config.deafen || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, {
+                    mute: selectedNode.data.type === 'mute-member' ? checked : undefined,
+                    deafen: selectedNode.data.type === 'deafen-member' ? checked : undefined,
+                  })
+                }
+              />
+              <Label className='text-white'>
+                {selectedNode.data.type === 'mute-member' ? 'Mute' : 'Deafen'}
+              </Label>
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'fetch-user':
+      case 'fetch-member':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., fetched-user'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The fetched user/member object will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
+      case 'fetch-channel':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., fetched-channel'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The fetched channel object will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
+      case 'fetch-role':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Role ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.roleId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { roleId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., fetched-role'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The fetched role object will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
+      case 'create-invite':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Max Uses (0 for unlimited)</Label>
+              <Input
+                type='number'
+                min={0}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.maxUses || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { maxUses: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Max Age (seconds, 0 for never)</Label>
+              <Input
+                type='number'
+                min={0}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.maxAge || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { maxAge: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.temporary || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { temporary: checked })
+                }
+              />
+              <Label className='text-white'>Temporary Membership</Label>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.unique || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { unique: checked })
+                }
+              />
+              <Label className='text-white'>Unique Invite</Label>
+            </div>
+          </div>
+        );
+      case 'delete-invite':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Invite Code</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.inviteCode || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { inviteCode: e.target.value })
+                }
+                placeholder='e.g., abcdef'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'add-reaction':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Message ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.messageId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Emoji</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.emoji || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { emoji: e.target.value })
+                }
+                placeholder='e.g., 👍 or :custom_emoji:'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='Channel ID (leave empty for current channel)'
+              />
+            </div>
+          </div>
+        );
+      case 'remove-reaction':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Message ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.messageId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Emoji (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.emoji || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { emoji: e.target.value })
+                }
+                placeholder='e.g., 👍 or :custom_emoji: (leave empty to remove all)'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='User ID (leave empty for bot user)'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='Channel ID (leave empty for current channel)'
+              />
+            </div>
+          </div>
+        );
+      case 'pin-message':
+      case 'unpin-message':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Message ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.messageId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='Channel ID (leave empty for current channel)'
+              />
+            </div>
+          </div>
+        );
+      case 'delete-message':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Message ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.messageId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { messageId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Channel ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='Channel ID (leave empty for current channel)'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'bulk-delete':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Channel ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.channelId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { channelId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Number of Messages (2-100)</Label>
+              <Input
+                type='number'
+                min={2}
+                max={100}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.count || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { count: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'create-role':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Role Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., New Role'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Color (Hex or Integer)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.color || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { color: e.target.value })
+                }
+                placeholder='e.g., #FF0000 or 16711680'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Permissions (Bitfield)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.permissions || '0'}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { permissions: e.target.value })
+                }
+                placeholder='e.g., 8 (Administrator)'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                Use a Discord permission bitfield.
+              </p>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.hoist || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { hoist: checked })
+                }
+              />
+              <Label className='text-white'>Display role members separately</Label>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.mentionable || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { mentionable: checked })
+                }
+              />
+              <Label className='text-white'>Allow anyone to @mention this role</Label>
+            </div>
+          </div>
+        );
+      case 'delete-role':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Role ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.roleId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { roleId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Reason</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.reason || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { reason: e.target.value })
+                }
+                placeholder='Optional reason for audit log'
+              />
+            </div>
+          </div>
+        );
+      case 'modify-role':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Role ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.roleId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { roleId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>New Name (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='New role name'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>New Color (Hex or Integer, Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.color || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { color: e.target.value })
+                }
+                placeholder='e.g., #FF0000 or 16711680'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>New Permissions (Bitfield, Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.permissions || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { permissions: e.target.value })
+                }
+                placeholder='e.g., 8 (Administrator)'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.hoist || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { hoist: checked })
+                }
+              />
+              <Label className='text-white'>Display role members separately</Label>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.mentionable || false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { mentionable: checked })
+                }
+              />
+              <Label className='text-white'>Allow anyone to @mention this role</Label>
+            </div>
+          </div>
+        );
+      case 'audit-log':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.userId || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
+                }
+                placeholder='123456789012345678'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Action Type (Optional)</Label>
+              <Input
+                type='number'
+                min={0}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.actionType || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { actionType: Number(e.target.value) })
+                }
+                placeholder='e.g., 1 (Guild Update)'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                Use a Discord audit log action type.
+              </p>
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Limit (1-100)</Label>
+              <Input
+                type='number'
+                min={1}
+                max={100}
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.limit || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { limit: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., audit-logs'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The fetched audit log entries will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
+      case 'random':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Minimum Value</Label>
+              <Input
+                type='number'
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.min || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { min: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Maximum Value</Label>
+              <Input
+                type='number'
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.max || 0}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { max: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Store Result As</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.storeIdAs || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                }
+                placeholder='e.g., random-number'
+              />
+              <p className='text-xs text-gray-400 mt-1'>
+                The generated random number will be stored as a variable.
+              </p>
+            </div>
+          </div>
+        );
+      case 'wait':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Time (ms)</Label>
+              <Input
+                type='number'
+                min='0'
+                max='10000'
+                className={'mt-1 ' + INPUT_FONT}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    duration: Number.parseInt(e.target.value) || 0,
+                  })
+                }
+                value={config.duration || ''}
+                placeholder='Yield time of the thread (max 10s)'
+              />
+            </div>
+          </div>
+        );
+      case 'unq-variable':
+        return (
+          <div className='space-y-1'>
+            <div>
+              <Label className='text-white font-medium'>Variable Name</Label>
+              <Input
+                type='text'
+                className={'mt-1 ' + INPUT_FONT}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    name: e.target.value,
+                  })
+                }
+                value={config.name || ''}
+                placeholder='Name of the unique variable'
+              />
+              <Label className='text-white font-medium pt-3'>
+                Variable Value
+              </Label>
+              <Input
+                type='text'
+                className={'mt-1 ' + INPUT_FONT}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    value: e.target.value,
+                  })
+                }
+                value={config.value || ''}
+                placeholder='Value of the unique variable'
+              />
+            </div>
+            <p className='text-xs text-gray-400 mt-1'>
+              You can use use that variable with {'{variable-name}'} in other
+              blocks.
+            </p>
           </div>
         );
       case 'wait':
@@ -1595,7 +3309,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           {/* Main Canvas */}
           <div className='flex-1 relative'>
             <ReactFlow
-              nodes={nodes}
+              nodes={memoizedNodes}
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
@@ -1700,7 +3414,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   <CardContent>{renderNodeConfiguration()}</CardContent>
                 </Card>
 
-                {/* Quick Actions */}
+                {/*    */}
                 <Card
                   className='mt-4 shadow-lg'
                   style={{
@@ -1765,6 +3479,75 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 >
                   <CardHeader>
                     <CardTitle className='text-white text-sm'>
+                      Connections
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-3'>
+                    <div>
+                      <h4 className='text-xs font-bold uppercase text-slate-400 mb-2'>Incoming</h4>
+                      {edges.filter(e => e.target === selectedNode.id).length === 0 ? (
+                        <p className='text-slate-400 text-xs'>No incoming connections.</p>
+                      ) : (
+                        <div className='space-y-2'>
+                          {edges
+                            .filter(e => e.target === selectedNode.id)
+                            .map(edge => (
+                              <div
+                                key={edge.id}
+                                className='flex items-center justify-between bg-slate-800/50 p-2 rounded-md transition-all duration-200 hover:bg-slate-700/50'
+                                onMouseEnter={() => setHoveredNodeId(edge.source)}
+                                onMouseLeave={() => setHoveredNodeId(null)}
+                              >
+                                <span className='text-sm text-white truncate'>
+                                  From: {getConnectedNodeLabel(edge.source)}
+                                </span>
+                                <Button variant='ghost' size='sm' onClick={() => removeEdge(edge.id)} className='p-1 h-auto'>
+                                  <X className='w-3 h-3 text-slate-400 hover:text-white' />
+                                </Button>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className='text-xs font-bold uppercase text-slate-400 mb-2'>Outgoing</h4>
+                      {edges.filter(e => e.source === selectedNode.id).length === 0 ? (
+                        <p className='text-slate-400 text-xs'>No outgoing connections.</p>
+                      ) : (
+                        <div className='space-y-2'>
+                          {edges
+                            .filter(e => e.source === selectedNode.id)
+                            .map(edge => (
+                              <div
+                                key={edge.id}
+                                className='flex items-center justify-between bg-slate-800/50 p-2 rounded-md transition-all duration-200 hover:bg-slate-700/50'
+                                onMouseEnter={() => setHoveredNodeId(edge.target)}
+                                onMouseLeave={() => setHoveredNodeId(null)}
+                              >
+                                <span className='text-sm text-white truncate'>
+                                  To: {getConnectedNodeLabel(edge.target)}
+                                </span>
+                                <Button variant='ghost' size='sm' onClick={() => removeEdge(edge.id)} className='p-1 h-auto'>
+                                  <X className='w-3 h-3 text-slate-400 hover:text-white' />
+                                </Button>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className='mt-4 shadow-lg'
+                  style={{
+                    backgroundColor: 'rgb(51 65 85)',
+                    borderColor: 'rgb(71 85 105)',
+                    gap: '1px',
+                  }}
+                >
+                  <CardHeader>
+                    <CardTitle className='text-white text-sm '>
                       Block Name
                     </CardTitle>
                   </CardHeader>

@@ -24,7 +24,6 @@ import {
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import Image from 'next/image';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
@@ -209,12 +208,8 @@ export default function ServersPage() {
                   {servers && servers.length > 0 ? (
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
                       {servers.map((server, index) => (
-                        <motion.div
+                        <div
                           key={server._id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.6, delay: index * 0.1 }}
-                          whileHover={{ y: -5 }}
                           className='w-full max-w-sm'
                         >
                           <Link href={`/dashboard/${server.serverId}`}>
@@ -253,28 +248,26 @@ export default function ServersPage() {
                                   </div>
                                 </div>
 
-                                <div className='grid grid-cols-2 gap-2'>
+                                <div className='grid grid-cols-1 gap-2 z-50'>
                                   <Button
                                     size='sm'
                                     variant='outline'
                                     className='discord-button-outline text-xs bg-transparent'
                                   >
                                     <Settings className='h-3 w-3 mr-1' />
-                                    SETTINGS
-                                  </Button>
-                                  <Button
-                                    size='sm'
-                                    variant='outline'
-                                    className='discord-button-outline text-xs bg-transparent'
-                                  >
-                                    <BarChart3 className='h-3 w-3 mr-1' />
-                                    ANALYTICS
+                                    <a
+                                      href={`/dashboard/${server.serverId}/settings`}
+                                      target='_blank'
+                                      rel='noopener noreferrer'
+                                    >
+                                      SETTINGS
+                                    </a>
                                   </Button>
                                 </div>
                               </CardContent>
                             </Card>
                           </Link>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   ) : (

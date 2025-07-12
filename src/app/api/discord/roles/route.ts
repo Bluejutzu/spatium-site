@@ -1,29 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DiscordAPI } from '@/features/discord';
-import { clerkClient } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const { userId: authenticatedUserId } = await auth();
   const serverId = searchParams.get('serverId');
   const userId = searchParams.get('userId');
   const client = await clerkClient();
 
-  if (!userId) {
+  if (!authenticatedUserId || !userId || authenticatedUserId !== userId) {
     return NextResponse.json(
-      { error: 'Unauthorized - No User ID' },
+      { error: 'Unauthorized - Invalid or mismatched user ID' },
       { status: 401 }
     );
   }
 
   const OauthData = await client.users.getUserOauthAccessToken(
-    userId,
+    authenticatedUserId,
     'discord'
   );
 
   if (!OauthData.data?.length || !OauthData.data[0]?.token) {
     return NextResponse.json(
       { error: 'No valid Discord token found. Please re-authenticate.' },
-      { status: 401 }
+      { status: 500 }
     );
   }
 

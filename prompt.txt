@@ -1,0 +1,15 @@
+✓ Starting...
+ ✓ Compiled middleware in 407ms
+ ✓ Ready in 1876ms
+ ○ Compiling / ...
+Error: Cannot apply unknown utility class `max-w-7xl`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    [at onInvalidCandidate (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:18:1312)]
+    [at ge (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:13:29803)]
+    [at C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:18:373]
+    [at I (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:3:1656)]
+    [at je (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:18:172)]
+    [at bi (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:35:780)]
+    [at process.processTicksAndRejections (node:internal/process/task_queues:105:5)]
+    [at async yi (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\tailwindcss@4.1.11\node_modules\tailwindcss\dist\lib.js:35:1123)]
+    [at async _r (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\@tailwindcss+node@4.1.11\node_modules\@tailwindcss\node\dist\index.js:10:3384)]
+    [at async p (C:\Users\Bluejutzu\feinfeinfein\spatium-site\node_modules\.pnpm\@tailwindcss+postcss@4.1.11\node_modules\@tailwindcss\postcss\dist\index.js:10:4019)]

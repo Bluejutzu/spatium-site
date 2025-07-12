@@ -93,6 +93,200 @@ export type UnqVariableNodeConfig = {
   value: string;
 };
 
+export type AddRoleNodeConfig = {
+  roleId: string;
+  userId: string;
+  reason: string;
+};
+
+export type RemoveRoleNodeConfig = {
+  roleId: string;
+  userId: string;
+  reason: string;
+};
+
+export type KickMemberNodeConfig = {
+  userId: string;
+  reason: string;
+  deleteMessageDays: number;
+};
+
+export type BanMemberNodeConfig = {
+  userId: string;
+  reason: string;
+  deleteMessageDays: number;
+};
+
+export type TimeoutMemberNodeConfig = {
+  userId: string;
+  duration: number;
+  reason: string;
+};
+
+export type SetNicknameNodeConfig = {
+  userId: string;
+  nickname: string;
+  reason: string;
+};
+
+export type CreateChannelNodeConfig = {
+  name: string;
+  type: number;
+  categoryId: string;
+  topic: string;
+  nsfw: boolean;
+};
+
+export type DeleteChannelNodeConfig = {
+  channelId: string;
+  reason: string;
+};
+
+export type ModifyChannelNodeConfig = {
+  channelId: string;
+  name: string;
+  topic: string;
+  nsfw: boolean;
+};
+
+export type SendDMNodeConfig = {
+  userId: string;
+  content: string;
+  embeds: Embed[];
+};
+
+export type CreateWebhookNodeConfig = {
+  channelId: string;
+  name: string;
+  avatar: string;
+};
+
+export type DeleteWebhookNodeConfig = {
+  webhookId: string;
+  reason: string;
+};
+
+export type MoveMemberNodeConfig = {
+  userId: string;
+  channelId: string;
+  reason: string;
+};
+
+export type MuteMemberNodeConfig = {
+  userId: string;
+  mute: boolean;
+  reason: string;
+};
+
+export type DeafenMemberNodeConfig = {
+  userId: string;
+  deafen: boolean;
+  reason: string;
+};
+
+export type FetchUserNodeConfig = {
+  userId: string;
+  storeIdAs: string;
+};
+
+export type FetchMemberNodeConfig = {
+  userId: string;
+  storeIdAs: string;
+};
+
+export type FetchChannelNodeConfig = {
+  channelId: string;
+  storeIdAs: string;
+};
+
+export type FetchRoleNodeConfig = {
+  roleId: string;
+  storeIdAs: string;
+};
+
+export type CreateInviteNodeConfig = {
+  channelId: string;
+  maxUses: number;
+  maxAge: number;
+  temporary: boolean;
+  unique: boolean;
+};
+
+export type DeleteInviteNodeConfig = {
+  inviteCode: string;
+  reason: string;
+};
+
+export type AddReactionNodeConfig = {
+  messageId: string;
+  emoji: string;
+  channelId: string;
+};
+
+export type RemoveReactionNodeConfig = {
+  messageId: string;
+  emoji: string;
+  userId: string;
+  channelId: string;
+};
+
+export type PinMessageNodeConfig = {
+  messageId: string;
+  channelId: string;
+};
+
+export type UnpinMessageNodeConfig = {
+  messageId: string;
+  channelId: string;
+};
+
+export type DeleteMessageNodeConfig = {
+  messageId: string;
+  channelId: string;
+  reason: string;
+};
+
+export type BulkDeleteNodeConfig = {
+  channelId: string;
+  count: number;
+  reason: string;
+};
+
+export type CreateRoleNodeConfig = {
+  name: string;
+  color: number;
+  permissions: string;
+  hoist: boolean;
+  mentionable: boolean;
+};
+
+export type DeleteRoleNodeConfig = {
+  roleId: string;
+  reason: string;
+};
+
+export type ModifyRoleNodeConfig = {
+  roleId: string;
+  name: string;
+  color: number;
+  permissions: string;
+  hoist: boolean;
+  mentionable: boolean;
+};
+
+export type AuditLogNodeConfig = {
+  userId: string;
+  actionType: number;
+  limit: number;
+  storeIdAs: string;
+};
+
+export type RandomNodeConfig = {
+  min: number;
+  max: number;
+  storeIdAs: string;
+};
+
 export type NodeDataType =
   | 'root'
   | 'error'
@@ -139,7 +333,39 @@ export type VisualNodeConfig =
   | EditMessageNodeConfig
   | ConditionNodeConfig
   | WaitNodeConfig
-  | UnqVariableNodeConfig;
+  | UnqVariableNodeConfig
+  | AddRoleNodeConfig
+  | RemoveRoleNodeConfig
+  | KickMemberNodeConfig
+  | BanMemberNodeConfig
+  | TimeoutMemberNodeConfig
+  | SetNicknameNodeConfig
+  | CreateChannelNodeConfig
+  | DeleteChannelNodeConfig
+  | ModifyChannelNodeConfig
+  | SendDMNodeConfig
+  | CreateWebhookNodeConfig
+  | DeleteWebhookNodeConfig
+  | MoveMemberNodeConfig
+  | MuteMemberNodeConfig
+  | DeafenMemberNodeConfig
+  | FetchUserNodeConfig
+  | FetchMemberNodeConfig
+  | FetchChannelNodeConfig
+  | FetchRoleNodeConfig
+  | CreateInviteNodeConfig
+  | DeleteInviteNodeConfig
+  | AddReactionNodeConfig
+  | RemoveReactionNodeConfig
+  | PinMessageNodeConfig
+  | UnpinMessageNodeConfig
+  | DeleteMessageNodeConfig
+  | BulkDeleteNodeConfig
+  | CreateRoleNodeConfig
+  | DeleteRoleNodeConfig
+  | ModifyRoleNodeConfig
+  | AuditLogNodeConfig
+  | RandomNodeConfig;
 
 export interface VisualNode {
   id: string;

@@ -48,3 +48,31 @@ export interface ThemeColors {
   'discord-text': string;
   'discord-border': string;
 }
+
+export interface BlockCategory {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export type BlockTypeCategory =
+  | 'options'
+  | 'messaging'
+  | 'logic'
+  | 'utilities'
+  | 'moderation'
+  | 'roles'
+  | 'utility'
+  | 'channels'
+  | 'voice'
+  | 'webhooks'
+  | 'members';
+
+export interface BlockType {
+  type: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  category: BlockTypeCategory;
+}
