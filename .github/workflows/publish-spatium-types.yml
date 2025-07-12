@@ -27,15 +27,15 @@ jobs:
         run: node scripts/generate-types.mjs
 
       - name: Install dependencies
-        run: pnpm install --filter spatium-types
-        working-directory: packages/spatium-types
+        run: pnpm install
+        working-directory: ./packages/spatium-types
 
       - name: Build Spatium Types
         run: pnpm build
-        working-directory: packages/spatium-types
+        working-directory: ./packages/spatium-types
 
       - name: Publish to npm
         run: npm publish --access public
-        working-directory: packages/spatium-types
+        working-directory: ./packages/spatium-types
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
