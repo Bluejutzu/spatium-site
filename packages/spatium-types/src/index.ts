@@ -1,7 +1,7 @@
 import { ButtonStyle, Embed } from 'discord.js';
-import { Doc } from './schema';
+import { Doc } from './convex-schema';
 
-export * from './schema';
+export * from './convex-schema';
 
 export type User = Doc<'users'>;
 export type DiscordServer = Doc<'discordServers'>;

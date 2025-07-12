@@ -1,60 +1,88 @@
-/* eslint-disable */
-/**
- * Generated data model types.
- *
- * THIS CODE IS AUTOMATICALLY GENERATED.
- *
- * To regenerate, run `npx convex dev`.
- * @module
- */
+import { defineSchema, defineTable } from 'convex/server';
+import { v } from 'convex/values';
 
-import type {
-  DataModelFromSchemaDefinition,
-  DocumentByName,
-  TableNamesInDataModel,
-  SystemTableNames,
-} from 'convex/server';
-import type { GenericId } from 'convex/values';
-import schema from '../../../convex/schema.js';
+export default defineSchema({
+  users: defineTable({
+    clerkId: v.string(),
+    discordUserId: v.string(),
+    username: v.string(),
+    email: v.string(),
+    avatarUrl: v.optional(v.string()),
+  })
+    .index('by_clerk_id', ['clerkId'])
+    .index('by_discord_id', ['discordUserId']),
 
-/**
- * The names of all of your Convex tables.
- */
-export type TableNames = TableNamesInDataModel<DataModel>;
+  discordServers: defineTable({
+    serverId: v.string(),
+    name: v.string(),
+    icon: v.optional(v.string()),
+    ownerId: v.string(),
+    memberCount: v.number(),
+    onlineCount: v.number(),
+    botJoinedAt: v.number(),
+    permissions: v.optional(v.array(v.string())),
+    features: v.array(v.string()),
+    lastUpdated: v.number(),
+  })
+    .index('by_server_id', ['serverId'])
+    .index('by_owner_id', ['ownerId']),
 
-/**
- * The type of a document stored in Convex.
- *
- * @typeParam TableName - A string literal type of the table name (like "users").
- */
-export type Doc<TableName extends TableNames> = DocumentByName<
-  DataModel,
-  TableName
->;
+  serverMetrics: defineTable({
+    serverId: v.string(),
+    timestamp: v.number(),
+    memberCount: v.number(),
+    onlineCount: v.number(),
+    commandsUsed: v.number(),
+    activeChannels: v.number(),
+  })
+    .index('by_server_timestamp', ['serverId', 'timestamp'])
+    .index('by_server_id', ['serverId']),
 
-/**
- * An identifier for a document in Convex.
- *
- * Convex documents are uniquely identified by their `Id`, which is accessible
- * on the `_id` field. To learn more, see [Document IDs](https://docs.convex.dev/using/document-ids).
- *
- * Documents can be loaded using `db.get(id)` in query and mutation functions.
- *
- * IDs are just strings at runtime, but this type can be used to distinguish them from other
- * strings when type checking.
- *
- * @typeParam TableName - A string literal type of the table name (like "users").
- */
-export type Id<TableName extends TableNames | SystemTableNames> =
-  GenericId<TableName>;
+  botCommands: defineTable({
+    serverId: v.string(),
+    commandName: v.string(),
+    userId: v.string(),
+    channelId: v.string(),
+    timestamp: v.number(),
+    success: v.boolean(),
+    executionTime: v.number(),
+  })
+    .index('by_server_id', ['serverId'])
+    .index('by_timestamp', ['timestamp']),
 
-/**
- * A type describing your Convex data model.
- *
- * This type includes information about what tables you have, the type of
- * documents stored in those tables, and the indexes defined on them.
- *
- * This type is used to parameterize methods like `queryGeneric` and
- * `mutationGeneric` to make them type-safe.
- */
-export type DataModel = DataModelFromSchemaDefinition<typeof schema>;
+  serverSettings: defineTable({
+    serverId: v.string(),
+    prefix: v.string(),
+    welcomeMessage: v.optional(v.string()),
+    autoRole: v.boolean(),
+    autoRoleId: v.optional(v.string()),
+    moderationEnabled: v.boolean(),
+    spamFilter: v.boolean(),
+    linkFilter: v.boolean(),
+    logChannelId: v.optional(v.string()),
+    joinNotifications: v.boolean(),
+    leaveNotifications: v.boolean(),
+  }).index('by_server_id', ['serverId']),
+
+  alerts: defineTable({
+    serverId: v.string(),
+    type: v.union(v.literal('info'), v.literal('warning'), v.literal('error')),
+    title: v.string(),
+    message: v.string(),
+    timestamp: v.number(),
+    dismissed: v.boolean(),
+    userId: v.optional(v.string()),
+  })
+    .index('by_server_id', ['serverId'])
+    .index('by_timestamp', ['timestamp']),
+
+  commands: defineTable({
+    serverId: v.string(),
+    name: v.string(),
+    description: v.optional(v.string()),
+    blocks: v.string(),
+    enabled: v.optional(v.boolean()),
+    creationTime: v.optional(v.number()),
+    lastUpdateTime: v.optional(v.number()),
+  }).index('by_server_id', ['serverId']),
+});
