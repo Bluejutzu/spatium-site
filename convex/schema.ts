@@ -64,12 +64,30 @@ export default defineSchema({
     .index('by_server_id', ['serverId'])
     .index('by_timestamp', ['timestamp']),
 
+  botCommands: defineTable({
+    serverId: v.string(),
+    commandName: v.string(),
+    userId: v.string(),
+    channelId: v.string(),
+    timestamp: v.number(),
+    success: v.boolean(),
+    executionTime: v.number(),
+  })
+    .index('by_server_id', ['serverId'])
+    .index('by_timestamp', ['timestamp']),
+
   commands: defineTable({
     serverId: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
     blocks: v.string(),
-    options: v.optional(v.array(v.string())),
+    options: v.optional(v.array(v.object({
+      type: v.union(v.literal('option-user'), v.literal('option-role'), v.literal('option-channel'), v.literal('option-text')),
+      name: v.string(),
+      description: v.string(),
+      required: v.boolean(),
+      value: v.optional(v.string()),
+    }))),
     cooldown: v.optional(v.number()),
     enabled: v.optional(v.boolean()),
     creationTime: v.optional(v.number()),

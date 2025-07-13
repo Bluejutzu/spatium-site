@@ -229,6 +229,14 @@ export const saveCommand = mutation({
     name: v.string(),
     description: v.string(),
     blocks: v.string(),
+    cooldown: v.number(),
+    options: v.optional(v.array(v.object({
+      type: v.union(v.literal('option-user'), v.literal('option-role'), v.literal('option-channel'), v.literal('option-text')),
+      name: v.string(),
+      description: v.string(),
+      required: v.boolean(),
+      value: v.optional(v.string()),
+    }))),
     commandId: v.optional(v.id('commands')),
   },
   handler: async (ctx, args) => {
@@ -238,6 +246,8 @@ export const saveCommand = mutation({
         name: args.name,
         description: args.description,
         blocks: args.blocks,
+        cooldown: args.cooldown,
+        options: args.options,
         lastUpdateTime: Date.now(),
       });
       return { updated: true, commandId: args.commandId };
@@ -263,6 +273,8 @@ export const saveCommand = mutation({
         name: args.name,
         description: args.description,
         blocks: args.blocks,
+        cooldown: args.cooldown,
+        options: args.options,
         enabled: true,
         creationTime: Date.now(),
         lastUpdateTime: Date.now(),

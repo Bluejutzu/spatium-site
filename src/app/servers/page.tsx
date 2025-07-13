@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
@@ -91,6 +92,7 @@ function AnimatedCounter({
 
 export default function ServersPage() {
   const { user } = useUser();
+  const router = useRouter();
   const servers = useQuery(
     api.discord.getUserServers,
     user ? { userId: user.externalAccounts[0].providerUserId } : 'skip'
@@ -250,15 +252,12 @@ export default function ServersPage() {
                                     size='sm'
                                     variant='outline'
                                     className='discord-button-outline text-xs bg-transparent'
+                                    onClick={() => {
+                                      router.push(`/dashboard/${server.serverId}/settings`);
+                                    }}
                                   >
                                     <Settings className='h-3 w-3 mr-1' />
-                                    <a
-                                      href={`/dashboard/${server.serverId}/settings`}
-                                      target='_blank'
-                                      rel='noopener noreferrer'
-                                    >
-                                      SETTINGS
-                                    </a>
+                                    SETTINGS
                                   </Button>
                                 </div>
                               </CardContent>

@@ -989,13 +989,13 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       case 'option-text':
         return { name: '', description: '', required: true };
       case 'option-user':
-        return { name: '', description: '', required: true, userId: '' };
+        return { name: '', description: '', required: true };
       case 'option-boolean':
         return { name: '', description: '', required: true, value: false };
       case 'option-role':
-        return { name: '', description: '', required: false, roleId: '' };
+        return { name: '', description: '', required: false, value: '' };
       case 'option-channel':
-        return { name: '', description: '', required: false, channelId: '' };
+        return { name: '', description: '', required: false, value: '' };
       case 'send-message':
         return {
           name: 'Send Message',
@@ -1231,14 +1231,19 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
 
     const description = rootNode.data.config?.description || '';
     const blocks = JSON.stringify({ nodes, edges });
+    const options = nodes.filter(n => n.type?.startsWith('option-')).map(n => ({
+      type: n.data.type,
+      ...n.data.config
+    }))
+    console.log(options)
     const commandData = {
-      name: name,
-      description: description,
-      blocks: blocks,
-      serverId: serverId,
-      commandId: (commandId as any) || undefined,
+      name,
+      description,
+      blocks,
+      serverId,
+      commandId: commandId as any || undefined,
       cooldown: rootNode.data.config?.cooldown || 0,
-      options: nodes.filter(n => n.type?.startsWith('option-')).map(n => n.data.config),
+      options,
     };
 
     try {
