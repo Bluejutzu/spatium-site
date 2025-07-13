@@ -152,13 +152,12 @@ const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
 const RootNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
-        selected
-          ? 'outline-2 outline-discord-blurple'
-          : data.isHovered
-            ? 'outline-2 outline-discord-purple'
-            : ''
-      }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
+        ? 'outline-2 outline-discord-blurple'
+        : data.isHovered
+          ? 'outline-2 outline-discord-purple'
+          : ''
+        }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -190,13 +189,12 @@ const RootNode = ({ data, selected }: NodeProps) => {
 const ErrorNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
-        selected
-          ? 'outline-2 outline-discord-blurple'
-          : data.isHovered
-            ? 'outline-2 outline-discord-purple'
-            : ''
-      }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
+        ? 'outline-2 outline-discord-blurple'
+        : data.isHovered
+          ? 'outline-2 outline-discord-purple'
+          : ''
+        }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <div className='h-2 bg-red-500' />
@@ -223,13 +221,12 @@ const ConditionNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
-        selected
-          ? 'outline-2 outline-discord-blurple'
-          : data.isHovered
-            ? 'outline-2 outline-discord-purple'
-            : ''
-      }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
+        ? 'outline-2 outline-discord-blurple'
+        : data.isHovered
+          ? 'outline-2 outline-discord-purple'
+          : ''
+        }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <div className='h-2' style={{ backgroundColor: color }} />
@@ -284,13 +281,12 @@ const MessageNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
-        selected
-          ? 'outline-2 outline-discord-blurple'
-          : data.isHovered
-            ? 'outline-2 outline-discord-purple'
-            : ''
-      }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
+        ? 'outline-2 outline-discord-blurple'
+        : data.isHovered
+          ? 'outline-2 outline-discord-purple'
+          : ''
+        }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <div className='h-2' style={{ backgroundColor: color }} />
@@ -325,93 +321,91 @@ const MessageNode = ({ data, selected }: NodeProps) => {
 
 const createCommandOptionNode =
   (icon: React.ComponentType<any>, label: string) =>
-  ({ data, selected }: NodeProps) => {
-    const color = 'var(--color-discord-green)';
-    const IconComponent = icon;
-    return (
-      <div
-        className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${
-          selected ? 'outline-2 outline-discord-blurple' : ''
-        }`}
-        style={{ backgroundColor: 'var(--color-discord-darker)' }}
-      >
-        <div className='h-2' style={{ backgroundColor: color }} />
-        <div className='p-3'>
-          <div className='text-center relative z-10'>
-            <IconComponent className='w-4 h-4 mx-auto mb-1' />
-            <span>{label}</span>
-            <div className='text-xs mt-1 opacity-80'>
-              {data.config?.name || 'Unnamed Option'}
+    ({ data, selected }: NodeProps) => {
+      const color = 'var(--color-discord-green)';
+      const IconComponent = icon;
+      return (
+        <div
+          className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : ''
+            }`}
+          style={{ backgroundColor: 'var(--color-discord-darker)' }}
+        >
+          <div className='h-2' style={{ backgroundColor: color }} />
+          <div className='p-3'>
+            <div className='text-center relative z-10'>
+              <IconComponent className='w-4 h-4 mx-auto mb-1' />
+              <span>{label}</span>
+              <div className='text-xs mt-1 opacity-80'>
+                {data.config?.name || 'Unnamed Option'}
+              </div>
             </div>
+            <Handle
+              type='source'
+              position={Position.Bottom}
+              className='w-3 h-3 shadow-lg'
+              style={{ backgroundColor: color }}
+            />
           </div>
-          <Handle
-            type='source'
-            position={Position.Bottom}
-            className='w-3 h-3 shadow-lg'
-            style={{ backgroundColor: color }}
-          />
         </div>
-      </div>
-    );
-  };
+      );
+    };
 
 const createDiscordNode =
   (icon: React.ComponentType<any>, defaultCategory: string, label: string) =>
-  ({ data, selected }: NodeProps) => {
-    const blockType = BLOCK_TYPES.find(b => b.type === data.type);
-    const category = blockType?.category || defaultCategory;
-    const IconComponent = icon;
+    ({ data, selected }: NodeProps) => {
+      const blockType = BLOCK_TYPES.find(b => b.type === data.type);
+      const category = blockType?.category || defaultCategory;
+      const IconComponent = icon;
 
-    const colorMap: Record<string, string> = {
-      messaging: 'var(--color-discord-blurple)',
-      moderation: 'var(--color-discord-red)',
-      roles: 'var(--color-discord-orange)',
-      channels: 'var(--color-discord-green)',
-      members: 'var(--color-discord-purple)',
-      voice: 'var(--color-discord-yellow)',
-      webhooks: 'var(--color-discord-green)',
-      logic: 'var(--color-discord-blurple)',
-      utilities: 'var(--color-discord-purple)',
-    };
+      const colorMap: Record<string, string> = {
+        messaging: 'var(--color-discord-blurple)',
+        moderation: 'var(--color-discord-red)',
+        roles: 'var(--color-discord-orange)',
+        channels: 'var(--color-discord-green)',
+        members: 'var(--color-discord-purple)',
+        voice: 'var(--color-discord-yellow)',
+        webhooks: 'var(--color-discord-green)',
+        logic: 'var(--color-discord-blurple)',
+        utilities: 'var(--color-discord-purple)',
+      };
 
-    const color = colorMap[category] || 'var(--color-discord-blurple)';
+      const color = colorMap[category] || 'var(--color-discord-blurple)';
 
-    return (
-      <div
-        className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
-          selected
+      return (
+        <div
+          className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
             ? 'outline-2 outline-discord-blurple'
             : data.isHovered
               ? 'outline-2 outline-discord-purple'
               : ''
-        }`}
-        style={{ backgroundColor: 'var(--color-discord-darker)' }}
-      >
-        <div className='h-2' style={{ backgroundColor: color }} />
-        <div className='p-4'>
-          <Handle
-            type='target'
-            position={Position.Top}
-            className='w-3 h-3 shadow-lg'
-            style={{ backgroundColor: color }}
-          />
-          <div className='text-center relative z-10'>
-            <IconComponent className='w-4 h-4 mx-auto mb-1' />
-            <span>{label}</span>
-            <div className='text-xs mt-1 opacity-80'>
-              {data.config?.configured ? 'Configured' : 'Not configured'}
+            }`}
+          style={{ backgroundColor: 'var(--color-discord-darker)' }}
+        >
+          <div className='h-2' style={{ backgroundColor: color }} />
+          <div className='p-4'>
+            <Handle
+              type='target'
+              position={Position.Top}
+              className='w-3 h-3 shadow-lg'
+              style={{ backgroundColor: color }}
+            />
+            <div className='text-center relative z-10'>
+              <IconComponent className='w-4 h-4 mx-auto mb-1' />
+              <span>{label}</span>
+              <div className='text-xs mt-1 opacity-80'>
+                {data.config?.configured ? 'Configured' : 'Not configured'}
+              </div>
             </div>
+            <Handle
+              type='source'
+              position={Position.Bottom}
+              className='w-3 h-3 shadow-lg'
+              style={{ backgroundColor: color }}
+            />
           </div>
-          <Handle
-            type='source'
-            position={Position.Bottom}
-            className='w-3 h-3 shadow-lg'
-            style={{ backgroundColor: color }}
-          />
         </div>
-      </div>
-    );
-  };
+      );
+    };
 
 const nodeTypes = {
   root: RootNode,
@@ -992,12 +986,16 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
 
   const getDefaultConfig = (type: string) => {
     switch (type) {
-      case 'option-user':
-      case 'option-role':
-      case 'option-channel':
       case 'option-text':
-      case 'option-boolean':
         return { name: '', description: '', required: true };
+      case 'option-user':
+        return { name: '', description: '', required: true, userId: '' };
+      case 'option-boolean':
+        return { name: '', description: '', required: true, value: false };
+      case 'option-role':
+        return { name: '', description: '', required: false, roleId: '' };
+      case 'option-channel':
+        return { name: '', description: '', required: false, channelId: '' };
       case 'send-message':
         return {
           name: 'Send Message',
@@ -1025,83 +1023,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           storeIdAs: '',
         };
       case 'send-dm':
-        return (
-          <div className='space-y-4'>
-            <div>
-              <Label className='text-white font-medium'>User ID</Label>
-              <Input
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.userId || ''}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
-                }
-                placeholder='123456789012345678'
-              />
-            </div>
-            <div>
-              <Label className='text-white font-medium'>Message Content</Label>
-              <Textarea
-                className='mt-1 min-h-[100px]'
-                value={config.content || ''}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, { content: e.target.value })
-                }
-                placeholder='Enter your message content here...'
-                maxLength={2000}
-              />
-              <div className='text-xs text-gray-400 mt-1'>
-                {(config.content || '').length}/2000 characters
-              </div>
-            </div>
-            <div className='flex items-center justify-between'>
-              <Label className='text-white font-medium'>Embeds</Label>
-              <Button
-                onClick={addEmbed}
-                size='sm'
-                disabled={(config.embeds?.length || 0) >= 10}
-              >
-                <Plus className='w-4 h-4 mr-2' />
-                Add Embed
-              </Button>
-            </div>
-            <div className='space-y-2'>
-              {config.embeds?.map((embed: any, index: number) => (
-                <Card key={index} className='p-3'>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm font-medium'>
-                      Embed {index + 1}
-                    </span>
-                    <div className='flex gap-2'>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => openEmbedBuilder(index)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant='destructive'
-                        size='sm'
-                        onClick={() => removeEmbed(index)}
-                      >
-                        <Trash2 className='w-4 h-4' />
-                      </Button>
-                    </div>
-                  </div>
-                  {embed.title && (
-                    <div className='text-xs text-gray-400 mt-1'>
-                      Title: {embed.title}
-                    </div>
-                  )}
-                </Card>
-              )) || (
-                <div className='text-center py-4 text-gray-400'>
-                  No embeds added yet. Click "Add Embed" to get started.
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        return { userId: '', content: '', embeds: [] };
       case 'condition':
         return { condition: '', operator: 'equals', value: '' };
       case 'add-role':
@@ -1174,197 +1096,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         };
       case 'delete-role':
         return { roleId: '', reason: '' };
-      case 'modify-role':
-        return {
-          roleId: '',
-          name: '',
-          color: 0,
-          permissions: '0',
-          hoist: false,
-          mentionable: false,
-        };
       case 'audit-log':
-        return (
-          <div className='space-y-4'>
-            <div>
-              <Label className='text-white font-medium'>
-                User ID (Optional)
-              </Label>
-              <Input
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.userId || ''}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, { userId: e.target.value })
-                }
-                placeholder='123456789012345678'
-              />
-            </div>
-            <div>
-              <Label className='text-white font-medium'>
-                Action Type (Optional)
-              </Label>
-              <Input
-                type='number'
-                min={0}
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.actionType || 0}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    actionType: Number(e.target.value),
-                  })
-                }
-                placeholder='e.g., 1 (Guild Update)'
-              />
-              <p className='text-xs text-gray-400 mt-1'>
-                Use a Discord audit log action type.
-              </p>
-            </div>
-            <div>
-              <Label className='text-white font-medium'>Limit (1-100)</Label>
-              <Input
-                type='number'
-                min={1}
-                max={100}
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.limit || 0}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    limit: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div>
-              <Label className='text-white font-medium'>Store Result As</Label>
-              <Input
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.storeIdAs || ''}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    storeIdAs: e.target.value,
-                  })
-                }
-                placeholder='e.g., audit-logs'
-              />
-              <p className='text-xs text-gray-400 mt-1'>
-                The fetched audit log entries will be stored as a variable.
-              </p>
-            </div>
-          </div>
-        );
-      case 'random':
-        return (
-          <div className='space-y-4'>
-            <div>
-              <Label className='text-white font-medium'>Minimum Value</Label>
-              <Input
-                type='number'
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.min || 0}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    min: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div>
-              <Label className='text-white font-medium'>Maximum Value</Label>
-              <Input
-                type='number'
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.max || 0}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    max: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div>
-              <Label className='text-white font-medium'>Store Result As</Label>
-              <Input
-                className={'mt-1 ' + INPUT_FONT}
-                value={config.storeIdAs || ''}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    storeIdAs: e.target.value,
-                  })
-                }
-                placeholder='e.g., random-number'
-              />
-              <p className='text-xs text-gray-400 mt-1'>
-                The generated random number will be stored as a variable.
-              </p>
-            </div>
-          </div>
-        );
+        return { userId: '', actionType: 0, limit: 0, storeIdAs: '' };
       case 'wait':
-        return (
-          <div className='space-y-4'>
-            <div>
-              <Label className='text-white font-medium'>Time (ms)</Label>
-              <Input
-                type='number'
-                min='0'
-                max='10000'
-                className={'mt-1 ' + INPUT_FONT}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    duration: Number.parseInt(e.target.value) || 0,
-                  })
-                }
-                value={config.duration || ''}
-                placeholder='Yield time of the thread (max 10s)'
-              />
-            </div>
-          </div>
-        );
+        return { duration: 0, unit: "milliseconds" }
       case 'unq-variable':
-        return (
-          <div className='space-y-1'>
-            <div>
-              <Label className='text-white font-medium'>Variable Name</Label>
-              <Input
-                type='text'
-                className={'mt-1 ' + INPUT_FONT}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    name: e.target.value,
-                  })
-                }
-                value={config.name || ''}
-                placeholder='Name of the unique variable'
-              />
-              <Label className='text-white font-medium pt-3'>
-                Variable Value
-              </Label>
-              <Input
-                type='text'
-                className={'mt-1 ' + INPUT_FONT}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    value: e.target.value,
-                  })
-                }
-                value={config.value || ''}
-                placeholder='Value of the unique variable'
-              />
-            </div>
-            <p className='text-xs text-gray-400 mt-1'>
-              You can use use that variable with {'{variable-name}'} in other
-              blocks.
-            </p>
-          </div>
-        );
-
+        return { name: '', value: '' }
       default:
-        return (
-          <div className='text-center py-8 text-gray-400'>
-            <Settings className='w-12 h-12 mx-auto mb-4 opacity-50' />
-            <p>Configuration for {selectedNode.data.label} coming soon...</p>
-          </div>
-        );
+        return 0
     }
   };
 
@@ -1410,9 +1149,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         nds.map(n =>
           n.id === nodeId
             ? {
-                ...n,
-                data: { ...n.data, config: { ...n.data.config, ...config } },
-              }
+              ...n,
+              data: { ...n.data, config: { ...n.data.config, ...config } },
+            }
             : n
         )
       );
@@ -1420,12 +1159,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         setSelectedNode(prev =>
           prev
             ? {
-                ...prev,
-                data: {
-                  ...prev.data,
-                  config: { ...prev.data.config, ...config },
-                },
-              }
+              ...prev,
+              data: {
+                ...prev.data,
+                config: { ...prev.data.config, ...config },
+              },
+            }
             : null
         );
       }
@@ -1498,6 +1237,8 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       blocks: blocks,
       serverId: serverId,
       commandId: (commandId as any) || undefined,
+      cooldown: rootNode.data.config?.cooldown || 0,
+      options: nodes.filter(n => n.type?.startsWith('option-')).map(n => n.data.config),
     };
 
     try {
@@ -1808,10 +1549,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                     )}
                   </Card>
                 )) || (
-                  <div className='text-center py-4 text-gray-400'>
-                    No embeds added yet. Click "Add Embed" to get started.
-                  </div>
-                )}
+                    <div className='text-center py-4 text-gray-400'>
+                      No embeds added yet. Click "Add Embed" to get started.
+                    </div>
+                  )}
               </div>
             </TabsContent>
 
@@ -2118,11 +1859,11 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   <SelectValue placeholder='Select channel type...' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={0}>Text</SelectItem>
-                  <SelectItem value={2}>Voice</SelectItem>
-                  <SelectItem value={4}>Category</SelectItem>
-                  <SelectItem value={5}>News</SelectItem>
-                  <SelectItem value={13}>Stage</SelectItem>
+                  <SelectItem value={"0"}>Text</SelectItem>
+                  <SelectItem value={"2"}>Voice</SelectItem>
+                  <SelectItem value={"4"}>Category</SelectItem>
+                  <SelectItem value={"5"}>News</SelectItem>
+                  <SelectItem value={"13"}>Stage</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -2316,10 +2057,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   )}
                 </Card>
               )) || (
-                <div className='text-center py-4 text-gray-400'>
-                  No embeds added yet. Click "Add Embed" to get started.
-                </div>
-              )}
+                  <div className='text-center py-4 text-gray-400'>
+                    No embeds added yet. Click "Add Embed" to get started.
+                  </div>
+                )}
             </div>
           </div>
         );
@@ -3082,9 +2823,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         return (
           <div className='space-y-4'>
             <div>
-              <Label className='text-white font-medium'>
-                User ID (Optional)
-              </Label>
+              <Label className='text-white font-medium'>User ID (Optional)</Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.userId || ''}
@@ -3095,18 +2834,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>
-                Action Type (Optional)
-              </Label>
+              <Label className='text-white font-medium'>Action Type (Optional)</Label>
               <Input
                 type='number'
                 min={0}
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.actionType || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    actionType: Number(e.target.value),
-                  })
+                  updateNodeConfig(selectedNode.id, { actionType: Number(e.target.value) })
                 }
                 placeholder='e.g., 1 (Guild Update)'
               />
@@ -3123,9 +2858,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.limit || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    limit: Number(e.target.value),
-                  })
+                  updateNodeConfig(selectedNode.id, { limit: Number(e.target.value) })
                 }
               />
             </div>
@@ -3135,9 +2868,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    storeIdAs: e.target.value,
-                  })
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
                 }
                 placeholder='e.g., audit-logs'
               />
@@ -3157,9 +2888,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.min || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    min: Number(e.target.value),
-                  })
+                  updateNodeConfig(selectedNode.id, { min: Number(e.target.value) })
                 }
               />
             </div>
@@ -3170,9 +2899,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.max || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    max: Number(e.target.value),
-                  })
+                  updateNodeConfig(selectedNode.id, { max: Number(e.target.value) })
                 }
               />
             </div>
@@ -3182,9 +2909,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    storeIdAs: e.target.value,
-                  })
+                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
                 }
                 placeholder='e.g., random-number'
               />
@@ -3194,27 +2919,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
             </div>
           </div>
         );
-      case 'wait':
-        return (
-          <div className='space-y-4'>
-            <div>
-              <Label className='text-white font-medium'>Time (ms)</Label>
-              <Input
-                type='number'
-                min='0'
-                max='10000'
-                className={'mt-1 ' + INPUT_FONT}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    duration: Number.parseInt(e.target.value) || 0,
-                  })
-                }
-                value={config.duration || ''}
-                placeholder='Yield time of the thread (max 10s)'
-              />
-            </div>
-          </div>
-        );
       case 'unq-variable':
         return (
           <div className='space-y-1'>
@@ -3273,44 +2977,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
             </div>
           </div>
         );
-      case 'unq-variable':
-        return (
-          <div className='space-y-1'>
-            <div>
-              <Label className='text-white font-medium'>Variable Name</Label>
-              <Input
-                type='text'
-                className={'mt-1 ' + INPUT_FONT}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    name: e.target.value,
-                  })
-                }
-                value={config.name || ''}
-                placeholder='Name of the unique variable'
-              />
-              <Label className='text-white font-medium pt-3'>
-                Variable Value
-              </Label>
-              <Input
-                type='text'
-                className={'mt-1 ' + INPUT_FONT}
-                onChange={e =>
-                  updateNodeConfig(selectedNode.id, {
-                    value: e.target.value,
-                  })
-                }
-                value={config.value || ''}
-                placeholder='Value of the unique variable'
-              />
-            </div>
-            <p className='text-xs text-gray-400 mt-1'>
-              You can use use that variable with {'{variable-name}'} in other
-              blocks.
-            </p>
-          </div>
-        );
-
       default:
         return (
           <div className='text-center py-8 text-gray-400'>

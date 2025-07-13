@@ -38,18 +38,6 @@ export default defineSchema({
     .index('by_server_timestamp', ['serverId', 'timestamp'])
     .index('by_server_id', ['serverId']),
 
-  botCommands: defineTable({
-    serverId: v.string(),
-    commandName: v.string(),
-    userId: v.string(),
-    channelId: v.string(),
-    timestamp: v.number(),
-    success: v.boolean(),
-    executionTime: v.number(),
-  })
-    .index('by_server_id', ['serverId'])
-    .index('by_timestamp', ['timestamp']),
-
   serverSettings: defineTable({
     serverId: v.string(),
     prefix: v.string(),
@@ -81,6 +69,8 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     blocks: v.string(),
+    options: v.optional(v.array(v.string())),
+    cooldown: v.optional(v.number()),
     enabled: v.optional(v.boolean()),
     creationTime: v.optional(v.number()),
     lastUpdateTime: v.optional(v.number()),

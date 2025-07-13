@@ -1,13 +1,10 @@
 {
   "name": "spatium-types",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w",
-    "lint": "echo \"No lint script for spatium-types\"",
-    "test": "echo \"No test script for spatium-types\""
+    "build": "tsc"
   },
   "dependencies": {
     "convex": "^1.25.2",
