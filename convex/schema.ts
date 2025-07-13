@@ -82,11 +82,11 @@ export default defineSchema({
     description: v.optional(v.string()),
     blocks: v.string(),
     options: v.optional(v.array(v.object({
-      type: v.union(v.literal('option-user'), v.literal('option-role'), v.literal('option-channel'), v.literal('option-text')),
+      type: v.union(v.literal('option-user'), v.literal('option-role'), v.literal('option-channel'), v.literal('option-text'), v.literal('option-boolean')),
       name: v.string(),
       description: v.string(),
       required: v.boolean(),
-      value: v.optional(v.string()),
+      value: v.optional(v.union(v.string(), v.boolean())),
     }))),
     cooldown: v.optional(v.number()),
     enabled: v.optional(v.boolean()),

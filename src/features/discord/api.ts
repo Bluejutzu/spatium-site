@@ -69,6 +69,24 @@ export class DiscordAPI {
     return this.request<DiscordChannel[]>(`/guilds/${guildId}/channels`);
   }
 
+  async getGuildChannelsWithBotToken(guildId: string): Promise<DiscordChannel[]> {
+    const response = await fetch(
+      `${this.baseURL}/guilds/${guildId}/channels`,
+      {
+        headers: {
+          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Discord API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+    return response.json() as Promise<DiscordChannel[]>;
+  }
+
   async getGuildMembers(
     guildId: string,
     limit = 100

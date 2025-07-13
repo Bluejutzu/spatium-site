@@ -66,6 +66,7 @@ import { Roboto } from 'next/font/google';
 import { api } from '../../../../../../convex/_generated/api';
 import { useRouter } from 'next/navigation';
 import { BlockCategory, BlockType } from '@/types/common';
+import { useUser } from '@clerk/nextjs';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -186,36 +187,36 @@ const RootNode = ({ data, selected }: NodeProps) => {
   );
 };
 
-const ErrorNode = ({ data, selected }: NodeProps) => {
-  return (
-    <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
-      style={{ backgroundColor: 'var(--color-discord-darker)' }}
-    >
-      <div className='h-2 bg-red-500' />
-      <div className='p-4'>
-        <div className='flex items-center justify-between relative z-10'>
-          <X className='w-4 h-4' />
-          <span>Error Handler</span>
-        </div>
-        <div className='text-xs mt-1 opacity-80 relative z-10'>
-          {data.config?.message || 'Default error message'}
-        </div>
-        <Handle
-          type='target'
-          position={Position.Top}
-          className='w-3 h-3 shadow-lg'
-          style={{ backgroundColor: 'var(--color-discord-red)' }}
-        />
-      </div>
-    </div>
-  );
-};
+// const ErrorNode = ({ data, selected }: NodeProps) => {
+//   return (
+//     <div
+//       className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
+//         ? 'outline-2 outline-discord-blurple'
+//         : data.isHovered
+//           ? 'outline-2 outline-discord-purple'
+//           : ''
+//         }`}
+//       style={{ backgroundColor: 'var(--color-discord-darker)' }}
+//     >
+//       <div className='h-2 bg-red-500' />
+//       <div className='p-4'>
+//         <div className='flex items-center justify-between relative z-10'>
+//           <X className='w-4 h-4' />
+//           <span>Error Handler</span>
+//         </div>
+//         <div className='text-xs mt-1 opacity-80 relative z-10'>
+//           {data.config?.message || 'Default error message'}
+//         </div>
+//         <Handle
+//           type='target'
+//           position={Position.Top}
+//           className='w-3 h-3 shadow-lg'
+//           style={{ backgroundColor: 'var(--color-discord-red)' }}
+//         />
+//       </div>
+//     </div>
+//   );
+// };
 
 const ConditionNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
@@ -409,7 +410,7 @@ const createDiscordNode =
 
 const nodeTypes = {
   root: RootNode,
-  error: ErrorNode,
+  // error: ErrorNode,
   condition: ConditionNode,
   'send-message': MessageNode,
   'option-user': createCommandOptionNode(Users, 'User Option'),
@@ -474,17 +475,17 @@ const initialNodes: Node[] = [
     },
     draggable: false,
   },
-  {
-    id: ERROR_NODE_ID,
-    type: 'error',
-    position: { x: 800, y: 100 },
-    data: {
-      label: 'Default Error Handler',
-      type: 'error',
-      config: { message: 'An error occurred.' },
-    },
-    draggable: false,
-  },
+  // {
+  //   id: ERROR_NODE_ID,
+  //   type: 'error',
+  //   position: { x: 800, y: 100 },
+  //   data: {
+  //     label: 'Default Error Handler',
+  //     type: 'error',
+  //     config: { message: 'An error occurred.' },
+  //   },
+  //   draggable: false,
+  // },
 ];
 
 const initialEdges: Edge[] = [];
@@ -853,6 +854,7 @@ interface CommandFlowBuilderProps {
 function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useUser();
   const commandId = searchParams.get('commandId');
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -868,6 +870,14 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const [rfInstance, setRfInstance] = useState<ReturnType<
     typeof useReactFlow
   > | null>(null);
+
+  // State for fetching server data
+  const [roles, setRoles] = useState<import('@/types/discord').DiscordRole[]>([]);
+  const [channels, setChannels] = useState<import('@/types/discord').DiscordChannel[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [channelsLoading, setChannelsLoading] = useState(false);
+  const [rolesError, setRolesError] = useState<string | null>(null);
+  const [channelsError, setChannelsError] = useState<string | null>(null);
 
   const memoizedNodes = useMemo(() => {
     return nodes.map(n => ({
@@ -987,9 +997,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const getDefaultConfig = (type: string) => {
     switch (type) {
       case 'option-text':
-        return { name: '', description: '', required: true };
+        return { name: '', description: '', required: true, value: '' };
       case 'option-user':
-        return { name: '', description: '', required: true };
+        return { name: '', description: '', required: true, value: '' };
       case 'option-boolean':
         return { name: '', description: '', required: true, value: false };
       case 'option-role':
@@ -1235,7 +1245,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       type: n.data.type,
       ...n.data.config
     }))
-    console.log(options)
+
     const commandData = {
       name,
       description,
@@ -1274,6 +1284,55 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const handleBackToCommands = () => {
     router.push(`/dashboard/${serverId}/commands`);
   };
+
+  // Fetch roles from Discord API
+  const fetchRoles = useCallback(async () => {
+    if (!serverId || !user?.id) return;
+
+    setRolesLoading(true);
+    setRolesError(null);
+
+    try {
+      const roles = await fetch(`/api/discord/roles?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
+      setRoles(roles);
+    } catch (err: any) {
+      setRolesError(err.message);
+      toast.error('Failed to fetch roles', err.message);
+    } finally {
+      setRolesLoading(false);
+    }
+  }, [serverId, toast]);
+
+  // Fetch channels from Discord API
+  const fetchChannels = useCallback(async () => {
+    if (!serverId || !user?.id) return;
+
+    setChannelsLoading(true);
+    setChannelsError(null);
+
+    try {
+      const channels = await fetch(`/api/discord/channels?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
+      setChannels(channels);
+    } catch (err: any) {
+      setChannelsError(err.message);
+      toast.error('Failed to fetch channels', err.message);
+    } finally {
+      setChannelsLoading(false);
+    }
+  }, [serverId, toast]);
+
+  // Auto-fetch roles and channels when needed
+  useEffect(() => {
+    if (selectedNode?.data.type === 'option-role' && roles.length === 0 && !rolesLoading) {
+      fetchRoles();
+    }
+  }, [selectedNode?.data.type, roles.length, rolesLoading, fetchRoles]);
+
+  useEffect(() => {
+    if (selectedNode?.data.type === 'option-channel' && channels.length === 0 && !channelsLoading) {
+      fetchChannels();
+    }
+  }, [selectedNode?.data.type, channels.length, channelsLoading, fetchChannels]);
 
   const openEmbedBuilder = (embedIndex = 0) => {
     setCurrentEmbedIndex(embedIndex);
@@ -1362,11 +1421,58 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           </div>
         );
 
-      case 'option-user':
-      case 'option-role':
-      case 'option-channel':
       case 'option-text':
-      case 'option-boolean':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Option Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., message'
+              />
+              
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Description</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.description || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    description: e.target.value,
+                  })
+                }
+                placeholder='What is this option for?'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Default Value</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.value || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { value: e.target.value })
+                }
+                placeholder='Default text value'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.required !== false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { required: checked })
+                }
+              />
+              <Label className='text-white'>Required</Label>
+            </div>
+          </div>
+        );
+
+      case 'option-user':
         return (
           <div className='space-y-4'>
             <div>
@@ -1392,6 +1498,221 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 }
                 placeholder='What is this option for?'
               />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Default User ID</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.value || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { value: e.target.value })
+                }
+                placeholder='Default user ID (optional)'
+              />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.required !== false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { required: checked })
+                }
+              />
+              <Label className='text-white'>Required</Label>
+            </div>
+          </div>
+        );
+
+      case 'option-role':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Option Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., role'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Description</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.description || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    description: e.target.value,
+                  })
+                }
+                placeholder='What is this option for?'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Default Role</Label>
+              <div className='flex gap-2'>
+                <Button
+                  onClick={fetchRoles}
+                  size='sm'
+                  variant='outline'
+                  disabled={rolesLoading}
+                  className='flex-shrink-0'
+                >
+                  {rolesLoading ? 'Loading...' : 'Load Roles'}
+                </Button>
+                <Select
+                  value={config.value || ''}
+                  onValueChange={value =>
+                    updateNodeConfig(selectedNode.id, { value })
+                  }
+                >
+                  <SelectTrigger className={'flex-1 ' + INPUT_FONT}>
+                    <SelectValue placeholder='Select a default role...' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map(role => (
+                      <SelectItem key={role.id} value={role.id}>
+                        <div className='flex items-center gap-2'>
+                          <div
+                            className='w-3 h-3 rounded-full'
+                            style={{ backgroundColor: `#${role.color.toString(16).padStart(6, '0')}` }}
+                          />
+                          <span>{role.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.required !== false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { required: checked })
+                }
+              />
+              <Label className='text-white'>Required</Label>
+            </div>
+          </div>
+        );
+
+      case 'option-channel':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Option Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., channel'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Description</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.description || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    description: e.target.value,
+                  })
+                }
+                placeholder='What is this option for?'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Default Channel</Label>
+              <div className='flex gap-2'>
+                <Button
+                  onClick={fetchChannels}
+                  size='sm'
+                  variant='outline'
+                  disabled={channelsLoading}
+                  className='flex-shrink-0'
+                >
+                  {channelsLoading ? 'Loading...' : 'Load Channels'}
+                </Button>
+                <Select
+                  value={config.value || ''}
+                  onValueChange={value =>
+                    updateNodeConfig(selectedNode.id, { value })
+                  }
+                >
+                  <SelectTrigger className={'flex-1 ' + INPUT_FONT}>
+                    <SelectValue placeholder='Select a default channel...' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {channels.map(channel => (
+                      <SelectItem key={channel.id} value={channel.id}>
+                        <div className='flex items-center gap-2'>
+                          <span>#{channel.name}</span>
+                          <span className='text-xs text-gray-400'>
+                            ({channel.type === 0 ? 'Text' : channel.type === 2 ? 'Voice' : 'Other'})
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Switch
+                checked={config.required !== false}
+                onCheckedChange={checked =>
+                  updateNodeConfig(selectedNode.id, { required: checked })
+                }
+              />
+              <Label className='text-white'>Required</Label>
+            </div>
+          </div>
+        );
+
+      case 'option-boolean':
+        return (
+          <div className='space-y-4'>
+            <div>
+              <Label className='text-white font-medium'>Option Name</Label>
+              <Input
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.name || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, { name: e.target.value })
+                }
+                placeholder='e.g., enabled'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Description</Label>
+              <Textarea
+                className={'mt-1 ' + INPUT_FONT}
+                value={config.description || ''}
+                onChange={e =>
+                  updateNodeConfig(selectedNode.id, {
+                    description: e.target.value,
+                  })
+                }
+                placeholder='What is this option for?'
+              />
+            </div>
+            <div>
+              <Label className='text-white font-medium'>Default Value</Label>
+              <div className='flex items-center space-x-2'>
+                <Switch
+                  checked={config.value || false}
+                  onCheckedChange={checked =>
+                    updateNodeConfig(selectedNode.id, { value: checked })
+                  }
+                />
+                <Label className='text-white'>
+                  {config.value ? 'True' : 'False'}
+                </Label>
+              </div>
             </div>
             <div className='flex items-center space-x-2'>
               <Switch
@@ -1504,10 +1825,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   }
                   placeholder='e.g., first-message'
                 />
-                <p className='text-xs text-gray-400 mt-1'>
-                  This will save the sent message ID as a variable for later
-                  use.
-                </p>
               </div>
             </TabsContent>
 
@@ -2255,9 +2572,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 }
                 placeholder='e.g., fetched-user'
               />
-              <p className='text-xs text-gray-400 mt-1'>
-                The fetched user/member object will be stored as a variable.
-              </p>
             </div>
           </div>
         );
@@ -2289,9 +2603,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 }
                 placeholder='e.g., fetched-channel'
               />
-              <p className='text-xs text-gray-400 mt-1'>
-                The fetched channel object will be stored as a variable.
-              </p>
             </div>
           </div>
         );
@@ -2321,9 +2632,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 }
                 placeholder='e.g., fetched-role'
               />
-              <p className='text-xs text-gray-400 mt-1'>
-                The fetched role object will be stored as a variable.
-              </p>
             </div>
           </div>
         );
@@ -2878,7 +3186,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 placeholder='e.g., audit-logs'
               />
               <p className='text-xs text-gray-400 mt-1'>
-                The fetched audit log entries will be stored as a variable.
+                Use {'{variable-name}'} in other blocks to access this stored audit log data.
               </p>
             </div>
           </div>
@@ -2919,7 +3227,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 placeholder='e.g., random-number'
               />
               <p className='text-xs text-gray-400 mt-1'>
-                The generated random number will be stored as a variable.
+                Use {'{variable-name}'} in other blocks to access this stored random number.
               </p>
             </div>
           </div>
