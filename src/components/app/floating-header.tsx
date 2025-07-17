@@ -191,15 +191,6 @@ export function FloatingHeader({
               {/* Theme Toggle */}
               <ThemeToggle />
 
-              {/* Settings */}
-              <Button
-                variant='ghost'
-                size='icon'
-                className='text-discord-text hover:text-white hover:bg-white/5'
-              >
-                <Settings className='h-5 w-5' />
-              </Button>
-
               {/* User Profile */}
               <UserButton
                 appearance={{

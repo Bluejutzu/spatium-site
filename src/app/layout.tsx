@@ -1,33 +1,48 @@
-import type React from 'react';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
-import { ThemeProvider } from '@/components/theme/theme-provider';
-import { ConvexClientProvider, SyncClerkToConvex } from '@/features/auth';
-import { Toaster } from '@/components/ui/sonner';
+import { Inter, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
+import { ConvexClientProvider, SyncClerkToConvex } from "@/features/auth";
 
-import './styles/globals.css';
-import './styles/clerk-pricing.css';
+const fontSans = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: 'Spatium',
-  description: "The only bot you'll ever need",
-};
+const fontMono = Geist_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <ClerkProvider>
-      <html lang='en' suppressHydrationWarning={true}>
-        <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
+      >
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: 'var(--color-discord-blurple)',
+              colorSuccess: 'var(--color-discord-green)',
+              colorWarning: 'var(--color-discord-red)',
+              colorShimmer: 'var(--color-discord-blurple-hover)',
+              colorText: "var(--color-discord-darker)",
+              colorInputBackground: 'white',
+              colorTextSecondary: "var(--color-discord-text)",
+              colorInputText: 'black',
+              colorBackground: 'white',
+              fontFamily: 'minecraft'
+            },
+          }}>
           <ThemeProvider
-            attribute='class'
-            defaultTheme='system'
+            attribute="class"
+            defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
@@ -36,8 +51,8 @@ export default function RootLayout({
             </ConvexClientProvider>
             <Toaster />
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

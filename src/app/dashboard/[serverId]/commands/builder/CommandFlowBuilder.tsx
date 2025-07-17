@@ -38,7 +38,6 @@ import {
   X,
   Plus,
   Settings,
-  Save,
   Trash2,
   MessageSquare,
   Crown,
@@ -55,8 +54,10 @@ import {
   Webhook,
   ImageIcon,
   Link,
-  ArrowLeft,
   ToggleRight,
+  Share,
+  Copy,
+  Save,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { DiscordEmbed } from '@/types/discord';
@@ -66,7 +67,9 @@ import { Roboto } from 'next/font/google';
 import { api } from '../../../../../../convex/_generated/api';
 import { useRouter } from 'next/navigation';
 import { BlockCategory, BlockType } from '@/types/common';
-import { useUser } from '@clerk/nextjs';
+import { useUser, UserButton } from '@clerk/nextjs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -80,7 +83,6 @@ const INPUT_FONT = roboto.className;
 const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
   if (nodes.length === 0) return [];
 
-  const nodeMap = new Map(nodes.map(n => [n.id, { ...n }]));
   const adj = new Map<string, string[]>();
   const reverseAdj = new Map<string, string[]>();
 
@@ -879,6 +881,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const [rolesError, setRolesError] = useState<string | null>(null);
   const [channelsError, setChannelsError] = useState<string | null>(null);
 
+  const [importValue, setImportValue] = useState('');
+  const [importLoading, setImportLoading] = useState(false);
+  const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const memoizedNodes = useMemo(() => {
     return nodes.map(n => ({
       ...n,
@@ -894,7 +902,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     api.discord.getCommand,
     commandId ? { commandId: commandId as any } : 'skip'
   );
-
+  const shareCode = existingCommand?.shareCode;
   const saveCommandMutation = useMutation(api.discord.saveCommand);
 
   // Load existing command data
@@ -1001,7 +1009,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       case 'option-user':
         return { name: '', description: '', required: true, value: '' };
       case 'option-boolean':
-        return { name: '', description: '', required: true, value: false };
+        return { name: '', description: '', required: true, value: "false" };
       case 'option-role':
         return { name: '', description: '', required: false, value: '' };
       case 'option-channel':
@@ -1215,6 +1223,105 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     );
   };
 
+  const handleShareClick = async () => {
+    if (!commandId) {
+      toast.error('No Command', 'You must save the command before sharing.');
+      return;
+    }
+    if (!existingCommand) {
+      toast.error('No Command', 'You must save the command before sharing.');
+      return
+    }
+    if (!shareCode) {
+      const newShareCode = `share_${commandId}`
+      await saveCommandMutation({
+        commandId: existingCommand._id,
+        serverId: existingCommand.serverId,
+        name: existingCommand.name,
+        description: existingCommand.description || "",
+        blocks: existingCommand.blocks,
+        cooldown: existingCommand.cooldown || 0,
+        shareCode: newShareCode,
+        options: existingCommand.options
+      })
+        .catch((e) => console.error(e))
+        .then((v) => {
+          toast.success('Share Code Created!', 'You can now share this command. ');
+        });
+
+      console.log(newShareCode, existingCommand)
+      return;
+    }
+    setSharePopoverOpen(true);
+  };
+
+  const handleCopyShareCode = () => {
+    if (shareCode) {
+      navigator.clipboard.writeText(shareCode);
+      toast.success('Copied!', 'Share code copied to clipboard.');
+    }
+  };
+
+  const handleDeleteShareCode = async () => {
+    setIsDeleting(true);
+    try {
+      if (!existingCommand) {
+        toast.error("No Command found", "A command was not found to delete")
+        return
+      };
+      await saveCommandMutation({
+        commandId: existingCommand._id,
+        serverId: existingCommand.serverId,
+        name: existingCommand.name,
+        description: existingCommand.description || "",
+        blocks: existingCommand.blocks,
+        cooldown: existingCommand.cooldown || 0,
+        shareCode: "",
+        options: existingCommand.options
+      });
+      toast.success('Share Code Deleted', 'This share code is no longer shareable.');
+      setDeleteDialogOpen(false);
+      setSharePopoverOpen(false);
+    } catch (err) {
+      toast.error('Delete Failed', 'Could not delete share code.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleImport = async () => {
+    const id = importValue.trim();
+    if (!id) {
+      toast.error('Invalid Link', 'Please enter a valid share link or command ID.');
+      return;
+    }
+    setImportLoading(true);
+    try {
+      const res = await fetch(`/api/commands/share/${id}`);
+      if (!res.ok) throw new Error('Command not found');
+      const data = await res.json();
+      // Save to current server
+      const result = await saveCommandMutation({
+        name: data.name,
+        description: data.description,
+        blocks: data.blocks,
+        serverId,
+        cooldown: data.cooldown || 0,
+        options: data.options || [],
+      });
+      toast.success('Command Imported!', 'The command has been added to this server.');
+      setImportValue('');
+      // Optionally, redirect to the new command
+      if (result.commandId) {
+        router.push(`/dashboard/${serverId}/commands/builder?commandId=${result.commandId}`);
+      }
+    } catch (err) {
+      toast.error('Import Failed', err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   const saveCommand = useCallback(async () => {
     setIsLoading(true);
 
@@ -1280,10 +1387,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       setIsLoading(false);
     }
   }, [nodes, edges, serverId, commandId, toast, saveCommandMutation, router]);
-
-  const handleBackToCommands = () => {
-    router.push(`/dashboard/${serverId}/commands`);
-  };
 
   // Fetch roles from Discord API
   const fetchRoles = useCallback(async () => {
@@ -1434,7 +1537,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 }
                 placeholder='e.g., message'
               />
-              
+
             </div>
             <div>
               <Label className='text-white font-medium'>Description</Label>
@@ -1704,9 +1807,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               <Label className='text-white font-medium'>Default Value</Label>
               <div className='flex items-center space-x-2'>
                 <Switch
-                  checked={config.value || false}
+                  checked={config.value || "false"}
                   onCheckedChange={checked =>
-                    updateNodeConfig(selectedNode.id, { value: checked })
+                    updateNodeConfig(selectedNode.id, { value: checked ? "true" : "false" })
                   }
                 />
                 <Label className='text-white'>
@@ -3305,66 +3408,120 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       className='h-screen w-full relative overflow-hidden'
       style={{ backgroundColor: 'rgb(15 23 42)' }}
     >
-      <ReactFlowProvider>
-        {/* Floating Action Bar */}
-        <div className='absolute top-4 left-1/2 transform -translate-x-1/2 z-50'>
-          <Card
-            className='shadow-2xl'
-            style={{
-              backgroundColor: 'rgb(30 41 59)',
-              borderColor: 'rgb(51 65 85)',
-            }}
-          >
-            <CardContent className='flex items-center gap-4 p-4'>
-              <Button
-                onClick={handleBackToCommands}
-                variant='outline'
-                size='sm'
-                className='discord-button-outline bg-transparent'
-              >
-                <ArrowLeft className='w-4 h-4 mr-2' />
-                Back
-              </Button>
-              <Button
-                onClick={() => setShowPalette(!showPalette)}
-                variant='outline'
-                size='sm'
-                className='discord-button-outline'
-              >
-                <Plus className='w-4 h-4 mr-2' />
-                Blocks
-              </Button>
-              <Button
-                onClick={saveCommand}
-                size='sm'
-                className='discord-button-primary'
-                disabled={isLoading}
-              >
-                <Save className='w-4 h-4 mr-2' />
-                {isLoading
-                  ? 'Saving...'
-                  : commandId
-                    ? 'Update Command'
-                    : 'Save Command'}
-              </Button>
-              {selectedNode &&
-                selectedNode.id !== ROOT_NODE_ID &&
-                selectedNode.id !== ERROR_NODE_ID && (
-                  <Button
-                    onClick={deleteSelectedNode}
-                    variant='destructive'
-                    size='sm'
-                  >
-                    <Trash2 className='w-4 h-4 mr-2' />
-                    Delete
-                  </Button>
-                )}
-            </CardContent>
-          </Card>
+      {/* Fixed Top Bar */}
+      <div className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-6 h-16 bg-[#181A20] border-b border-[#23262F] shadow-lg">
+        {/* Left: Logo/Icon */}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 flex items-center justify-center bg-[#23262F] rounded-md">
+            {/* Replace with your logo if needed */}
+            <Settings className="w-6 h-6 text-white" />
+          </div>
+
+          <div className="mt-1 flex gap-2">
+            <Input
+              value={importValue}
+              onChange={e => setImportValue(e.target.value)}
+              placeholder="Paste share link or command ID..."
+              className="w-64 bg-[#23262F] text-white border border-[#353945] h-8 text-sm px-2"
+              disabled={importLoading}
+            />
+            <Button
+              size="sm"
+              className="bg-discord-blurple text-white font-semibold hover:bg-discord-blurple/80 h-8 px-4"
+              onClick={handleImport}
+              disabled={importLoading || !importValue.trim()}
+            >
+              {importLoading ? 'Importing...' : 'Import'}
+            </Button>
+          </div>
         </div>
 
+        <div className="flex-1 flex flex-col items-center">
+          <div className="text-slate-400 font-medium flex items-center gap-1">
+            <a className="hover:underline cursor-pointer" href={`/dashboard/${serverId}`} >Dashboard</a>
+            <span className="mx-1">/</span>
+            <span className="text-white font-semibold">Command Builder</span>
+          </div>
+          {/* Import Field */}
+
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex space-x-2 mr-2">
+            <Button
+              onClick={saveCommand}
+              size='sm'
+              className='discord-button-primary'
+              disabled={isLoading}
+            >
+              <Save className='w-4 h-4 mr-2' />
+              {isLoading
+                ? 'Saving...'
+                : commandId
+                  ? 'Update Command'
+                  : 'Save Command'}
+            </Button>
+            <UserButton />
+          </div>
+          <Popover open={sharePopoverOpen} onOpenChange={setSharePopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button size="sm" className="bg-white text-black font-semibold hover:bg-gray-200" onClick={handleShareClick} style={{ borderRadius: 'var(--radius)', background: 'var(--color-popover)', color: 'var(--color-popover-foreground)', border: '1px solid var(--color-border)' }}>
+                Share <Share className="w-4 h-4 ml-1" />
+              </Button>
+            </PopoverTrigger>
+            {shareCode && (
+              <PopoverContent style={{ background: 'var(--color-discord-darker)', color: 'var(--color-popover-foreground)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', minWidth: 320 }}>
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-1">
+                    <span className='text-sm font-medium text-gray-400'>Last Updated</span>
+                    <span className='text-sm text-gray-300'>
+                      {existingCommand?.lastUpdateTime
+                        ? new Date(existingCommand.lastUpdateTime).toLocaleString()
+                        : new Date().toLocaleString()}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <span className='text-sm font-medium text-gray-400'>Share Code</span>
+                    <div className="flex items-center justify-between p-2 rounded bg-[var(--color-discord-dark)]">
+                      <span className="font-mono text-sm truncate text-[var(--color-primary)]">{shareCode}</span>
+                      <Button variant="ghost" size="icon" onClick={handleCopyShareCode} className="text-[var(--color-discord-blurple)] hover:text-[var(--color-discord-blurple)] hover:bg-[var(--color-discord-darker)]">
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="w-full bg-[var(--color-discord-red)] hover:bg-[var(--color-discord-red)/90] mt-2"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete Share Code
+                  </Button>
+                </div>
+              </PopoverContent>
+            )}
+          </Popover>
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent style={{ background: 'var(--color-discord-darker)', color: 'var(--color-card-foreground)', borderRadius: 'var(--radius)' }}>
+              <DialogHeader>
+                <DialogTitle>Delete Share Code?</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this share code? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} style={{ borderRadius: 'var(--radius-sm)' }}>Cancel</Button>
+                <Button variant="destructive" onClick={handleDeleteShareCode} disabled={isDeleting} style={{ background: 'var(--color-discord-red)', borderRadius: 'var(--radius-sm)' }}>
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      <ReactFlowProvider>
         <div className='flex h-full'>
-          {/* Enhanced Block Palette */}
           {showPalette && (
             <div
               className='w-80 flex flex-col shadow-2xl'
@@ -3478,7 +3635,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
             </div>
           )}
 
-          {/* Main Canvas */}
           <div className='flex-1 relative'>
             <ReactFlow
               nodes={memoizedNodes}
