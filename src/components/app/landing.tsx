@@ -182,32 +182,11 @@ export function LandingPage() {
       interactive: true,
     },
     {
-      icon: BarChart3,
-      title: "Real-time Analytics",
-      description:
-        "Comprehensive insights into your server's activity and growth with beautiful dashboards and detailed reports.",
-      gradient: "from-green-500 to-emerald-600",
-      interactive: true,
-    },
-    {
       icon: Users,
       title: "Member Management",
       description:
-        "Sophisticated tools for managing roles, permissions, and user engagement with automated welcome systems.",
+        "Tools for managing roles, permissions, and user engagement with automated welcome systems.",
       gradient: "from-orange-500 to-red-600",
-    },
-    {
-      icon: Database,
-      title: "Custom Databases",
-      description: "Store and manage custom data for your server with powerful queries and seamless integration.",
-      gradient: "from-purple-500 to-indigo-600",
-    },
-    {
-      icon: Cloud,
-      title: "Cloud Infrastructure",
-      description:
-        "Reliable, scalable hosting with 99.9% uptime guarantee and global CDN for lightning-fast performance.",
-      gradient: "from-cyan-500 to-blue-600",
     },
   ]
 

@@ -6,89 +6,23 @@ import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
 import {
   Bot,
   Users,
-  Activity,
   Settings,
   BarChart3,
   Plus,
   ExternalLink,
   Crown,
-  Shield,
-  TrendingUp,
   Sparkles,
   ArrowDown,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
-
-const serverFeatures = [
-  {
-    icon: BarChart3,
-    title: 'ADVANCED ANALYTICS',
-    description:
-      'Deep insights into member engagement, growth patterns, and community health metrics.',
-    accent: 'discord-blurple',
-  },
-  {
-    icon: Shield,
-    title: 'SECURITY FORTRESS',
-    description:
-      'Multi-layered protection with automated moderation and threat detection systems.',
-    accent: 'discord-green',
-  },
-  {
-    icon: Settings,
-    title: 'TOTAL AUTOMATION',
-    description:
-      'Streamline operations with intelligent workflows and custom command systems.',
-    accent: 'discord-yellow',
-  },
-  {
-    icon: Users,
-    title: 'MEMBER MANAGEMENT',
-    description:
-      'Sophisticated onboarding, role management, and engagement tracking tools.',
-    accent: 'discord-red',
-  },
-];
-
-function AnimatedCounter({
-  end,
-  duration = 2000,
-}: {
-  end: number;
-  duration?: number;
-}) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
-
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [end, duration]);
-
-  return <span>{count.toLocaleString()}</span>;
-}
 
 export default function ServersPage() {
   const { user } = useUser();
@@ -98,13 +32,24 @@ export default function ServersPage() {
     user ? { userId: user.externalAccounts[0].providerUserId } : 'skip'
   );
   const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollY, setScrollY] = useState('0%');
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  });
+  useEffect(() => {
+    if (containerRef.current) {
+      const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ['start start', 'end start'],
+      });
 
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+      const unsubscribe = scrollYProgress.on('change', (latest) => {
+        setScrollY(`${latest * 50}%`);
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, []);
 
   if (!user) {
     return (
@@ -128,12 +73,6 @@ export default function ServersPage() {
     );
   }
 
-  const totalServers = servers?.length || 0;
-  const totalMembers =
-    servers?.reduce((acc, server) => acc + server.memberCount, 0) || 0;
-  const totalOnline =
-    servers?.reduce((acc, server) => acc + server.onlineCount, 0) || 0;
-
   return (
     <div
       className='bg-discord-dark overflow-hidden font-minecraft'
@@ -144,7 +83,7 @@ export default function ServersPage() {
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
         <motion.div
           className='absolute inset-0 bg-grid-pattern opacity-5'
-          style={{ y }}
+          style={{ y: scrollY }}
         />
         <div className='floating-orb floating-orb-1' />
         <div className='floating-orb floating-orb-2' />
@@ -154,7 +93,7 @@ export default function ServersPage() {
       {/* Main Content Container - Centered */}
       <div className='relative z-10 min-h-screen'>
         {/* Server Management Section */}
-        <section className='min-h-screen flex items-center justify-center py-20 pt-40'>
+        <section className='min-h-screen flex items-center justify-center py-20 pt-20'>
           <div className='w-full max-w-7xl mx-auto px-6'>
             <motion.div
               className='text-center mb-16'
@@ -209,7 +148,7 @@ export default function ServersPage() {
                 <CardContent className='p-8'>
                   {servers && servers.length > 0 ? (
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
-                      {servers.map((server, index) => (
+                      {servers.map((server) => (
                         <div key={server._id} className='w-full max-w-sm'>
                           <Link href={`/dashboard/${server.serverId}`}>
                             <Card className='discord-card hover:border-discord-border-hover transition-all duration-300 cursor-pointer group h-full'>
@@ -348,155 +287,6 @@ export default function ServersPage() {
             >
               <ArrowDown className='h-6 w-6 text-discord-text/60' />
             </motion.div>
-          </div>
-        </section>
-
-        {/* Stats Overview Section */}
-        <section className='min-h-screen flex items-center justify-center py-20 bg-discord-darker/50'>
-          <div className='w-full max-w-7xl mx-auto px-6'>
-            <motion.div
-              className='text-center mb-16'
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <Badge className='mb-6 bg-discord-blurple/20 text-discord-blurple border-discord-blurple/30 px-4 py-2 font-bold'>
-                EMPIRE STATISTICS
-              </Badge>
-              <h2 className='text-5xl md:text-6xl font-black text-white mb-6'>
-                YOUR
-                <br />
-                <span className='text-discord-blurple glow-text'>DOMINION</span>
-              </h2>
-              <p className='text-xl text-discord-text max-w-3xl mx-auto'>
-                Real-time insights into your Discord empire's reach, engagement,
-                and growth across all managed communities.
-              </p>
-            </motion.div>
-
-            {/* Enhanced Stats Grid - Centered */}
-            <div className='flex justify-center mb-16'>
-              <div className='grid md:grid-cols-3 gap-8 max-w-5xl w-full'>
-                {[
-                  {
-                    title: 'TOTAL SERVERS',
-                    value: totalServers,
-                    icon: Bot,
-                    accent: 'discord-blurple',
-                    description: 'Communities under your command',
-                    growth: '+2 this month',
-                  },
-                  {
-                    title: 'TOTAL MEMBERS',
-                    value: totalMembers,
-                    icon: Users,
-                    accent: 'discord-green',
-                    description: 'Active community members',
-                    growth: '+12% growth rate',
-                  },
-                  {
-                    title: 'ONLINE NOW',
-                    value: totalOnline,
-                    icon: Activity,
-                    accent: 'discord-orange',
-                    description: 'Currently active members',
-                    growth: `${Math.round((totalOnline / Math.max(totalMembers, 1)) * 100)}% engagement`,
-                  },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -10, scale: 1.02 }}
-                  >
-                    <Card className='discord-card border-2 border-white/10 h-full'>
-                      <CardContent className='p-8 text-center'>
-                        <motion.div
-                          className={`p-4 rounded-xl bg-${stat.accent}/20 w-fit mx-auto mb-6`}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 17,
-                          }}
-                        >
-                          <stat.icon
-                            className={`h-8 w-8 text-${stat.accent}`}
-                          />
-                        </motion.div>
-
-                        <h3 className='text-lg font-bold text-white mb-2 tracking-wide'>
-                          {stat.title}
-                        </h3>
-
-                        <div
-                          className={`text-5xl font-black text-${stat.accent} mb-4 glow-text`}
-                        >
-                          <AnimatedCounter end={stat.value} />
-                        </div>
-
-                        <p className='text-discord-text mb-3'>
-                          {stat.description}
-                        </p>
-
-                        <Badge
-                          className={`bg-${stat.accent}/20 text-${stat.accent} border-${stat.accent}/30`}
-                        >
-                          <TrendingUp className='mr-1 h-3 w-3' />
-                          {stat.growth}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Actions - Centered */}
-            <div className='flex justify-center'>
-              <motion.div
-                className='grid md:grid-cols-4 gap-6 max-w-5xl w-full'
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                viewport={{ once: true }}
-              >
-                {serverFeatures.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  >
-                    <Card className='discord-card h-full'>
-                      <CardContent className='p-6 text-center'>
-                        <motion.div
-                          className={`p-3 rounded-xl bg-${feature.accent}/20 w-fit mx-auto mb-4`}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 17,
-                          }}
-                        >
-                          <feature.icon
-                            className={`h-6 w-6 text-${feature.accent}`}
-                          />
-                        </motion.div>
-                        <h4 className='text-sm font-bold text-white mb-2 tracking-wide'>
-                          {feature.title}
-                        </h4>
-                        <p className='text-xs text-discord-text leading-relaxed'>
-                          {feature.description}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
           </div>
         </section>
 

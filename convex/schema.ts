@@ -42,6 +42,7 @@ export default defineSchema({
 		serverId: v.string(),
 		prefix: v.string(),
 		welcomeMessage: v.optional(v.string()),
+		welcomeChannelId: v.optional(v.string()),
 		autoRole: v.boolean(),
 		autoRoleId: v.optional(v.string()),
 		moderationEnabled: v.boolean(),

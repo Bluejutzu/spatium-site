@@ -9,6 +9,30 @@ export const getServers = query({
 	},
 });
 
+export const getServer = query({
+	args: {
+		serverId: v.string()
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query("discordServers")
+			.withIndex("by_server_id", q => q.eq('serverId', args.serverId))
+			.first()
+	},
+})
+
+export const getServerSettings = query({
+	args: {
+		serverId: v.string()
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query("serverSettings")
+			.withIndex("by_server_id", q => q.eq('serverId', args.serverId))
+			.first()
+	},
+})
+
 export const syncDiscordServers = mutation({
 	args: {
 		servers: v.array(
