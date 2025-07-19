@@ -128,3 +128,55 @@ export interface DiscordMessage {
   attachments?: any[];
   flags?: number;
 }
+
+export interface DiscordPresence {
+  user: {
+    id: string;
+    username: string;
+    discriminator: string;
+    avatar: string | null;
+  };
+  status: 'online' | 'idle' | 'dnd' | 'offline';
+  activities: DiscordActivity[];
+  client_status: {
+    desktop?: string;
+    mobile?: string;
+    web?: string;
+  };
+}
+
+export interface DiscordActivity {
+  name: string;
+  type: number;
+  url?: string;
+  created_at: number;
+  timestamps?: {
+    start?: number;
+    end?: number;
+  };
+  application_id?: string;
+  details?: string;
+  state?: string;
+  emoji?: {
+    name: string;
+    id?: string;
+    animated?: boolean;
+  };
+  party?: {
+    id?: string;
+    size?: [number, number];
+  };
+  assets?: {
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
+  };
+  secrets?: {
+    join?: string;
+    spectate?: string;
+    match?: string;
+  };
+  instance?: boolean;
+  flags?: number;
+}

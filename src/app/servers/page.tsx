@@ -33,23 +33,20 @@ export default function ServersPage() {
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState('0%');
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end start'],
+  });
 
   useEffect(() => {
-    if (containerRef.current) {
-      const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ['start start', 'end start'],
-      });
+    const unsubscribe = scrollYProgress.on('change', (latest) => {
+      setScrollY(`${latest * 50}%`);
+    });
 
-      const unsubscribe = scrollYProgress.on('change', (latest) => {
-        setScrollY(`${latest * 50}%`);
-      });
-
-      return () => {
-        unsubscribe();
-      };
-    }
-  }, []);
+    return () => {
+      unsubscribe();
+    };
+  }, [scrollYProgress]);
 
   if (!user) {
     return (

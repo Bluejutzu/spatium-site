@@ -1,22 +1,12 @@
 'use client';
 
-import type React from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { useParams } from 'next/navigation';
-import { FloatingSidebar } from '@/components/app/floating-sidebar';
+import type React from 'react';;
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const params = useParams();
-  const serverId =
-    typeof params.serverId === 'string'
-      ? params.serverId
-      : Array.isArray(params.serverId)
-        ? params.serverId[0]
-        : undefined;
 
   return (
     <div className='bg-discord-dark min-h-screen font-minecraft'>
@@ -28,15 +18,13 @@ export default function DashboardLayout({
         <div className='floating-orb floating-orb-2' />
         <div className='floating-orb floating-orb-3' />
       </div>
-
-      <SidebarProvider>
-        <div className='relative z-10 flex min-h-screen w-full'>
-          <div className='flex-1 flex flex-col'>
-            <FloatingSidebar />
-            <main className='flex-1'>{children}</main>
-          </div>
+      <div className='relative z-10 flex min-h-screen w-full'>
+        <div className='flex-1 flex flex-col'>
+          <main className='flex-1'>
+            {children}
+          </main>
         </div>
-      </SidebarProvider>
+      </div>
     </div>
   );
 }

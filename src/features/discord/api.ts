@@ -4,6 +4,7 @@ import {
   DiscordRole,
   DiscordChannel,
   DiscordMember,
+  DiscordPresence,
 } from '@/types/discord';
 
 export class DiscordAPI {
@@ -130,6 +131,23 @@ export class DiscordAPI {
       );
     }
     return response.json() as Promise<DiscordRole[]>;
+  }
+  
+  async getUserPresence(userId: string): Promise<DiscordPresence | null> {
+    try {
+      const response = await fetch(`${this.baseURL}/users/${userId}/presence`, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      });
+      if (!response.ok) {
+        return null;
+      }
+      return response.json() as Promise<DiscordPresence>;
+    } catch (error) {
+      console.error('Error fetching user presence:', error);
+      return null;
+    }
   }
 }
 

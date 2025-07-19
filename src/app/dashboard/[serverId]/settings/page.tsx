@@ -28,12 +28,32 @@ import {
   Lock,
   Eye,
   Hash,
+  Copy,
 } from 'lucide-react';
 import { api } from '../../../../../convex/_generated/api';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-function isPromise<T>(value: any): value is Promise<T> {
-  return value && typeof value.then === 'function';
+function VariableCopyBadge({ variable }: { variable: string }) {
+  const toast = useToast();
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(variable);
+    setCopied(true);
+    toast.success('Copied!', `${variable} copied to clipboard`);
+    setTimeout(() => setCopied(false), 1200);
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="flex items-center gap-1 px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-sm font-mono hover:bg-discord-blurple/30 transition-colors focus:outline-none"
+      title="Copy variable"
+    >
+      <span>{variable}</span>
+      <Copy className="w-4 h-4" />
+      {copied && <span className="ml-1 text-discord-green">✓</span>}
+    </button>
+  );
 }
 
 export default function SettingsPage({
@@ -185,7 +205,7 @@ export default function SettingsPage({
     if (isLoading) return;
 
     setIsLoading(true);
-    toast.loading('Saving settings...', 'Your changes are being applied');
+    const ref = toast.loading('Saving settings...', 'Your changes are being applied');
 
     try {
       await updateSettings({
@@ -203,13 +223,13 @@ export default function SettingsPage({
         ...(form.autoRoleId ? { autoRoleId: form.autoRoleId } : {}),
       });
 
-      toast.dismiss();
+      toast.dismiss(ref);
       toast.success(
         'Settings saved successfully!',
         'Your bot configuration has been updated'
       );
     } catch (_error) {
-      toast.dismiss();
+      toast.dismiss(ref);
       toast.error(
         'Failed to save settings',
         'Please try again or contact support'
@@ -489,9 +509,25 @@ export default function SettingsPage({
                         className='bg-white/5 border-white/20 text-white placeholder:text-discord-text min-h-[120px] text-lg'
                       />
                       <p className='text-sm text-discord-text'>
-                        Message sent to new members. Use {'{user}'} for
-                        mentions.
+                        Message sent to new members. Use {'{variable-name}'} for customization.
                       </p>
+
+                      {/* Available Variables Section */}
+                      <div className="mt-4">
+                        <Label className="text-white font-bold text-md mb-2 block">Available Variables</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { label: 'UserMention', value: '{userMention}' },
+                            { label: 'UserAvatarUrl', value: '{userAvatarUrl}' },
+                            { label: 'GuildIconUrl', value: '{guildIconUrl}' },
+                            { label: 'GuildBannerUrl', value: '{guildBannerUrl}' },
+                            { label: 'GuildMemberCount', value: '{guildMemberCount}' },
+                            { label: 'NewGuildMemberCount', value: '{newGuildMemberCount'}
+                          ].map(variable => (
+                            <VariableCopyBadge key={variable.value} variable={variable.value} />
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     <div className='space-y-6'>

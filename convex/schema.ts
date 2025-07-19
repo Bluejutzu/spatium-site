@@ -37,7 +37,6 @@ export default defineSchema({
 	})
 		.index('by_server_timestamp', ['serverId', 'timestamp'])
 		.index('by_server_id', ['serverId']),
-
 	serverSettings: defineTable({
 		serverId: v.string(),
 		prefix: v.string(),

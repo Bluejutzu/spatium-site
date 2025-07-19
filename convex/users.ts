@@ -38,3 +38,5 @@ export const getUserByClerkId = query({
       .first();
   },
 });
+
+

@@ -4,6 +4,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { ConvexClientProvider, SyncClerkToConvex } from "@/features/auth";
+import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
+import { cookies } from "next/headers";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -15,7 +17,7 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -32,12 +34,14 @@ export default function RootLayout({
               colorSuccess: 'var(--color-discord-green)',
               colorWarning: 'var(--color-discord-red)',
               colorShimmer: 'var(--color-discord-blurple-hover)',
-              colorText: "var(--color-discord-darker)",
+              colorText: "var(--color-discord-text)",
               colorInputBackground: 'white',
               colorTextSecondary: "var(--color-discord-text)",
-              colorInputText: 'black',
-              colorBackground: 'white',
-              fontFamily: 'minecraft'
+              colorInputText: 'white',
+              colorBackground: 'var(--color-discord-darker)',
+              fontFamily: 'minecraft',
+              colorInput: 'white',
+              colorNeutral: 'white',
             },
           }}>
           <ThemeProvider

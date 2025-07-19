@@ -2,15 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Star,
-  X,
-  Crown,
-  Sparkles,
-  Shield,
   Loader2,
   AlertCircle,
 } from 'lucide-react';
@@ -30,7 +24,6 @@ export default function PricingPage() {
         return;
       }
 
-      // Simulate 5-second loading
       await new Promise(resolve => setTimeout(resolve, 500));
 
       setLoading(false);
