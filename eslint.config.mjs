@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import typescriptParser from '@typescript-eslint/parser';
+import importPlugin from 'eslint-plugin-import';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +17,9 @@ const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
+    plugins: {
+      'import': importPlugin,
+    },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -31,7 +35,24 @@ const eslintConfig = [
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-unused-vars': "off"
+      '@typescript-eslint/no-unused-vars': "off",
+      'import/order': [
+        'error',
+        {
+          'groups': [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type'
+          ],
+          'newlines-between': 'always',
+          'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
+        }
+      ],
     },
   },
   {

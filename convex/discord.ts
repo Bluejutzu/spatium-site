@@ -1,7 +1,9 @@
-import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
+
 import { DiscordAPI } from '@/features/discord';
+
 import { api } from './_generated/api';
+import { query, mutation, internalMutation } from './_generated/server';
 
 export const getServers = query({
 	handler: async ctx => {
