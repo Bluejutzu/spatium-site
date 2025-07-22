@@ -37,7 +37,6 @@ export default defineSchema({
 	})
 		.index('by_server_timestamp', ['serverId', 'timestamp'])
 		.index('by_server_id', ['serverId']),
-
 	serverSettings: defineTable({
 		serverId: v.string(),
 		prefix: v.string(),
@@ -95,4 +94,26 @@ export default defineSchema({
 		lastUpdateTime: v.optional(v.number()),
 		shareCode: v.optional(v.string()),
 	}).index('by_server_id', ['serverId']).index("by_share_code", ['shareCode']),
+
+	moderationActions: defineTable({
+		auditId: v.string(), // Discord audit log ID
+		serverId: v.string(),
+		action: v.string(), // ban, kick, mute, timeout, warn, unban, etc.
+		user: v.string(), // Discord user ID
+		reason: v.string(),
+		moderator: v.string(), // Discord moderator ID
+		time: v.string(),
+		duration: v.optional(v.string()),
+		state: v.optional(v.string()), // open, closed, etc.
+		proof: v.optional(v.string()),
+		closedAt: v.optional(v.string()),
+		closedBy: v.optional(v.string()),
+		notificationMessage: v.optional(v.string()),
+		logMessage: v.optional(v.string()),
+		raw: v.any(),
+	})
+		.index('by_server_id', ['serverId'])
+		.index('by_user', ['user'])
+		.index('by_moderator', ['moderator'])
+		.index('by_audit_id', ['auditId']),
 });

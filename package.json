@@ -7,10 +7,10 @@
     "dev:c": "convex dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --ext ts",
+    "lint": "next lint",
     "lint:fix": "pnpm lint --fix",
     "typecheck": "tsc --noEmit",
-    "check-all": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "check-all": "pnpm typecheck && pnpm lint",
     "generateTypes": "node scripts/generate-types.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
