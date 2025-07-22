@@ -438,7 +438,6 @@ export function LandingPage() {
         <div className="floating-orb floating-orb-1" />
         <div className="floating-orb floating-orb-2" />
         <div className="floating-orb floating-orb-3" />
-
         {/* Additional atmospheric elements */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-discord-blurple/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
@@ -626,13 +625,106 @@ export function LandingPage() {
                   </Badge>
                 </div>
               </div>
-
               {/* Floating elements for visual appeal */}
               <div className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-r from-discord-blurple to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center shadow-lg">
                 <Zap className="w-6 h-6 text-white" />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Analytics showcase */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="order-2 lg:order-1 relative"
+            >
+              <div className="bg-gradient-to-br from-discord-darker to-discord-dark rounded-3xl p-10 border border-discord-border shadow-2xl backdrop-blur-sm">
+                <div className="grid grid-cols-2 gap-6 mb-8">
+                  <div className="bg-discord-dark rounded-2xl p-6 border border-discord-border/50">
+                    <div className="flex items-center gap-3 mb-4">
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                      <span className="text-white text-sm font-medium">Active Users</span>
+                    </div>
+                    <div className="text-3xl font-black text-green-500">
+                      <AnimatedCounter end={12470} />
+                    </div>
+                    <p className="text-xs text-discord-text mt-2">+12% this week</p>
+                  </div>
+                  <div className="bg-discord-dark rounded-2xl p-6 border border-discord-border/50">
+                    <div className="flex items-center gap-3 mb-4">
+                      <MessageSquare className="w-5 h-5 text-blue-500" />
+                      <span className="text-white text-sm font-medium">Messages</span>
+                    </div>
+                    <div className="text-3xl font-black text-blue-500">
+                      <AnimatedCounter end={89340} />
+                    </div>
+                    <p className="text-xs text-discord-text mt-2">+8% this week</p>
+                  </div>
+                </div>
+                <div className="h-40 bg-discord-dark rounded-2xl flex items-end justify-between p-6 border border-discord-border/50">
+                  {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 95, 80].map((height, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ height: 0 }}
+                      whileInView={{ height: `${height}%` }}
+                      transition={{ duration: 0.8, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                      className="bg-gradient-to-t from-discord-blurple to-purple-500 w-4 rounded-t-lg shadow-lg"
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="order-1 lg:order-2"
+            >
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 mb-6 px-4 py-2">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Analytics
+              </Badge>
+              <h3 className="text-4xl md:text-5xl font-black text-white mb-8 leading-tight">
+                Understand Your Community with
+                <br />
+                <span className="text-discord-green glow-text">Powerful Insights</span>
+              </h3>
+              <p className="text-discord-text text-xl mb-10 leading-relaxed">
+                Get detailed analytics about your server activity, member engagement, and growth trends.
+                Make data-driven decisions to improve your community and boost engagement.
+              </p>
+              <div className="space-y-4">
+                {[
+                  "Real-time member activity tracking",
+                  "Message and engagement metrics",
+                  "Growth trend analysis and forecasting",
+                  "Custom report generation",
+                  "Export data in multiple formats",
+                  "Advanced filtering and segmentation",
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-discord-green to-teal-500 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white text-lg">{item}</span>
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
           </div>
@@ -675,7 +767,6 @@ export function LandingPage() {
               <br />
               YOUR SERVER?
             </h2>
-
             <p className="text-xl md:text-2xl text-discord-text mb-16 max-w-3xl mx-auto leading-relaxed">
               Start building amazing Discord experiences today with Spatium's powerful visual tools,
               advanced analytics, and comprehensive moderation features.
@@ -744,7 +835,6 @@ export function LandingPage() {
             </motion.div>
           </motion.div>
         </div>
-
         <CurvedLoop
           marqueeText="Be ✦ Creative ✦ With ✦ Spatium ✦ Transform ✦ Your ✦ Discord ✦"
           speed={2}

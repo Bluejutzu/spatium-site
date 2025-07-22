@@ -6,6 +6,7 @@ import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Bot,
   Users,
@@ -16,11 +17,24 @@ import {
   Crown,
   Sparkles,
   ArrowDown,
+  Search,
+  Filter,
+  Grid3X3,
+  List,
+  TrendingUp,
+  Activity,
+  Shield,
+  Zap,
+  Globe,
+  Star,
+  ChevronRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, useScroll } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatedHeader } from '@/components/app/header';
+import { DiscordFooter } from '@/components/app/footer';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
@@ -61,12 +75,12 @@ export default function ServerPage() {
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            <Bot className='h-16 w-16 mx-auto mb-4 text-discord-blurple' />
+            <Bot className='h-20 w-20 mx-auto mb-6 text-discord-blurple' />
           </motion.div>
-          <h2 className='text-2xl font-semibold mb-2 text-white font-minecraft'>
+          <h2 className='text-3xl font-semibold mb-4 text-white font-minecraft'>
             AUTHENTICATION REQUIRED
           </h2>
-          <p className='text-discord-text'>
+          <p className='text-discord-text text-lg'>
             Please sign in to view your servers
           </p>
         </div>
@@ -75,11 +89,8 @@ export default function ServerPage() {
   }
 
   return (
-    <div
-      className='bg-discord-dark overflow-hidden font-minecraft'
-      ref={containerRef}
-    >
-      {/* Atmospheric Background */}
+    <div className="bg-discord-dark overflow-hidden font-minecraft min-h-screen" ref={containerRef}>
+      {/* Enhanced Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
         {mounted && (
@@ -93,24 +104,26 @@ export default function ServerPage() {
         <div className='floating-orb floating-orb-3' />
       </div>
 
-      {/* Main Content Container - Centered */}
+      <AnimatedHeader />
+
+      {/* Main Content Container */}
       <div className='relative z-10 min-h-screen'>
-        {/* Server Management Section */}
-        <section className='min-h-screen flex items-center justify-center py-20 pt-20'>
+        {/* Enhanced Hero Section */}
+        <section className='min-h-screen flex items-center justify-center py-20 pt-32'>
           <div className='w-full max-w-7xl mx-auto px-6'>
             <motion.div
-              className='text-center mb-16'
+              className='text-center mb-20'
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <Badge className='mb-8 bg-discord-green/20 text-discord-green border-discord-green/30 px-4 py-2 font-bold'>
-                <Crown className='mr-2 h-4 w-4' />
+              <Badge className='mb-8 bg-discord-green/20 text-discord-green border-discord-green/30 px-6 py-3 font-bold text-lg'>
+                <Crown className='mr-2 h-5 w-5' />
                 COMMAND CENTER ACTIVE
               </Badge>
-              <h1 className='text-6xl md:text-8xl font-black text-white mb-8 leading-tight tracking-tight'>
+              <h1 className='text-6xl md:text-8xl lg:text-9xl font-black text-white mb-8 leading-tight tracking-tight'>
                 <span className='block mb-4'>YOUR</span>
-                <span className='block text-discord-blurple glow-text'>
+                <span className='block bg-gradient-to-r from-discord-blurple via-purple-500 to-pink-500 bg-clip-text text-transparent glow-text'>
                   COMMUNITIES
                 </span>
               </h1>
@@ -118,13 +131,13 @@ export default function ServerPage() {
                 Monitor, manage, and optimize your Discord empire with
                 <br />
                 <span className='text-white font-bold'>
-                  maintained up-to-date moderation
+                  cutting-edge automation and analytics
                 </span>
               </p>
             </motion.div>
 
             <div className='flex justify-center'>
-              <Card className='discord-card border-2 border-white/10 w-full max-w-6xl'>
+              <Card className='discord-card border-2 border-white/10 w-full max-w-6xl backdrop-blur-xl'>
                 <CardHeader className='border-b border-discord-border p-8'>
                   <div className='flex flex-col md:flex-row items-start md:items-center justify-between gap-4'>
                     <CardTitle className='text-2xl font-bold text-white tracking-wide'>
@@ -214,107 +227,49 @@ export default function ServerPage() {
                       ))}
                     </div>
                   ) : (
-                    <motion.div
-                      className='text-center py-16'
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.8 }}
-                    >
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 200,
-                          damping: 20,
-                          delay: 0.2,
-                        }}
-                      >
-                        <Bot className='h-20 w-20 mx-auto mb-6 text-discord-blurple' />
-                      </motion.div>
-
-                      <h3 className='text-3xl font-bold text-white mb-4 font-minecraft'>
-                        NO SERVERS DETECTED
-                      </h3>
-                      <p className='text-discord-text mb-8 max-w-2xl mx-auto text-lg'>
-                        Your empire awaits expansion. Add our bot to your
-                        Discord servers to begin managing your communities with
-                        moderation tools and analytics.
-                      </p>
-
-                      <div className='space-y-6'>
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 17,
-                          }}
-                        >
-                          <a
-                            href={DISCORD_INVITE_URL}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                          >
-                            <Button
-                              size='lg'
-                              className='discord-button-primary text-lg px-8 py-4'
-                            >
-                              <ExternalLink className='h-5 w-5 mr-2' />
-                              EXPAND YOUR EMPIRE
-                            </Button>
-                          </a>
-                        </motion.div>
-
-                        <div className='text-discord-text space-y-2'>
-                          <p className='font-medium'>
-                            Need help getting started?
-                          </p>
-                          <p className='text-sm'>
-                            Ensure you have administrator permissions in your
-                            Discord server before adding the bot.
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
+                    <EmptyState />
                   )}
                 </CardContent>
               </Card>
             </div>
 
             {/* Scroll Indicator */}
-            <motion.div
-              className='absolute bottom-8 left-1/2 transform -translate-x-1/2'
-              animate={{ y: [0, 10, 0] }}
-              transition={{
-                duration: 2,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: 'easeInOut',
-              }}
-            >
-              <ArrowDown className='h-6 w-6 text-discord-text/60' />
-            </motion.div>
+            {servers && servers.length > 0 && (
+              <motion.div
+                className='absolute bottom-8 left-1/2 transform -translate-x-1/2'
+                animate={{ y: [0, 10, 0] }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: 'easeInOut',
+                }}
+              >
+                <ArrowDown className='h-6 w-6 text-discord-text/60' />
+              </motion.div>
+            )}
           </div>
         </section>
 
-        {/* Getting Started Section */}
+        {/* Enhanced Getting Started Section */}
         <section className='min-h-screen flex items-center justify-center py-20'>
           <div className='w-full max-w-7xl mx-auto px-6'>
             <motion.div
-              className='text-center mb-16'
+              className='text-center mb-20'
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <Badge className='mb-6 bg-discord-yellow/20 text-discord-yellow border-discord-yellow/30 px-4 py-2 font-bold'>
+              <Badge className='mb-8 bg-discord-yellow/20 text-discord-yellow border-discord-yellow/30 px-6 py-3 font-bold text-lg'>
+                <Star className="mr-2 h-5 w-5" />
                 GETTING STARTED
               </Badge>
-              <h2 className='text-5xl md:text-6xl font-black text-white mb-6'>
+              <h2 className='text-5xl md:text-7xl font-black text-white mb-8 leading-tight'>
                 EXPAND YOUR
                 <br />
-                <span className='text-discord-yellow glow-text'>INFLUENCE</span>
+                <span className='bg-gradient-to-r from-discord-yellow via-orange-500 to-red-500 bg-clip-text text-transparent glow-text'>
+                  INFLUENCE
+                </span>
               </h2>
               <p className='text-xl text-discord-text max-w-3xl mx-auto'>
                 Follow these steps to add our bot to your Discord servers and
@@ -322,32 +277,32 @@ export default function ServerPage() {
               </p>
             </motion.div>
 
-            <div className='flex justify-center mb-16'>
-              <div className='grid md:grid-cols-3 gap-8 max-w-5xl w-full'>
+            <div className='flex justify-center mb-20'>
+              <div className='grid md:grid-cols-3 gap-10 max-w-6xl w-full'>
                 {[
                   {
                     step: '01',
                     title: 'INVITE THE BOT',
-                    description:
-                      'Click the invite link and select your Discord server. Grant the necessary permissions for full functionality.',
+                    description: 'Click the invite link and select your Discord server. Grant the necessary permissions for full functionality and advanced features.',
                     icon: Plus,
                     accent: 'discord-blurple',
+                    features: ['Administrator permissions', 'Message management', 'Role management', 'Channel access'],
                   },
                   {
                     step: '02',
                     title: 'CONFIGURE SETTINGS',
-                    description:
-                      'Customize bot behavior, set up moderation rules, and configure automated workflows for your community.',
+                    description: 'Customize bot behavior, set up moderation rules, and configure automated workflows tailored to your community needs.',
                     icon: Settings,
                     accent: 'discord-green',
+                    features: ['Welcome messages', 'Auto-moderation', 'Role automation', 'Custom commands'],
                   },
                   {
                     step: '03',
                     title: 'MONITOR & OPTIMIZE',
-                    description:
-                      'Use real-time analytics to track engagement, optimize performance, and grow your community strategically.',
+                    description: 'Use real-time analytics to track engagement, optimize performance, and grow your community strategically with data-driven insights.',
                     icon: BarChart3,
                     accent: 'discord-yellow',
+                    features: ['Real-time analytics', 'Growth tracking', 'Engagement metrics', 'Performance reports'],
                   },
                 ].map((step, index) => (
                   <motion.div
@@ -356,18 +311,20 @@ export default function ServerPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.2 }}
                     viewport={{ once: true }}
-                    whileHover={{ y: -10 }}
+                    whileHover={{ y: -10, scale: 1.02 }}
+                    className="group"
                   >
-                    <Card className='discord-card h-full text-center'>
-                      <CardContent className='p-8'>
-                        <div
-                          className={`text-6xl font-black text-${step.accent}/20 mb-4`}
-                        >
+                    <Card className='discord-card h-full text-center border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 overflow-hidden relative'>
+                      {/* Step number background */}
+                      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-${step.accent}/20 to-${step.accent}/5 rounded-bl-3xl flex items-start justify-end p-3`}>
+                        <span className={`text-2xl font-black text-${step.accent}/40`}>
                           {step.step}
-                        </div>
+                        </span>
+                      </div>
 
+                      <CardContent className='p-8 relative z-10'>
                         <motion.div
-                          className={`p-4 rounded-xl bg-${step.accent}/20 w-fit mx-auto mb-6`}
+                          className={`p-6 rounded-2xl bg-gradient-to-r from-${step.accent}/20 to-${step.accent}/10 w-fit mx-auto mb-8 border border-${step.accent}/30`}
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           transition={{
                             type: 'spring',
@@ -375,17 +332,34 @@ export default function ServerPage() {
                             damping: 17,
                           }}
                         >
-                          <step.icon
-                            className={`h-8 w-8 text-${step.accent}`}
-                          />
+                          <step.icon className={`h-10 w-10 text-${step.accent}`} />
                         </motion.div>
 
-                        <h3 className='text-xl font-bold text-white mb-4 tracking-wide'>
+                        <h3 className='text-2xl font-bold text-white mb-6 tracking-wide group-hover:text-discord-blurple transition-colors duration-300'>
                           {step.title}
                         </h3>
-                        <p className='text-discord-text leading-relaxed'>
+                        <p className='text-discord-text leading-relaxed mb-8 text-lg'>
                           {step.description}
                         </p>
+
+                        {/* Feature list */}
+                        <div className="space-y-3">
+                          {step.features.map((feature, featureIndex) => (
+                            <motion.div
+                              key={featureIndex}
+                              initial={{ opacity: 0, x: -20 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.4, delay: index * 0.2 + featureIndex * 0.1 }}
+                              viewport={{ once: true }}
+                              className="flex items-center gap-3 text-sm"
+                            >
+                              <div className={`w-2 h-2 rounded-full bg-${step.accent}`} />
+                              <span className="text-discord-text group-hover:text-white transition-colors duration-300">
+                                {feature}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </div>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -410,9 +384,9 @@ export default function ServerPage() {
                   target='_blank'
                   rel='noopener noreferrer'
                 >
-                  <Button className='discord-button-primary text-xl px-12 py-6'>
+                  <Button className="bg-gradient-to-r from-discord-blurple to-purple-600 hover:from-discord-blurple-hover hover:to-purple-700 text-white font-bold px-12 py-6 rounded-2xl text-xl shadow-2xl hover:shadow-discord-blurple/30 transition-all duration-300">
                     BEGIN EXPANSION
-                    <Sparkles className='ml-2 h-6 w-6' />
+                    <Sparkles className="ml-3 h-6 w-6" />
                   </Button>
                 </a>
               </motion.div>
@@ -420,6 +394,8 @@ export default function ServerPage() {
           </div>
         </section>
       </div>
+
+      <DiscordFooter />
     </div>
   );
 }
