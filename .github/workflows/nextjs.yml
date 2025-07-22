@@ -77,6 +77,8 @@ jobs:
         env:
             CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
         run: ${{ steps.detect-package-manager.outputs.runner }} convex deploy --admin-key $CONVEX_DEPLOY_KEY
+      - name: Generate Convex Types
+        run: npx --no-install convex codegen
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
