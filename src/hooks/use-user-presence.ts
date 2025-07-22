@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { useEffect,useState } from 'react';
+
 import type { DiscordPresence } from '@/types/discord';
 
 export function useUserPresence(serverId: string) {

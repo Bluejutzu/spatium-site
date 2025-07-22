@@ -1,36 +1,38 @@
 'use client';
 
+import {
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  ImageIcon,
+  Palette,
+  Plus,
+  Save,
+  Trash2,
+  User,
+  X,
+} from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Plus,
-  Trash2,
-  ImageIcon,
-  User,
-  Calendar,
-  Palette,
-  Eye,
-  Save,
-  X,
-  ChevronUp,
-  ChevronDown,
-} from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Image from 'next/image';
+
 
 interface DiscordEmbed {
   title?: string;
@@ -152,11 +154,13 @@ export function EmbedBuilder({
         {embed.author?.name && (
           <div className='flex items-center gap-2 text-sm'>
             {embed.author.icon_url && (
-              <img
+              <Image
                 src={
                   embed.author.icon_url || '/placeholder.svg?height=20&width=20'
                 }
                 alt=''
+                width={20}
+                height={20}
                 className='w-5 h-5 rounded-full'
               />
             )}
@@ -187,17 +191,21 @@ export function EmbedBuilder({
           </div>
         )}
         {embed.image?.url && (
-          <img
+          <Image
             src={embed.image.url || '/placeholder.svg?height=200&width=400'}
             alt=''
+            width={400}
+            height={200}
             className='max-w-full rounded'
           />
         )}
         <div className='flex items-center justify-between'>
           {embed.thumbnail?.url && (
-            <img
+            <Image
               src={embed.thumbnail.url || '/placeholder.svg?height=80&width=80'}
               alt=''
+              width={80}
+              height={80}
               className='w-20 h-20 rounded ml-auto'
             />
           )}
@@ -205,11 +213,13 @@ export function EmbedBuilder({
         {embed.footer?.text && (
           <div className='flex items-center gap-2 text-xs text-slate-400'>
             {embed.footer.icon_url && (
-              <img
+              <Image
                 src={
                   embed.footer.icon_url || '/placeholder.svg?height=16&width=16'
                 }
                 alt=''
+                width={16}
+                height={16}
                 className='w-4 h-4 rounded-full'
               />
             )}

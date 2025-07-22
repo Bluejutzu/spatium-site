@@ -1,15 +1,15 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   Bot,
-  Github,
-  Twitter,
-  MessageSquare,
-  Mail,
-  ExternalLink,
   ChevronRight,
+  ExternalLink,
+  Github,
+  Mail,
+  MessageSquare,
+  Twitter,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 export function DiscordFooter() {

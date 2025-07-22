@@ -1,12 +1,13 @@
 'use client';
 
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+import { motion, useMotionValueEvent,useScroll } from 'framer-motion';
 import { Bot, LayoutDashboard } from 'lucide-react';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
-import { useState } from 'react';
 import Link from 'next/link';
+import { useState } from 'react';
+
+import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { Button } from '@/components/ui/button';
 
 interface AnimatedHeaderProps {
   showNavigation?: boolean;

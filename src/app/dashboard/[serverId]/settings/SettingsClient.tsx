@@ -1,34 +1,36 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
+import { useMutation,useQuery } from 'convex/react';
+import { motion } from 'framer-motion';
+import {
+    Bell,
+    Bot,
+    CheckCircle,
+    Copy,
+    Crown,
+    Eye,
+    Hash,
+    Lock,
+    RefreshCw,
+    Save,
+    Settings,
+    Shield,
+    Users,
+} from 'lucide-react';
+import { useCallback, useEffect, useRef,useState } from 'react';
+import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import React from 'react';
-import { useUser } from '@clerk/nextjs';
-import { motion } from 'framer-motion';
-import {
-    Settings,
-    Shield,
-    Bell,
-    Users,
-    Crown,
-    CheckCircle,
-    RefreshCw,
-    Save,
-    Bot,
-    Lock,
-    Eye,
-    Hash,
-    Copy,
-} from 'lucide-react';
-import { api } from '../../../../../convex/_generated/api';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
+
+import { api } from '../../../../../convex/_generated/api';
 import WelcomeSettingsSection from './WelcomeSettingsSection';
 
 function VariableCopyBadge({ variable }: { variable: string }) {

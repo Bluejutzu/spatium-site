@@ -1,20 +1,21 @@
 'use client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { UserButton } from '@clerk/nextjs';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
 import {
-  Bot,
-  Users,
-  Server,
   Activity,
-  TrendingUp,
-  Settings,
   BarChart3,
+  Bot,
   Plus,
+  Server,
+  Settings,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
+
+import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function DashboardHome() {
   // Mock data - replace with actual Convex queries

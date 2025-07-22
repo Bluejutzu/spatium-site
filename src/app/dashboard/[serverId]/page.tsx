@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { useParams } from "next/navigation"
-import { AppSidebar } from "@/components/dashboard/sidebar/app-sidebar"
-import { DashboardContent } from "@/components/dashboard/dashboard-content"
-import { ModerationContent } from "@/components/dashboard/moderation-content"
-import { MembersContent } from "@/components/dashboard/members-content"
-import { CommandsContent } from "@/app/dashboard/[serverId]/commands/page";
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { useUser } from "@clerk/nextjs"
 import { useQuery } from "convex/react"
+import { useParams } from "next/navigation"
+import { useState } from "react"
+
+import { CommandsContent } from "@/app/dashboard/[serverId]/commands/page";
+import { DashboardContent } from "@/components/dashboard/dashboard-content"
+import { MembersContent } from "@/components/dashboard/members-content"
+import { ModerationContent } from "@/components/dashboard/moderation-content"
+import { AppSidebar } from "@/components/dashboard/sidebar/app-sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
+
 import { api } from "../../../../convex/_generated/api"
 import { SettingsContent } from "./settings/page"
 

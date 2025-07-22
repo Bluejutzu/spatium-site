@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { PlaygroundCommandFlowBuilder } from '@/components/playground/PlaygroundCommandFlowBuilder';
 
 export default function PlaygroundPage() {

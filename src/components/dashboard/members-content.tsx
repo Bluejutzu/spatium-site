@@ -1,31 +1,32 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { motion, useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { 
-  Users, 
-  Search, 
-  UserPlus, 
-  Crown, 
-  Shield, 
-  Filter,
-  MoreVertical,
-  TrendingUp,
+import {
   Activity,
-  UserCheck,
-  UserX,
+  AlertTriangle,
+  Ban,
+  BarChart3,
   Calendar,
+  Crown,
+  Filter,
   Globe,
   MessageSquare,
+  MoreVertical,
+  Search,
   Settings,
-  Ban,
-  AlertTriangle,
+  Shield,
+  TrendingUp,
+  UserCheck,
+  UserPlus,
+  Users,
+  UserX,
 } from "lucide-react"
+import { useRef, useState } from "react"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 
 interface MembersContentProps {
     serverId?: string
@@ -73,7 +75,7 @@ function MemberCard({ member, index }: { member: any; index: number }) {
       <Card className="discord-card border border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-300 overflow-hidden relative">
         {/* Enhanced background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-discord-blurple/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
+
         <CardContent className="p-6 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -89,15 +91,15 @@ function MemberCard({ member, index }: { member: any; index: number }) {
                     </AvatarFallback>
                   </Avatar>
                 </motion.div>
-                
+
                 {/* Enhanced status indicator */}
-                <motion.div 
+                <motion.div
                   className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-discord-dark ${getStatusColor(member.status)}`}
                   animate={{ scale: member.status === 'online' ? [1, 1.2, 1] : 1 }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-white truncate group-hover:text-discord-blurple transition-colors duration-300">
@@ -105,7 +107,7 @@ function MemberCard({ member, index }: { member: any; index: number }) {
                   </h3>
                   {getRoleIcon(member.roles)}
                 </div>
-                
+
                 <div className="flex items-center gap-2 mb-2">
                   {member.roles.slice(0, 2).map((role: string) => (
                     <Badge
@@ -122,7 +124,7 @@ function MemberCard({ member, index }: { member: any; index: number }) {
                     </Badge>
                   )}
                 </div>
-                
+
                 <div className="flex items-center gap-4 text-xs text-discord-text">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
@@ -135,7 +137,7 @@ function MemberCard({ member, index }: { member: any; index: number }) {
                 </div>
               </div>
             </div>
-            
+
             {/* Enhanced action menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -202,7 +204,7 @@ function StatsCard({ title, value, icon: Icon, color, change, index }: {
       <Card className="discord-card border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 relative overflow-hidden">
         {/* Enhanced background gradient */}
         <div className={`absolute inset-0 bg-gradient-to-br from-${color}/5 via-transparent to-${color}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-        
+
         <CardContent className="p-6 text-center relative z-10">
           <motion.div
             className={`p-4 rounded-2xl bg-gradient-to-r from-${color}/20 to-${color}/10 w-fit mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow duration-300 border border-${color}/30`}
@@ -211,13 +213,13 @@ function StatsCard({ title, value, icon: Icon, color, change, index }: {
           >
             <Icon className={`h-8 w-8 text-${color}`} />
           </motion.div>
-          
+
           <div className={`text-3xl font-black text-${color} mb-2 glow-text`}>
             {value}
           </div>
-          
+
           <div className="text-discord-text text-sm mb-3 font-medium">{title}</div>
-          
+
           <Badge className={`bg-${color}/20 text-${color} border-${color}/30 text-xs px-3 py-1`}>
             <TrendingUp className="mr-1 h-3 w-3" />
             {change}
@@ -235,47 +237,47 @@ export function MembersContent({ serverId }: MembersContentProps) {
 
     // Sample members data - in real app this would come from Convex
     const members = [
-        { 
+        {
           id: "1",
-          username: "AdminUser", 
-          roles: ["Administrator"], 
-          status: "online", 
+          username: "AdminUser",
+          roles: ["Administrator"],
+          status: "online",
           joinedAt: "2023-01-15T10:00:00Z",
           avatar: null,
           messageCount: 1250,
         },
-        { 
+        {
           id: "2",
-          username: "ModeratorX", 
-          roles: ["Moderator"], 
-          status: "online", 
+          username: "ModeratorX",
+          roles: ["Moderator"],
+          status: "online",
           joinedAt: "2023-03-20T14:30:00Z",
           avatar: null,
           messageCount: 890,
         },
-        { 
+        {
           id: "3",
-          username: "Helper99", 
-          roles: ["Helper"], 
-          status: "idle", 
+          username: "Helper99",
+          roles: ["Helper"],
+          status: "idle",
           joinedAt: "2023-06-10T09:15:00Z",
           avatar: null,
           messageCount: 456,
         },
-        { 
+        {
           id: "4",
-          username: "ActiveMember", 
-          roles: ["Member"], 
-          status: "online", 
+          username: "ActiveMember",
+          roles: ["Member"],
+          status: "online",
           joinedAt: "2023-08-05T16:45:00Z",
           avatar: null,
           messageCount: 234,
         },
-        { 
+        {
           id: "5",
-          username: "NewUser789", 
-          roles: ["Member"], 
-          status: "offline", 
+          username: "NewUser789",
+          roles: ["Member"],
+          status: "offline",
           joinedAt: "2023-12-01T11:20:00Z",
           avatar: null,
           messageCount: 12,
@@ -314,7 +316,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
                         </h1>
                         <p className="text-discord-text text-lg">Manage server members, roles, and permissions</p>
                     </motion.div>
-                    
+
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -331,7 +333,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
                                 className="pl-12 h-12 bg-discord-dark/50 border-discord-border text-white placeholder:text-discord-text focus:border-discord-blurple focus:ring-2 focus:ring-discord-blurple/20 rounded-xl lg:w-80"
                             />
                         </div>
-                        
+
                         {/* Filter Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -341,27 +343,27 @@ export function MembersContent({ serverId }: MembersContentProps) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48 bg-discord-darker border-discord-border shadow-2xl">
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setFilterRole("all")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
                                     All Roles
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setFilterRole("Administrator")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
                                     <Crown className="w-4 h-4 mr-2 text-yellow-500" />
                                     Administrators
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setFilterRole("Moderator")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
                                     <Shield className="w-4 h-4 mr-2 text-red-500" />
                                     Moderators
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setFilterRole("Member")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
@@ -370,7 +372,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        
+
                         {/* Invite Button */}
                         <motion.div
                             whileHover={{ scale: 1.05 }}
@@ -435,7 +437,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
                                     {filterRole !== "all" && ` with role "${filterRole}"`}
                                 </p>
                             </div>
-                            
+
                             {/* Sort Options */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -445,19 +447,19 @@ export function MembersContent({ serverId }: MembersContentProps) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-48 bg-discord-darker border-discord-border shadow-2xl">
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={() => setSortBy("joined")}
                                         className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                     >
                                         Join Date
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={() => setSortBy("activity")}
                                         className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                     >
                                         Activity Level
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={() => setSortBy("role")}
                                         className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                     >
@@ -486,18 +488,18 @@ export function MembersContent({ serverId }: MembersContentProps) {
                             </div>
                             <h3 className="text-2xl font-bold text-white mb-4">No members found</h3>
                             <p className="text-discord-text mb-6 max-w-md mx-auto">
-                                {searchQuery || filterRole !== "all" 
+                                {searchQuery || filterRole !== "all"
                                     ? "Try adjusting your search or filter criteria"
                                     : "No members to display"
                                 }
                             </p>
                             {(searchQuery || filterRole !== "all") && (
-                                <Button 
+                                <Button
                                     onClick={() => {
                                         setSearchQuery("")
                                         setFilterRole("all")
                                     }}
-                                    variant="outline" 
+                                    variant="outline"
                                     className="discord-button-outline"
                                 >
                                     Clear Filters

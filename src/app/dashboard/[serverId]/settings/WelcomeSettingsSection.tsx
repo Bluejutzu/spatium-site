@@ -1,18 +1,20 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
+import { useMutation,useQuery } from "convex/react";
+import { Copy,MessageSquare, UserPlus } from "lucide-react";
+import { useEffect,useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, UserPlus, Copy } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+
+import { api } from "../../../../../convex/_generated/api";
 
 export default function WelcomeSettingsSection({ serverId }: { serverId: string }) {
   const serverSettings = useQuery(api.serverSettings.getServerSettings, {
@@ -88,7 +90,7 @@ export default function WelcomeSettingsSection({ serverId }: { serverId: string 
         leaveNotifications: serverSettings.leaveNotifications,
       }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [serverSettings]);
 
   // Helper: Check if a role has high permissions

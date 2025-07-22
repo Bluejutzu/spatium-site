@@ -1,25 +1,24 @@
 'use client';
 
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { motion } from 'framer-motion';
 import { 
-  Bell, 
-  Settings, 
-  Search, 
-  BarChart3, 
-  Users, 
-  MessageSquare, 
-  Shield,
   Activity,
-  Globe,
-  Zap,
+  BarChart3, 
+  Bell, 
   Crown,
   ExternalLink,
+  Globe,
+  MessageSquare, 
+  Search, 
+  Settings, 
+  Shield,
+  Users, 
+  Zap,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +26,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface DashboardHeaderProps {
   serverId: string;

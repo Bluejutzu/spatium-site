@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Badge } from '@/components/ui/badge';
-import {
-  Star,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
 import { motion } from 'framer-motion';
-import { AnimatedHeader } from '@/components/app/header';
+import {
+  AlertCircle,
+  Loader2,
+  Star,
+} from 'lucide-react';
+import { useEffect,useState } from 'react';
+
 import { DiscordFooter } from '@/components/app/footer';
+import { AnimatedHeader } from '@/components/app/header';
+import { Badge } from '@/components/ui/badge';
 
 export default function PricingPage() {
   const [loading, setLoading] = useState(true);
@@ -106,7 +107,7 @@ export default function PricingPage() {
               className='mt-12'
             >
               <p className='text-discord-text text-lg'>
-                Thank you for your patience. We`&lsquo;`ll be back soon with
+                Thank you for your patience. We&apos;ll be back soon with
                 exciting new plans!
               </p>
             </motion.div>

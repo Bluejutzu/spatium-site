@@ -1,11 +1,14 @@
 "use client"
 
 import { useQuery } from "convex/react"
-import { api } from "../../../../../convex/_generated/api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Bot, Check,Crown, Shield, Star, Users, Zap } from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
-import { Crown, Star, Zap, Shield, Users, Bot, Check } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+import { api } from "../../../../../convex/_generated/api"
+
 
 export default function PremiumPage({ params }: { params: { serverId: string } }) {
   const serverSettings = useQuery(api.serverSettings.getServerSettings, {

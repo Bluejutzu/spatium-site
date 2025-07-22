@@ -1,10 +1,13 @@
 "use client"
 
+import { useMutation,useQuery } from 'convex/react';
+import Image from 'next/image';
 import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation } from 'convex/react';
-import { api } from "../../../../../../convex/_generated/api";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef,useState } from "react";
+
 import { Button } from "@/components/ui/button";
+
+import { api } from "../../../../../../convex/_generated/api";
 
 export default function ModerationActionPage() {
     const { serverId, actionId } = useParams();
@@ -50,7 +53,7 @@ export default function ModerationActionPage() {
         setSaveLoading(true);
         setSaveError(null);
         try {
-            let durationChanged = editDuration !== (action.duration || '');
+            const durationChanged = editDuration !== (action.duration || '');
             await updateReason({
                 auditId: action.auditId,
                 serverId: action.serverId,
@@ -112,10 +115,12 @@ export default function ModerationActionPage() {
                         <span className="text-xs text-discord-text">User</span>
                         <div className="flex items-center gap-2">
                             {profileCache[action.user] ? (
-                                <img
+                                <Image
                                     src={`https://cdn.discordapp.com/avatars/${profileCache[action.user].id}/${profileCache[action.user].avatar}.png?size=32`}
                                     alt="avatar"
-                                    className="w-8 h-8 rounded-full"
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full"
                                 />
                             ) : (
                                 <div className="w-8 h-8 rounded-full bg-discord-darkest flex items-center justify-center text-xs text-discord-text">?</div>
@@ -143,10 +148,12 @@ export default function ModerationActionPage() {
                         <span className="text-xs text-discord-text">Author</span>
                         <div className="flex items-center gap-2">
                             {profileCache[action.moderator] ? (
-                                <img
+                                <Image
                                     src={`https://cdn.discordapp.com/avatars/${profileCache[action.moderator].id}/${profileCache[action.moderator].avatar}.png?size=32`}
                                     alt="avatar"
-                                    className="w-8 h-8 rounded-full"
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full"
                                 />
                             ) : (
                                 <div className="w-8 h-8 rounded-full bg-discord-darkest flex items-center justify-center text-xs text-discord-text">?</div>

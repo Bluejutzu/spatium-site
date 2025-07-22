@@ -1,28 +1,63 @@
 'use client';
 
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import 'reactflow/dist/style.css';
+
+import { UserButton, useUser } from '@clerk/nextjs';
+import { useMutation, useQuery } from 'convex/react';
+import {
+  Ban,
+  Clock,
+  Copy,
+  Crown,
+  Database,
+  GitBranch,
+  Hash,
+  ImageIcon,
+  Link,
+  MessageSquare,
+  Plus,
+  Save,
+  Settings,
+  Share,
+  Shield,
+  ToggleRight,
+  Trash2,
+  Users,
+  UserX,
+  Volume2,
+  Webhook,
+  X,
+  Zap,
+} from 'lucide-react';
+import { Roboto } from 'next/font/google';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   addEdge,
   Background,
+  type Connection,
   Controls,
+  type Edge,
+  Handle,
+  type Node,
+  type NodeProps,
+  Position,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  type Connection,
-  type Edge,
-  type Node,
-  Handle,
-  Position,
-  type NodeProps,
   type useReactFlow,
 } from 'reactflow';
-import 'reactflow/dist/style.css';
+
+import { EmbedBuilder } from '@/components/app/embed-builder';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -30,46 +65,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  X,
-  Plus,
-  Settings,
-  Trash2,
-  MessageSquare,
-  Crown,
-  Shield,
-  Users,
-  Hash,
-  Volume2,
-  Ban,
-  UserX,
-  Clock,
-  Zap,
-  GitBranch,
-  Database,
-  Webhook,
-  ImageIcon,
-  Link,
-  ToggleRight,
-  Share,
-  Copy,
-  Save,
-} from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import type { DiscordEmbed } from '@/types/discord';
-import { EmbedBuilder } from '@/components/app/embed-builder';
-import { useMutation, useQuery } from 'convex/react';
-import { Roboto } from 'next/font/google';
-import { api } from '../../../../../../convex/_generated/api';
-import { useRouter } from 'next/navigation';
 import { BlockCategory, BlockType } from '@/types/common';
-import { useUser, UserButton } from '@clerk/nextjs';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import type { DiscordEmbed } from '@/types/discord';
+
+import { api } from '../../../../../../convex/_generated/api';
+
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -1268,7 +1272,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       if (!existingCommand) {
         toast.error("No Command found", "A command was not found to delete")
         return
-      };
+      }
       await saveCommandMutation({
         commandId: existingCommand._id,
         serverId: existingCommand.serverId,
@@ -1404,7 +1408,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     } finally {
       setRolesLoading(false);
     }
-  }, [serverId, toast]);
+  }, [serverId, toast, user?.id]);
 
   // Fetch channels from Discord API
   const fetchChannels = useCallback(async () => {
@@ -1422,7 +1426,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     } finally {
       setChannelsLoading(false);
     }
-  }, [serverId, toast]);
+  }, [serverId, toast, user?.id]);
 
   // Auto-fetch roles and channels when needed
   useEffect(() => {

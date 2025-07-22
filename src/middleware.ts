@@ -1,5 +1,5 @@
-import { NextFetchEvent, NextResponse } from 'next/server'
 import { clerkMiddleware } from '@clerk/nextjs/server'
+import { NextFetchEvent, NextResponse } from 'next/server'
 
 function proxyMiddleware(req: any) {
   if (req.nextUrl.pathname.match('__clerk')) {

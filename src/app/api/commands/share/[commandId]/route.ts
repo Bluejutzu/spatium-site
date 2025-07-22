@@ -1,9 +1,11 @@
+import { auth } from '@clerk/nextjs/server';
+import { ConvexClient } from 'convex/browser';
 import { NextRequest, NextResponse } from 'next/server';
 import { Commands } from 'spatium-types';
+
 import { api } from '../../../../../../convex/_generated/api';
-import { ConvexClient } from 'convex/browser';
 import { Id } from '../../../../../../convex/_generated/dataModel';
-import { auth } from '@clerk/nextjs/server';
+
 
 async function getCommandById(shareCode: string): Promise<Commands | null> {
 	try {

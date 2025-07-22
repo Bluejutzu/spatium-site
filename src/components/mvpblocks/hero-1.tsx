@@ -1,8 +1,10 @@
-import React from 'react';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
-import Link from 'next/link';
-import { Button } from '../ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
+
+import { Button } from '../ui/button';
+
 
 export default function Hero1() {
   return (

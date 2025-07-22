@@ -1,5 +1,5 @@
-import { useRef, useEffect } from "react";
-import { Renderer, Program, Mesh, Triangle, Vec2 } from "ogl";
+import { Mesh, Program, Renderer, Triangle, Vec2 } from "ogl";
+import { useEffect,useRef } from "react";
 
 const vertex = `
 attribute vec2 position;
@@ -102,7 +102,7 @@ export default function DarkVeil({
             canvas,
         });
 
-        const gl = renderer.gl;
+        const {gl} = renderer;
         const geometry = new Triangle(gl);
 
         const program = new Program(gl, {

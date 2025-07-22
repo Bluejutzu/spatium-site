@@ -1,42 +1,46 @@
 "use client"
 
-import { SignInButton, SignedOut, SignedIn } from "@clerk/nextjs"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { SignedIn,SignedOut, SignInButton } from "@clerk/nextjs"
+import { motion, useInView,useScroll, useTransform } from "framer-motion"
 import {
-  Sparkles,
-  Shield,
-  Users,
-  Database,
-  Cloud,
-  MessageSquare,
-  Settings,
-  BarChart3,
-  Code,
-  ArrowRight,
-  CheckCircle,
-  Star,
-  TrendingUp,
-  Globe,
-  Zap,
-  Bot,
-  Crown,
   Activity,
+  ArrowRight,
+  BarChart3,
+  Bot,
+  CheckCircle,
+  Cloud,
+  Code,
+  Crown,
+  Database,
+  Globe,
   Layers,
+  MessageSquare,
   Palette,
   Rocket,
+  Settings,
+  Shield,
+  Sparkles,
+  Star,
+  TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react"
-import { motion, useScroll, useTransform, useInView } from "framer-motion"
-import { useRef, useState, useEffect } from "react"
-import { AnimatedHeader } from "./header"
-import { DiscordFooter } from "./footer"
-import { VelocityScroll } from "../ui/scrollbasedvelocity"
-import Hero1 from "../mvpblocks/hero-1"
-import CurvedLoop from "../ui/CurvedLoop"
-import { StaticNoise } from "../ui/AnimatedNoise"
 import Link from "next/link"
+import { useEffect,useRef, useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+
+import Hero1 from "../mvpblocks/hero-1"
+import { StaticNoise } from "../ui/AnimatedNoise"
+import CurvedLoop from "../ui/CurvedLoop"
 import DarkVeil from "../ui/DarkVeil"
+import { VelocityScroll } from "../ui/scrollbasedvelocity"
+import { DiscordFooter } from "./footer"
+import { AnimatedHeader } from "./header"
+
+
 
 // Enhanced Animated Counter Component with better performance
 function AnimatedCounter({

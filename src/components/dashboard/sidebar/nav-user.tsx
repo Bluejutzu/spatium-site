@@ -1,5 +1,6 @@
 "use client"
 
+import { useClerk, UserProfile } from '@clerk/nextjs';
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -7,6 +8,7 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
+import { useState } from 'react';
 
 import {
   Avatar,
@@ -28,9 +30,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useClerk, UserProfile } from '@clerk/nextjs';
 import { useUserPresence } from '@/hooks/use-user-presence';
-import { useState } from 'react';
+
 
 export function NavUser({
   user,

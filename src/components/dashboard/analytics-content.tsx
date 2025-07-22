@@ -1,29 +1,30 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { motion, useInView } from "framer-motion"
-import { useRef, useState, useEffect } from "react"
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  MessageSquare, 
-  Calendar, 
-  Download,
+import {
   Activity,
-  Globe,
-  Zap,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  Calendar,
   Clock,
-  Target,
+  Download,
   Eye,
   Filter,
-  RefreshCw,
-  ArrowUpRight,
-  ArrowDownRight,
+  Globe,
+  MessageSquare,
   Minus,
+  RefreshCw,
+  Target,
+  TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react"
+import { useEffect,useRef, useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,14 +37,14 @@ interface AnalyticsContentProps {
 }
 
 // Enhanced Animated Counter
-function AnimatedCounter({ 
-  end, 
+function AnimatedCounter({
+  end,
   duration = 2000,
   suffix = "",
   prefix = "",
   className = ""
-}: { 
-  end: number; 
+}: {
+  end: number;
   duration?: number;
   suffix?: string;
   prefix?: string;
@@ -62,11 +63,11 @@ function AnimatedCounter({
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp
       const progress = Math.min((timestamp - startTime) / duration, 1)
-      
+
       // Smooth easing function
       const easeOutCubic = 1 - Math.pow(1 - progress, 3)
       setCount(Math.floor(easeOutCubic * end))
-      
+
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate)
       }
@@ -112,7 +113,7 @@ function MetricCard({ metric, index }: { metric: any; index: number }) {
       <Card className="discord-card border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 relative overflow-hidden">
         {/* Enhanced background gradient */}
         <div className={`absolute inset-0 bg-gradient-to-br from-${metric.color}/5 via-transparent to-${metric.color}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-        
+
         <CardContent className="p-8 relative z-10">
           <div className="flex items-center justify-between mb-6">
             <motion.div
@@ -122,7 +123,7 @@ function MetricCard({ metric, index }: { metric: any; index: number }) {
             >
               <metric.icon className={`h-8 w-8 text-${metric.color}`} />
             </motion.div>
-            
+
             <div className="text-right">
               <div className={`text-3xl font-black text-${metric.color} glow-text`}>
                 <AnimatedCounter end={parseInt(metric.value.replace(/[^\d]/g, ''))} suffix={metric.value.replace(/[\d,]/g, '')} />
@@ -135,11 +136,11 @@ function MetricCard({ metric, index }: { metric: any; index: number }) {
               </div>
             </div>
           </div>
-          
+
           <h3 className="text-sm font-bold text-white mb-2 tracking-wide uppercase group-hover:text-discord-blurple transition-colors duration-300">
             {metric.title}
           </h3>
-          
+
           <p className="text-xs text-discord-text group-hover:text-white/80 transition-colors duration-300">
             {metric.description}
           </p>
@@ -180,7 +181,7 @@ function EngagementChart() {
     >
       {/* Background grid */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      
+
       {chartData.map((item, index) => (
         <motion.div
           key={index}
@@ -199,7 +200,7 @@ function EngagementChart() {
               <div className="text-discord-text text-xs">{item.label}</div>
             </motion.div>
           )}
-          
+
           {/* Bar */}
           <motion.div
             initial={{ height: 0 }}
@@ -207,12 +208,12 @@ function EngagementChart() {
             transition={{ duration: 0.8, delay: index * 0.1 }}
             whileHover={{ scale: 1.1 }}
             className={`w-6 rounded-t-lg shadow-lg transition-all duration-300 ${
-              hoveredBar === index 
-                ? 'bg-gradient-to-t from-discord-blurple via-purple-500 to-pink-500' 
+              hoveredBar === index
+                ? 'bg-gradient-to-t from-discord-blurple via-purple-500 to-pink-500'
                 : 'bg-gradient-to-t from-discord-blurple/80 via-purple-500/80 to-pink-500/80'
             }`}
           />
-          
+
           {/* Label */}
           <div className="text-xs text-discord-text mt-2 font-medium">
             {item.label}
@@ -286,9 +287,9 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                         <h1 className="text-4xl font-black text-white font-minecraft tracking-wide mb-2">
                             SERVER ANALYTICS
                         </h1>
-                        <p className="text-discord-text text-lg">Deep insights into your community's engagement and growth</p>
+                        <p className="text-discord-text text-lg">Deep insights into your community&apos;s engagement and growth</p>
                     </motion.div>
-                    
+
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -304,25 +305,25 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48 bg-discord-darker border-discord-border shadow-2xl">
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setTimeRange("24h")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
                                     Last 24 Hours
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setTimeRange("7d")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
                                     Last 7 Days
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setTimeRange("30d")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
                                     Last 30 Days
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={() => setTimeRange("90d")}
                                     className="text-discord-text hover:text-white hover:bg-white/5 p-3"
                                 >
@@ -330,10 +331,10 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        
+
                         <div className="flex gap-3">
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                variant="outline"
                                 className="discord-button-outline h-12 px-6"
                                 onClick={handleRefresh}
                                 disabled={refreshing}
@@ -341,7 +342,7 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                                 <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                                 Refresh
                             </Button>
-                            
+
                             <motion.div
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -372,7 +373,7 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                         <h2 className="text-3xl font-black text-white mb-2">
                             PERFORMANCE <span className="text-discord-green glow-text">INDICATORS</span>
                         </h2>
-                        <p className="text-discord-text text-lg">Track your server's growth and engagement metrics</p>
+                        <p className="text-discord-text text-lg">Track your server&apos;s growth and engagement metrics</p>
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -576,7 +577,7 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                                 <Card className="discord-card h-full border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 overflow-hidden relative">
                                     {/* Enhanced background gradient */}
                                     <div className={`absolute inset-0 bg-gradient-to-br from-${insight.color}/5 via-transparent to-${insight.color}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                                    
+
                                     <CardContent className="p-8 relative z-10">
                                         <div className="flex items-start justify-between mb-6">
                                             <motion.div
@@ -586,20 +587,20 @@ export function AnalyticsContent({ serverId }: AnalyticsContentProps) {
                                             >
                                                 <insight.icon className={`h-8 w-8 text-${insight.color}`} />
                                             </motion.div>
-                                            
+
                                             <Badge className={`bg-${insight.color}/20 text-${insight.color} border-${insight.color}/30 text-xs px-3 py-1`}>
                                                 {insight.trend}
                                             </Badge>
                                         </div>
-                                        
+
                                         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-discord-blurple transition-colors duration-300">
                                             {insight.title}
                                         </h3>
-                                        
+
                                         <div className={`text-3xl font-black text-${insight.color} mb-4 glow-text`}>
                                             {insight.value}
                                         </div>
-                                        
+
                                         <p className="text-discord-text group-hover:text-white/90 transition-colors duration-300">
                                             {insight.description}
                                         </p>

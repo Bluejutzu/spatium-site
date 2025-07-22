@@ -3,6 +3,7 @@
 import { useUser } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect } from 'react';
+
 import { api } from '../../../convex/_generated/api';
 
 export function SyncClerkToConvex() {

@@ -1,15 +1,17 @@
 "use client"
 
-import { useQuery, useMutation } from "convex/react"
-import { api } from "../../../../../convex/_generated/api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useMutation,useQuery } from "convex/react"
+import { AlertTriangle, Ban, MessageSquare,Shield } from "lucide-react"
+import { useState } from "react"
+
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { Shield, AlertTriangle, Ban, MessageSquare } from "lucide-react"
-import { useState } from "react"
+
+import { api } from "../../../../../convex/_generated/api"
 
 export default function ModerationPage({ params }: { params: { serverId: string } }) {
   const serverSettings = useQuery(api.serverSettings.getServerSettings, {

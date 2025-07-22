@@ -1,11 +1,11 @@
 import {
-    useRef,
-    useEffect,
-    useState,
-    useMemo,
-    useId,
     FC,
     PointerEvent,
+    useEffect,
+    useId,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
 
 interface CurvedLoopProps {

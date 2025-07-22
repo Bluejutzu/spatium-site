@@ -1,37 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '../../../../../convex/_generated/api';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
+import { useMutation,useQuery } from 'convex/react';
+import { AnimatePresence,motion } from 'framer-motion';
 import {
-  Plus,
-  Settings,
-  Trash2,
-  Search,
-  MessageSquare,
+  Activity,
+  Clock,
+  Command,
   Crown,
-  Shield,
+  Database,
+  Edit3,
+  GitBranch,
   Hash,
+  Loader2,
+  MessageSquare,
+  Plus,
+  Search,
+  Settings,
+  Shield,
+  Sparkles,
+  Trash2,
   Volume2,
   Webhook,
-  GitBranch,
-  Database,
-  Clock,
-  Edit3,
-  Loader2,
   Zap,
-  Activity,
-  Command,
-  Sparkles,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import React, { useEffect,useState } from 'react';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,6 +37,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+
+import { api } from '../../../../../convex/_generated/api';
 
 function isPromise<T>(value: any): value is Promise<T> {
   return value && typeof value.then === 'function';
@@ -247,7 +249,7 @@ export default function CommandsPage({ params }: any) {
       await deleteCommandMutation({ commandId: commandId as any });
       toast.success(
         'Command Deleted',
-        `Command "${commandName}" has been deleted successfully.`
+        `Command &quot;${commandName}&quot; has been deleted successfully.`
       );
     } catch (error) {
       toast.error(
@@ -266,7 +268,7 @@ export default function CommandsPage({ params }: any) {
       await toggleCommandMutation({ commandId: commandId as any, enabled });
       toast.success(
         enabled ? 'Command Enabled' : 'Command Disabled',
-        `Command "${commandName}" has been ${enabled ? 'enabled' : 'disabled'}.`
+        `Command &quot;${commandName}&quot; has been ${enabled ? 'enabled' : 'disabled'}.`
       );
     } catch (error) {
       toast.error(

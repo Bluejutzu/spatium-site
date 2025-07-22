@@ -1,77 +1,67 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import typescriptParser from '@typescript-eslint/parser';
-import importPlugin from 'eslint-plugin-import';
+import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
+import importSort from 'eslint-plugin-simple-import-sort';
+import unusedImports from 'eslint-plugin-unused-imports';
+import stylistic from "@stylistic/eslint-plugin"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  js.configs.recommended,
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+export default tseslint.config(
   {
-    files: ['**/*.{js,mjs,cjs,ts,tsx}'],
+    files: ['./src/**/*.{js,mjs,cjs,ts,tsx}'],
     plugins: {
-      'import': importPlugin,
+      importSort,
+      unusedImports,
+      stylistic,
       'react-hooks': reactHooks
     },
     languageOptions: {
-      parser: typescriptParser,
+      parser: tseslint.parser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        project: './tsconfig.json',
+        project: true,
         tsconfigRootDir: __dirname,
         ecmaFeatures: {
-          jsx: true,
-        },
+          jsx: true
+        }
       },
     },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unused-vars': "off",
-      'import/order': [
-        'error',
-        {
-          'groups': [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-            'object',
-            'type'
-          ],
-          'newlines-between': 'always',
-          'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
-        }
-      ],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      
+      'prefer-destructuring': [
+        'error',
+        {
+          VariableDeclarator: { array: false, object: true },
+          AssignmentExpression: { array: false, object: false },
+        },
+      ],
+      'stylistic/spaced-comment': ['error', 'always', { markers: ['!'] }],
+      'stylistic/no-extra-semi': 'error',
+      'importSort/imports': 'error',
+      'importSort/exports': 'error',
     },
   },
   {
     ignores: [
+      'packages/**',
       'node_modules/**',
       '.next/**',
+      'convex/**',
       'dist/**',
       'build/**',
       'out/**',
       'convex/_generated/**',
       '*.min.js',
       '*.min.css',
+      '*.config.ts',
+      '*.mjs',
+      '*.json'
     ],
   },
-];
+)
 
-export default eslintConfig;

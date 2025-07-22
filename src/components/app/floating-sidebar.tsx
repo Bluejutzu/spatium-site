@@ -1,37 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
+import { useQuery } from 'convex/react';
+import { AnimatePresence,motion } from 'framer-motion';
 import {
-  Home,
-  Server,
   BarChart3,
-  Users,
-  Settings,
-  MessageSquare,
-  Shield,
   Bot,
-  Menu,
-  X,
-  Crown,
-  Zap,
-  HelpCircle,
   ChevronLeft,
   ChevronRight,
+  Crown,
+  HelpCircle,
+  Home,
+  Menu,
+  MessageSquare,
+  Server,
+  Settings,
+  Shield,
+  Users,
+  X,
+  Zap,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect,useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useQuery } from 'convex/react';
+
 import { api } from '../../../convex/_generated/api';
-import { useUser } from '@clerk/nextjs';
+
 
 const navigationItems = [
   {

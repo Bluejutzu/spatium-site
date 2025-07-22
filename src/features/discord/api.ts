@@ -1,10 +1,10 @@
 import {
-	DiscordGuild,
-	DiscordUser,
-	DiscordRole,
 	DiscordChannel,
+	DiscordGuild,
 	DiscordMember,
 	DiscordPresence,
+	DiscordRole,
+	DiscordUser,
 } from '@/types/discord';
 
 export class DiscordAPI {

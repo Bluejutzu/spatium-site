@@ -1,15 +1,23 @@
 "use client"
 
-import * as React from "react"
 import {
+  IconChartBar,
   IconDashboard,
-  IconUsers,
+  IconRobot,
   IconSettings,
   IconShield,
-  IconChartBar,
-  IconRobot,
+  IconUsers,
 } from "@tabler/icons-react"
+import Image from 'next/image';
+import * as React from "react"
+
 import { NavUser } from "@/components/dashboard/sidebar/nav-user"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -19,12 +27,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
 
 export function AppSidebar({
   user,
@@ -97,7 +99,7 @@ export function AppSidebar({
                 <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5 cursor-pointer">
                   <div className="flex items-center gap-3">
                     {serverIcon ? (
-                      <img src={serverIcon} alt={serverName} className="w-8 h-8 rounded-lg" />
+                      <Image src={serverIcon} alt={serverName} width={32} height={32} className="w-8 h-8 rounded-lg" />
                     ) : (
                       <div className="w-8 h-8 bg-discord-blurple rounded-lg flex items-center justify-center text-white font-bold text-lg">
                         {serverName.charAt(0).toUpperCase()}
@@ -120,7 +122,7 @@ export function AppSidebar({
                     className={`flex items-center gap-3 ${server.serverId === serverId ? "bg-discord-blurple/10 text-white" : "text-discord-text"}`}
                   >
                     {server.icon ? (
-                      <img src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`} alt={server.name} className="w-6 h-6 rounded" />
+                      <Image src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`} alt={server.name} width={24} height={24} className="w-6 h-6 rounded" />
                     ) : (
                       <div className="w-6 h-6 bg-discord-blurple rounded flex items-center justify-center text-white font-bold text-base">
                         {server.name.charAt(0).toUpperCase()}

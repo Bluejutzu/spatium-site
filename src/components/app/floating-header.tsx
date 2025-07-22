@@ -1,24 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { usePathname } from 'next/navigation';
-import {
-  Search,
-  Bell,
-  Settings,
-  BarChart3,
-  Users,
-  MessageSquare,
-  Zap,
-  Command,
-  ChevronDown,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { UserButton } from '@clerk/nextjs';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import {
+  BarChart3,
+  Bell,
+  ChevronDown,
+  Command,
+  MessageSquare,
+  Search,
+  Settings,
+  Users,
+  Zap,
+} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useEffect,useState } from 'react';
+
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+
 
 interface FloatingHeaderProps {
   showSearch?: boolean;

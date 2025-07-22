@@ -1,35 +1,36 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
 import {
-  Users,
   Activity,
-  TrendingUp,
-  Settings,
-  ExternalLink,
-  Shield,
-  MessageSquare,
-  Zap,
-  Bell,
-  Search,
-  Webhook,
+  AlertTriangle,
+  ArrowUpRight,
   BarChart3,
-  Crown,
+  Bell,
   Bot,
+  CheckCircle,
+  Clock,
+  Crown,
+  Database,
+  ExternalLink,
   Globe,
   Layers,
-  Database,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  ArrowUpRight,
+  MessageSquare,
+  Search,
+  Settings,
+  Shield,
   Sparkles,
+  TrendingUp,
+  Users,
+  Webhook,
+  Zap,
 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useRef } from "react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface DashboardContentProps {
   serverId?: string

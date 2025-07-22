@@ -1,41 +1,44 @@
 'use client';
 
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useUser } from '@clerk/nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { useQuery } from 'convex/react';
+import { motion, useScroll } from 'framer-motion';
 import {
-  Bot,
-  Users,
-  Settings,
-  BarChart3,
-  Plus,
-  ExternalLink,
-  Crown,
-  Sparkles,
+  Activity,
   ArrowDown,
-  Search,
+  BarChart3,
+  Bot,
+  ChevronRight,
+  Crown,
+  ExternalLink,
   Filter,
+  Globe,
   Grid3X3,
   List,
-  TrendingUp,
-  Activity,
+  Plus,
+  Search,
+  Settings,
   Shield,
-  Zap,
-  Globe,
+  Sparkles,
   Star,
-  ChevronRight,
+  TrendingUp,
+  Users,
+  Zap,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useScroll } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AnimatedHeader } from '@/components/app/header';
+import { useEffect, useRef, useState } from 'react';
+
 import { DiscordFooter } from '@/components/app/footer';
+import { AnimatedHeader } from '@/components/app/header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
+
+import { api } from '../../../convex/_generated/api';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
@@ -49,7 +52,9 @@ export default function ServerPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [scrollY, setScrollY] = useState('0%');
-  let scrollYProgress;
+  // Move useScroll to top-level, after refs
+  const scroll = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
+  const scrollYProgressRef = useRef(scroll.scrollYProgress);
 
   useEffect(() => {
     setMounted(true);
@@ -57,15 +62,13 @@ export default function ServerPage() {
 
   useEffect(() => {
     if (mounted && containerRef.current) {
-      // Only initialize useScroll after mount
-      const { scrollYProgress: sy } = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
-      const unsubscribe = sy.on('change', (latest) => {
+      const unsubscribe = scroll.scrollYProgress.on('change', (latest) => {
         setScrollY(`${latest * 50}%`);
       });
-      scrollYProgress = sy;
+      scrollYProgressRef.current = scroll.scrollYProgress;
       return () => unsubscribe();
     }
-  }, [mounted]);
+  }, [mounted, scroll.scrollYProgress]);
 
   if (!user) {
     return (
@@ -179,9 +182,11 @@ export default function ServerPage() {
                                   <div className='relative'>
                                     <div className='w-12 h-12 bg-gradient-to-br from-discord-blurple to-discord-purple rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden'>
                                       {server.icon ? (
-                                        <img
+                                        <Image
                                           src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`}
                                           alt={server.name}
+                                          width={48}
+                                          height={48}
                                           className='w-12 h-12 rounded-lg object-cover'
                                         />
                                       ) : (
