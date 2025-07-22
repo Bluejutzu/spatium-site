@@ -35,6 +35,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatedHeader } from '@/components/app/header';
 import { DiscordFooter } from '@/components/app/footer';
+import { EmptyState } from '@/components/ui/empty-state';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
