@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "convex/react"
-import { api } from "@/convex/_generated/api"
+import { api } from "../../../../../convex/_generated/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -119,7 +119,7 @@ export default function RolesPage({ params }: { params: { serverId: string } }) 
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-wrap gap-1 max-w-xs">
-                    {role.permissions.slice(0, 3).map((permission) => (
+                    {role.permissions.slice(0, 3).map((permission: any) => (
                       <Badge
                         key={permission}
                         variant="secondary"
