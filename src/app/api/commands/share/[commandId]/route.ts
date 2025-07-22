@@ -20,10 +20,15 @@ async function getCommandById(shareCode: string): Promise<Commands | null> {
 }
 
 
-export async function GET(req: NextRequest, { params }: { params: { commandId: string } }) {
-	await auth.protect()
+export async function GET(req: NextRequest) {
+	await auth.protect();
 
-	const { commandId } = params;
+	// Extract commandId from the URL
+	const commandId = req.nextUrl.pathname.split('/').pop();
+
+	if (!commandId) {
+		return NextResponse.json({ error: 'Command ID is required' }, { status: 400 });
+	}
 
 	const command = await getCommandById(commandId);
 	if (!command) {
@@ -36,5 +41,4 @@ export async function GET(req: NextRequest, { params }: { params: { commandId: s
 		cooldown: command.cooldown || 0,
 		options: command.options || [],
 	});
-
 }
