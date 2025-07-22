@@ -5,23 +5,68 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { Shield, AlertTriangle, Ban, UserX, Eye } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
+import { useUser } from "@clerk/nextjs"
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useRouter } from "next/navigation";
 
 interface ModerationContentProps {
   serverId?: string
 }
 
 export function ModerationContent({ serverId }: ModerationContentProps) {
-  const recentActions = [
-    { action: "Ban", user: "ToxicUser123", reason: "Spam", moderator: "AdminUser", time: "2 min ago" },
-    {
-      action: "Kick",
-      user: "RuleBreaker456",
-      reason: "Inappropriate content",
-      moderator: "ModeratorX",
-      time: "15 min ago",
-    },
-    { action: "Warn", user: "NewUser789", reason: "Minor rule violation", moderator: "Helper99", time: "1 hour ago" },
-  ]
+  const actions = useQuery(api.discord.getModerationActions, serverId ? { serverId } : 'skip');
+  const router = useRouter();
+  // Filtering and searching
+  const [actionFilter, setActionFilter] = useState('All');
+  const [stateFilter, setStateFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  // User profile cache
+  const [profileCache, setProfileCache] = useState<Record<string, any>>({});
+  const fetchingProfiles = useRef<Set<string>>(new Set());
+
+  // Fetch and cache a Discord user profile
+  const fetchProfile = async (userId: string) => {
+    if (!userId || profileCache[userId] || fetchingProfiles.current.has(userId)) return;
+    fetchingProfiles.current.add(userId);
+    try {
+      const res = await fetch(`/api/discord/user?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setProfileCache(prev => ({ ...prev, [userId]: data }));
+      }
+    } finally {
+      fetchingProfiles.current.delete(userId);
+    }
+  };
+
+  // Preload visible user/mod profiles
+  useEffect(() => {
+    if (!actions) return;
+    const ids = new Set<string>();
+    actions.forEach((a: any) => {
+      if (a.user) ids.add(a.user);
+      if (a.moderator) ids.add(a.moderator);
+    });
+    ids.forEach(id => fetchProfile(id));
+    // eslint-disable-next-line
+  }, [actions]);
+
+  // Filtering and searching logic
+  const filteredActions = (actions || []).filter((a: any) => {
+    if (actionFilter !== 'All' && a.action !== actionFilter) return false;
+    if (stateFilter !== 'All' && a.state !== stateFilter) return false;
+    if (search) {
+      const s = search.toLowerCase();
+      return (
+        (a.user && a.user.toLowerCase().includes(s)) ||
+        (a.moderator && a.moderator.toLowerCase().includes(s)) ||
+        (a.reason && a.reason.toLowerCase().includes(s))
+      );
+    }
+    return true;
+  });
 
   return (
     <div className="flex-1 overflow-auto">
@@ -47,78 +92,93 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
           </div>
         </div>
       </header>
-
       <div className="p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[
-            { title: "Active Warnings", value: "3", icon: AlertTriangle, color: "discord-yellow" },
-            { title: "Bans This Month", value: "12", icon: Ban, color: "discord-red" },
-            { title: "Kicks This Month", value: "8", icon: UserX, color: "discord-orange" },
-            { title: "Auto-Mod Actions", value: "45", icon: Shield, color: "discord-green" },
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <Card className="discord-card">
-                <CardContent className="p-6 text-center">
-                  <div className={`p-3 rounded-xl bg-${stat.color}/20 w-fit mx-auto mb-4`}>
-                    <stat.icon className={`h-6 w-6 text-${stat.color}`} />
-                  </div>
-                  <div className={`text-3xl font-black text-${stat.color} mb-2`}>{stat.value}</div>
-                  <div className="text-discord-text text-sm">{stat.title}</div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+        {/* Filter/Search Controls */}
+        <div className="flex flex-wrap gap-4 mb-4 items-center">
+          <select
+            className="px-2 py-1 rounded bg-discord-darkest text-white border border-discord-border"
+            value={actionFilter}
+            onChange={e => setActionFilter(e.target.value)}
+          >
+            <option value="All">All Actions</option>
+            <option value="Ban">Ban</option>
+            <option value="Kick">Kick</option>
+            <option value="Warn">Warn</option>
+            <option value="Mute">Mute</option>
+            <option value="Timeout">Timeout</option>
+            <option value="Unban">Unban</option>
+            <option value="Unmute">Unmute</option>
+          </select>
+          <select
+            className="px-2 py-1 rounded bg-discord-darkest text-white border border-discord-border"
+            value={stateFilter}
+            onChange={e => setStateFilter(e.target.value)}
+          >
+            <option value="All">All States</option>
+            <option value="closed">Closed</option>
+            <option value="Done">Done</option>
+            <option value="open">Open</option>
+          </select>
+          <input
+            className="px-2 py-1 rounded bg-discord-darkest text-white border border-discord-border flex-1 min-w-[200px]"
+            placeholder="Search by user, moderator, or reason..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
-
         <Card className="discord-card">
           <CardHeader>
-            <CardTitle className="text-white">Recent Moderation Actions</CardTitle>
+            <CardTitle className="text-white">Moderation Log</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentActions.map((action, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        action.action === "Ban"
-                          ? "bg-discord-red/20"
-                          : action.action === "Kick"
-                            ? "bg-discord-orange/20"
-                            : "bg-discord-yellow/20"
-                      }`}
-                    >
-                      {action.action === "Ban" && <Ban className="w-4 h-4 text-discord-red" />}
-                      {action.action === "Kick" && <UserX className="w-4 h-4 text-discord-orange" />}
-                      {action.action === "Warn" && <AlertTriangle className="w-4 h-4 text-discord-yellow" />}
-                    </div>
-                    <div>
-                      <div className="font-medium text-white">
-                        {action.action} - {action.user}
+            <div className="flex flex-row gap-4 overflow-x-auto py-2">
+              {!actions ? (
+                <div className="text-discord-text">Loading...</div>
+              ) : filteredActions.length === 0 ? (
+                <div className="text-discord-text">No moderation actions found.</div>
+              ) : (
+                filteredActions.map((action: any, index: number) => (
+                  <motion.div
+                    key={action._id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 min-w-[350px] cursor-pointer hover:bg-white/10"
+                    onClick={() => router.push(`/dashboard/${serverId}/moderation/${action._id}`)}
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* User Avatar */}
+                      {profileCache[action.user] ? (
+                        <img
+                          src={`https://cdn.discordapp.com/avatars/${profileCache[action.user].id}/${profileCache[action.user].avatar}.png?size=32`}
+                          alt="avatar"
+                          className="w-8 h-8 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-discord-darkest flex items-center justify-center text-xs text-discord-text">?</div>
+                      )}
+                      <div className="flex flex-col gap-1">
+                        <div className="font-medium text-white">
+                          {action.action} - {profileCache[action.user]?.username || action.user}
+                        </div>
+                        <div className="flex flex-row flex-wrap gap-x-6 gap-y-1 text-xs text-discord-text">
+                          <span><b>Reason:</b> {action.reason}</span>
+                          <span><b>Moderator:</b> {profileCache[action.moderator]?.username || action.moderator}</span>
+                          <span><b>Duration:</b> {action.duration || 'Permanent'}</span>
+                          <span><b>State:</b> {action.state || 'Unknown'}</span>
+                          <span><b>Time:</b> {action.time}</span>
+                        </div>
                       </div>
-                      <div className="text-xs text-discord-text">
-                        {action.reason} • by {action.moderator}
-                      </div>
                     </div>
-                  </div>
-                  <div className="text-xs text-discord-text">{action.time}</div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
+
+

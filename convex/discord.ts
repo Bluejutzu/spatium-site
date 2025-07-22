@@ -398,3 +398,81 @@ export const getAutoRoleData = query({
 		};
 	},
 });
+
+export const updateModerationActionReason = mutation({
+	args: {
+		auditId: v.string(), // Discord audit log ID
+		serverId: v.string(),
+		reason: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const action = await ctx.db
+			.query('moderationActions')
+			.withIndex('by_audit_id', q => q.eq('auditId', args.auditId))
+			.first();
+		if (!action) throw new Error('Moderation action not found');
+		await ctx.db.patch(action._id, { reason: args.reason });
+		return { updated: true };
+	},
+});
+
+export const upsertModerationAction = mutation({
+	args: {
+		auditId: v.string(),
+		serverId: v.string(),
+		action: v.string(),
+		user: v.string(),
+		reason: v.string(),
+		moderator: v.string(),
+		time: v.string(),
+		raw: v.any(),
+	},
+	handler: async (ctx, args) => {
+		const existing = await ctx.db
+			.query('moderationActions')
+			.withIndex('by_audit_id', q => q.eq('auditId', args.auditId))
+			.first();
+		if (existing) {
+			await ctx.db.patch(existing._id, { ...args });
+			return { updated: true };
+		} else {
+			await ctx.db.insert('moderationActions', { ...args });
+			return { created: true };
+		}
+	},
+});
+
+export const getModerationActions = query({
+	args: { serverId: v.string() },
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query('moderationActions')
+			.withIndex('by_server_id', q => q.eq('serverId', args.serverId))
+			.order('desc')
+			.collect();
+	},
+});
+
+export const updateModerationActionState = mutation({
+	args: {
+		serverId: v.string(),
+		userId: v.string(),
+		action: v.string(),
+		state: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const latest = await ctx.db
+			.query('moderationActions')
+			.withIndex('by_server_id', q => q.eq('serverId', args.serverId))
+			.filter(q => q.eq(q.field('user'), args.userId))
+			.filter(q => q.eq(q.field('action'), args.action))
+			.order('desc')
+			.first();
+
+		if (latest && latest.state !== args.state) {
+			await ctx.db.patch(latest._id, { state: args.state });
+			return { updated: true, id: latest._id };
+		}
+		return { updated: false };
+	},
+});

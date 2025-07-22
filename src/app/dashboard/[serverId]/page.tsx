@@ -2,11 +2,16 @@
 
 import { useState } from "react"
 import { useParams } from "next/navigation"
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
+import { AppSidebar } from "@/components/dashboard/sidebar/app-sidebar"
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
 import { ModerationContent } from "@/components/dashboard/moderation-content"
 import { MembersContent } from "@/components/dashboard/members-content"
+import { CommandsContent } from "@/app/dashboard/[serverId]/commands/page";
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { useUser } from "@clerk/nextjs"
+import { useQuery } from "convex/react"
+import { api } from "../../../../convex/_generated/api"
+import { SettingsContent } from "./settings/page"
 
 export type DashboardSection =
   | "dashboard"
@@ -35,22 +40,32 @@ export type DashboardSection =
   | "external"
   | "settings"
   | "premium"
+  | "servers"
 
 export default function DashboardPage() {
   const params = useParams<{ serverId: string }>()
   const [activeSection, setActiveSection] = useState<DashboardSection>("dashboard")
-  const [selectedServerId, setSelectedServerId] = useState<string>(params.serverId)
+  const { user } = useUser()
+  const servers = useQuery(
+    api.discord.getUserServers,
+    user ? { userId: user.externalAccounts[0]?.providerUserId } : "skip"
+  )
+  const selectedServer = servers?.find(s => s.serverId === params.serverId)
 
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
-        return <DashboardContent serverId={selectedServerId} />
+        return <DashboardContent serverId={params.serverId} />
       case "moderation":
-        return <ModerationContent serverId={selectedServerId} />
+        return <ModerationContent serverId={params.serverId} />
       case "members":
-        return <MembersContent serverId={selectedServerId} />
+        return <MembersContent serverId={params.serverId} />
+      case "commands":
+        return <CommandsContent serverId={params.serverId} />
+      case "settings":
+        return <SettingsContent serverId={params.serverId} />
       default:
-        return <DashboardContent serverId={selectedServerId} />
+        return <DashboardContent serverId={params.serverId} />
     }
   }
 
@@ -67,11 +82,12 @@ export default function DashboardPage() {
 
       <SidebarProvider>
         <div className="relative z-10 flex min-h-screen w-full">
-          <DashboardSidebar
+          <AppSidebar
+            user={user}
+            servers={servers ?? []}
+            selectedServer={selectedServer}
             activeSection={activeSection}
-            onSectionChange={setActiveSection}
-            selectedServerId={selectedServerId}
-            onServerChange={setSelectedServerId}
+            onSectionChange={(section: string) => setActiveSection(section as DashboardSection)}
           />
           <main className="flex-1 overflow-hidden">{renderContent()}</main>
         </div>

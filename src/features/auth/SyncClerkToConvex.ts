@@ -70,13 +70,13 @@ export function SyncClerkToConvex() {
       });
 
       if (!response.ok) {
-        console.error('Failed to sync Discord data:', response.statusText);
+        console.log('Failed to sync Discord data:', response.statusText);
       } else {
         const result = await response.json();
         console.log('Discord sync successful:', result);
       }
     } catch (error) {
-      console.error('Failed to sync Discord data:', error);
+      console.log('Failed to sync Discord data:', error);
     }
   };
 

@@ -333,5 +333,5 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
         </div>
       </div>
     </div>
-  ) 
+  )
 }

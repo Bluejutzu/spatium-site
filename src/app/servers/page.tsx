@@ -18,35 +18,39 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
-export default function ServersPage() {
+export default function ServerPage() {
   const { user } = useUser();
   const router = useRouter();
   const servers = useQuery(
     api.discord.getUserServers,
-    user ? { userId: user.externalAccounts[0].providerUserId } : 'skip'
+    user ? { userId: user.externalAccounts[0]?.providerUserId } : 'skip'
   );
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   const [scrollY, setScrollY] = useState('0%');
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  });
+  let scrollYProgress;
 
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on('change', (latest) => {
-      setScrollY(`${latest * 50}%`);
-    });
+    setMounted(true);
+  }, []);
 
-    return () => {
-      unsubscribe();
-    };
-  }, [scrollYProgress]);
+  useEffect(() => {
+    if (mounted && containerRef.current) {
+      // Only initialize useScroll after mount
+      const { scrollYProgress: sy } = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
+      const unsubscribe = sy.on('change', (latest) => {
+        setScrollY(`${latest * 50}%`);
+      });
+      scrollYProgress = sy;
+      return () => unsubscribe();
+    }
+  }, [mounted]);
 
   if (!user) {
     return (
@@ -78,10 +82,12 @@ export default function ServersPage() {
       {/* Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
-        <motion.div
-          className='absolute inset-0 bg-grid-pattern opacity-5'
-          style={{ y: scrollY }}
-        />
+        {mounted && (
+          <motion.div
+            className='absolute inset-0 bg-grid-pattern opacity-5'
+            style={{ y: scrollY }}
+          />
+        )}
         <div className='floating-orb floating-orb-1' />
         <div className='floating-orb floating-orb-2' />
         <div className='floating-orb floating-orb-3' />
@@ -147,9 +153,14 @@ export default function ServersPage() {
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
                       {servers.map((server) => (
                         <div key={server._id} className='w-full max-w-sm'>
-                          <Link href={`/dashboard/${server.serverId}`}>
-                            <Card className='discord-card hover:border-discord-border-hover transition-all duration-300 cursor-pointer group h-full'>
-                              <CardContent className='p-6'>
+                          <Card
+                            className='discord-card hover:border-discord-border-hover transition-all duration-300 cursor-pointer group h-full'
+                            onClick={() => router.push(`/dashboard/${server.serverId}`)}
+                            tabIndex={0}
+                            role="button"
+                            style={{ outline: 'none' }}
+                          >
+                            <CardContent className='p-6'>
                                 <div className='flex items-center gap-4 mb-4'>
                                   <div className='relative'>
                                     <div className='w-12 h-12 bg-gradient-to-br from-discord-blurple to-discord-purple rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden'>
@@ -188,7 +199,8 @@ export default function ServersPage() {
                                     size='sm'
                                     variant='outline'
                                     className='discord-button-outline text-xs bg-transparent'
-                                    onClick={() => {
+                                    onClick={e => {
+                                      e.stopPropagation();
                                       router.push(`/dashboard/${server.serverId}/settings`);
                                     }}
                                   >
@@ -198,7 +210,6 @@ export default function ServersPage() {
                                 </div>
                               </CardContent>
                             </Card>
-                          </Link>
                         </div>
                       ))}
                     </div>

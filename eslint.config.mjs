@@ -4,6 +4,7 @@ import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import typescriptParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,6 +20,7 @@ const eslintConfig = [
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     plugins: {
       'import': importPlugin,
+      'react-hooks': reactHooks
     },
     languageOptions: {
       parser: typescriptParser,
@@ -53,6 +55,9 @@ const eslintConfig = [
           'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
         }
       ],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      
     },
   },
   {

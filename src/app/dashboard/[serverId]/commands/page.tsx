@@ -1,9 +1,5 @@
 import CommandsClient from './CommandsClient';
 
-export default function CommandsPage({
-  params,
-}: {
-  params: { serverId: string };
-}) {
-  return <CommandsClient params={params} />;
+export function CommandsContent({ serverId }: { serverId: string }) {
+  return <CommandsClient params={{ serverId }} />;
 }
