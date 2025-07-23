@@ -102,52 +102,52 @@ function MetricCard({ metric, index }: { metric: any; index: number }) {
   }
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className="group"
-    >
-      <Card className="discord-card border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 relative overflow-hidden">
-        {/* Enhanced background gradient */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-${metric.color}/5 via-transparent to-${metric.color}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 50 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        className="group"
+      >
+          <Card className="discord-card border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 relative overflow-hidden">
+            {/* Enhanced background gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br from-${metric.color}/5 via-transparent to-${metric.color}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-        <CardContent className="p-8 relative z-10">
-          <div className="flex items-center justify-between mb-6">
-            <motion.div
-              className={`p-4 rounded-2xl bg-gradient-to-r from-${metric.color}/20 to-${metric.color}/10 shadow-lg group-hover:shadow-xl transition-shadow duration-300 border border-${metric.color}/30`}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <metric.icon className={`h-8 w-8 text-${metric.color}`} />
-            </motion.div>
+            <CardContent className="p-8 relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <motion.div
+                  className={`p-4 rounded-2xl bg-gradient-to-r from-${metric.color}/20 to-${metric.color}/10 shadow-lg group-hover:shadow-xl transition-shadow duration-300 border border-${metric.color}/30`}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <metric.icon className={`h-8 w-8 text-${metric.color}`} />
+                </motion.div>
 
-            <div className="text-right">
-              <div className={`text-3xl font-black text-${metric.color} glow-text`}>
-                <AnimatedCounter end={parseInt(metric.value.replace(/[^\d]/g, ''))} suffix={metric.value.replace(/[\d,]/g, '')} />
+                <div className="text-right">
+                  <div className={`text-3xl font-black text-${metric.color} glow-text`}>
+                    <AnimatedCounter end={parseInt(metric.value.replace(/[^\d]/g, ''))} suffix={metric.value.replace(/[\d,]/g, '')} />
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    {getTrendIcon(metric.change)}
+                    <span className={`text-sm font-bold ${getTrendColor(metric.change)}`}>
+                      {metric.change}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1 mt-1">
-                {getTrendIcon(metric.change)}
-                <span className={`text-sm font-bold ${getTrendColor(metric.change)}`}>
-                  {metric.change}
-                </span>
-              </div>
-            </div>
-          </div>
 
-          <h3 className="text-sm font-bold text-white mb-2 tracking-wide uppercase group-hover:text-discord-blurple transition-colors duration-300">
-            {metric.title}
-          </h3>
+              <h3 className="text-sm font-bold text-white mb-2 tracking-wide uppercase group-hover:text-discord-blurple transition-colors duration-300">
+                {metric.title}
+              </h3>
 
-          <p className="text-xs text-discord-text group-hover:text-white/80 transition-colors duration-300">
-            {metric.description}
-          </p>
-        </CardContent>
-      </Card>
-    </motion.div>
-  )
+              <p className="text-xs text-discord-text group-hover:text-white/80 transition-colors duration-300">
+                {metric.description}
+              </p>
+            </CardContent>
+          </Card>
+      </motion.div>
+  );
 }
 
 // Enhanced Chart Component

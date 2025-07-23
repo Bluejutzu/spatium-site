@@ -1,19 +1,23 @@
 "use client"
 
-import { useMutation,useQuery } from 'convex/react';
-import Image from 'next/image';
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef,useState } from "react";
+import { useMutation, useQuery } from 'convex/react';
+import { ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button";
 
 import { api } from "../../../../../../convex/_generated/api";
 
 export default function ModerationActionPage() {
-    const { serverId, actionId } = useParams();
+    const params = useParams();
+    const serverId = params?.serverId as string;
+    const actionId = params?.actionId as string;
     const router = useRouter();
     const actions = useQuery(api.discord.getModerationActions, {
-        serverId: `${serverId}`
+        serverId: serverId
     });
     const action = actions?.find((a: any) => a._id === actionId);
     const updateReason = useMutation(api.discord.updateModerationActionReason);
@@ -23,6 +27,9 @@ export default function ModerationActionPage() {
     const [saveError, setSaveError] = useState<string | null>(null);
     const [profileCache, setProfileCache] = useState<Record<string, any>>({});
     const fetchingProfiles = useRef<Set<string>>(new Set());
+
+    // Add back button
+    const handleBack = () => router.push(`/dashboard/${serverId}?tab=moderation`);
 
     // Fetch and cache Discord user profile
     const fetchProfile = async (userId: string) => {
@@ -95,7 +102,13 @@ export default function ModerationActionPage() {
 
     return (
         <div className="max-w-4xl mx-auto p-8 bg-discord-darkest border border-discord-border rounded-lg mt-8">
-            <div className="text-2xl font-bold mb-4 text-white">Actions</div>
+            <div className="flex items-center mb-6">
+                <Button variant="ghost" onClick={handleBack} className="mr-4 flex items-center gap-2">
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Moderation Log
+                </Button>
+                <div className="text-2xl font-bold text-white">Actions</div>
+            </div>
             <div className="mb-6">
                 <div className="text-lg font-semibold text-white mb-2">General information</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
@@ -114,17 +127,13 @@ export default function ModerationActionPage() {
                     <div className="flex flex-col gap-2">
                         <span className="text-xs text-discord-text">User</span>
                         <div className="flex items-center gap-2">
-                            {profileCache[action.user] ? (
-                                <Image
-                                    src={`https://cdn.discordapp.com/avatars/${profileCache[action.user].id}/${profileCache[action.user].avatar}.png?size=32`}
-                                    alt="avatar"
-                                    width={32}
-                                    height={32}
-                                    className="rounded-full"
-                                />
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-discord-darkest flex items-center justify-center text-xs text-discord-text">?</div>
-                            )}
+                            <Avatar className="h-8 w-8">
+                                {profileCache[action.user]?.avatar ? (
+                                    <AvatarImage src={`https://cdn.discordapp.com/avatars/${profileCache[action.user].id}/${profileCache[action.user].avatar}.png?size=32`} alt={profileCache[action.user].username} />
+                                ) : (
+                                    <AvatarFallback>{profileCache[action.user]?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                                )}
+                            </Avatar>
                             <span className="text-white">{profileCache[action.user]?.username || action.user}</span>
                             <span className="text-discord-text text-xs">{action.user}</span>
                         </div>
@@ -147,17 +156,13 @@ export default function ModerationActionPage() {
                     <div className="flex flex-col gap-2">
                         <span className="text-xs text-discord-text">Author</span>
                         <div className="flex items-center gap-2">
-                            {profileCache[action.moderator] ? (
-                                <Image
-                                    src={`https://cdn.discordapp.com/avatars/${profileCache[action.moderator].id}/${profileCache[action.moderator].avatar}.png?size=32`}
-                                    alt="avatar"
-                                    width={32}
-                                    height={32}
-                                    className="rounded-full"
-                                />
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-discord-darkest flex items-center justify-center text-xs text-discord-text">?</div>
-                            )}
+                            <Avatar className="h-8 w-8">
+                                {profileCache[action.moderator]?.avatar ? (
+                                    <AvatarImage src={`https://cdn.discordapp.com/avatars/${profileCache[action.moderator].id}/${profileCache[action.moderator].avatar}.png?size=32`} alt={profileCache[action.moderator].username} />
+                                ) : (
+                                    <AvatarFallback>{profileCache[action.moderator]?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                                )}
+                            </Avatar>
                             <span className="text-white">{profileCache[action.moderator]?.username || action.moderator}</span>
                             <span className="text-discord-text text-xs">{action.moderator}</span>
                         </div>
@@ -178,7 +183,7 @@ export default function ModerationActionPage() {
             <div className="flex gap-2 mt-4">
                 <Button
                     variant="outline"
-                    onClick={() => router.back()}
+                    onClick={handleBack}
                 >
                     Cancel
                 </Button>

@@ -14,6 +14,7 @@ import {
   Hash,
   ImageIcon,
   Link,
+  Link2,
   MessageSquare,
   Plus,
   Save,
@@ -32,7 +33,7 @@ import {
 import { Roboto } from 'next/font/google';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { JSX, useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   addEdge,
   Background,
@@ -73,7 +74,6 @@ import { BlockCategory, BlockType } from '@/types/common';
 import type { DiscordEmbed } from '@/types/discord';
 
 import { api } from '../../../../../../convex/_generated/api';
-
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -155,7 +155,6 @@ const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
   });
 };
 
-// Enhanced Node Components
 const RootNode = ({ data, selected }: NodeProps) => {
   return (
     <div
@@ -192,37 +191,6 @@ const RootNode = ({ data, selected }: NodeProps) => {
     </div>
   );
 };
-
-// const ErrorNode = ({ data, selected }: NodeProps) => {
-//   return (
-//     <div
-//       className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-//         ? 'outline-2 outline-discord-blurple'
-//         : data.isHovered
-//           ? 'outline-2 outline-discord-purple'
-//           : ''
-//         }`}
-//       style={{ backgroundColor: 'var(--color-discord-darker)' }}
-//     >
-//       <div className='h-2 bg-red-500' />
-//       <div className='p-4'>
-//         <div className='flex items-center justify-between relative z-10'>
-//           <X className='w-4 h-4' />
-//           <span>Error Handler</span>
-//         </div>
-//         <div className='text-xs mt-1 opacity-80 relative z-10'>
-//           {data.config?.message || 'Default error message'}
-//         </div>
-//         <Handle
-//           type='target'
-//           position={Position.Top}
-//           className='w-3 h-3 shadow-lg'
-//           style={{ backgroundColor: 'var(--color-discord-red)' }}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
 
 const ConditionNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
@@ -414,153 +382,8 @@ const createDiscordNode =
       );
     };
 
-const nodeTypes = {
-  root: RootNode,
-  // error: ErrorNode,
-  condition: ConditionNode,
-  'send-message': MessageNode,
-  'option-user': createCommandOptionNode(Users, 'User Option'),
-  'option-role': createCommandOptionNode(Crown, 'Role Option'),
-  'option-channel': createCommandOptionNode(Hash, 'Channel Option'),
-  'option-text': createCommandOptionNode(MessageSquare, 'Text Option'),
-  'option-boolean': createCommandOptionNode(ToggleRight, 'Boolean Option'),
-  'add-role': createDiscordNode(Crown, 'roles', 'Add Role'),
-  'remove-role': createDiscordNode(Crown, 'roles', 'Remove Role'),
-  'kick-member': createDiscordNode(UserX, 'moderation', 'Kick Member'),
-  'ban-member': createDiscordNode(Ban, 'moderation', 'Ban Member'),
-  'timeout-member': createDiscordNode(Clock, 'moderation', 'Timeout Member'),
-  'create-channel': createDiscordNode(Hash, 'channels', 'Create Channel'),
-  'delete-channel': createDiscordNode(Hash, 'channels', 'Delete Channel'),
-  'modify-channel': createDiscordNode(Hash, 'channels', 'Modify Channel'),
-  'send-dm': createDiscordNode(MessageSquare, 'messaging', 'Send DM'),
-  'create-webhook': createDiscordNode(Webhook, 'webhooks', 'Create Webhook'),
-  'delete-webhook': createDiscordNode(Webhook, 'webhooks', 'Delete Webhook'),
-  'move-member': createDiscordNode(Volume2, 'voice', 'Move Member'),
-  'mute-member': createDiscordNode(Volume2, 'voice', 'Mute Member'),
-  'deafen-member': createDiscordNode(Volume2, 'voice', 'Deafen Member'),
-  'fetch-user': createDiscordNode(Users, 'members', 'Fetch User'),
-  'fetch-member': createDiscordNode(Users, 'members', 'Fetch Member'),
-  'fetch-channel': createDiscordNode(Hash, 'channels', 'Fetch Channel'),
-  'fetch-role': createDiscordNode(Crown, 'roles', 'Fetch Role'),
-  'create-invite': createDiscordNode(Link, 'channels', 'Create Invite'),
-  'delete-invite': createDiscordNode(Link, 'channels', 'Delete Invite'),
-  'add-reaction': createDiscordNode(Zap, 'messaging', 'Add Reaction'),
-  'remove-reaction': createDiscordNode(Zap, 'messaging', 'Remove Reaction'),
-  'pin-message': createDiscordNode(MessageSquare, 'messaging', 'Pin Message'),
-  'unpin-message': createDiscordNode(
-    MessageSquare,
-    'messaging',
-    'Unpin Message'
-  ),
-  'delete-message': createDiscordNode(
-    MessageSquare,
-    'messaging',
-    'Delete Message'
-  ),
-  'edit-message': createDiscordNode(MessageSquare, 'messaging', 'Edit Message'),
-  'bulk-delete': createDiscordNode(MessageSquare, 'messaging', 'Bulk Delete'),
-  'set-nickname': createDiscordNode(Users, 'moderation', 'Set Nickname'),
-  'create-role': createDiscordNode(Crown, 'roles', 'Create Role'),
-  'delete-role': createDiscordNode(Crown, 'roles', 'Delete Role'),
-  'modify-role': createDiscordNode(Crown, 'roles', 'Modify Role'),
-  'audit-log': createDiscordNode(Database, 'utilities', 'Audit Log'),
-  wait: createDiscordNode(Clock, 'logic', 'Wait/Delay'),
-  random: createDiscordNode(Zap, 'logic', 'Random'),
-  'unq-variable': createDiscordNode(Database, 'utilities', 'Variable'),
-};
-
-const initialNodes: Node[] = [
-  {
-    id: ROOT_NODE_ID,
-    type: 'root',
-    position: { x: 400, y: 100 },
-    data: {
-      label: 'Command Settings',
-      type: 'root',
-      config: { name: '', description: '', ephemeral: false, cooldown: 0 },
-    },
-    draggable: false,
-  },
-  // {
-  //   id: ERROR_NODE_ID,
-  //   type: 'error',
-  //   position: { x: 800, y: 100 },
-  //   data: {
-  //     label: 'Default Error Handler',
-  //     type: 'error',
-  //     config: { message: 'An error occurred.' },
-  //   },
-  //   draggable: false,
-  // },
-];
-
-const initialEdges: Edge[] = [];
-
-// Comprehensive Discord API Block Types
-const BLOCK_CATEGORIES: BlockCategory[] = [
-  {
-    id: 'options',
-    label: 'Command Options',
-    icon: Settings,
-    description: 'Define command options/parameters',
-  },
-  {
-    id: 'messaging',
-    label: 'Messaging',
-    icon: MessageSquare,
-    description: 'Send and manage messages',
-  },
-  {
-    id: 'moderation',
-    label: 'Moderation',
-    icon: Shield,
-    description: 'Moderation actions',
-  },
-  {
-    id: 'roles',
-    label: 'Roles & Permissions',
-    icon: Crown,
-    description: 'Role management',
-  },
-  {
-    id: 'channels',
-    label: 'Channels',
-    icon: Hash,
-    description: 'Channel operations',
-  },
-  {
-    id: 'members',
-    label: 'Members',
-    icon: Users,
-    description: 'Member management',
-  },
-  {
-    id: 'voice',
-    label: 'Voice',
-    icon: Volume2,
-    description: 'Voice channel operations',
-  },
-  {
-    id: 'webhooks',
-    label: 'Webhooks',
-    icon: Webhook,
-    description: 'Webhook management',
-  },
-  {
-    id: 'logic',
-    label: 'Logic & Flow',
-    icon: GitBranch,
-    description: 'Control flow',
-  },
-  {
-    id: 'utilities',
-    label: 'Utilities',
-    icon: Database,
-    description: 'Helper functions',
-  },
-];
-
-const BLOCK_TYPES: BlockType[] = [
+// 1. Define BLOCK_TYPES as a const array and extract type union
+const BLOCK_TYPES = [
   // Command Options
   {
     type: 'option-user',
@@ -851,8 +674,140 @@ const BLOCK_TYPES: BlockType[] = [
     icon: Database,
     description: 'Log actions to audit',
   },
+] as const;
+
+export type BlockTypeId = typeof BLOCK_TYPES[number]['type'];
+
+type NodeTypeComponent = (props: NodeProps) => JSX.Element;
+
+type NodeTypesMap = {
+  root: NodeTypeComponent;
+} & {
+  [K in BlockTypeId]: NodeTypeComponent;
+};
+
+const nodeTypes: NodeTypesMap = {
+  root: RootNode,
+  condition: ConditionNode,
+  'send-message': MessageNode,
+  'option-user': createCommandOptionNode(Users, 'User Option'),
+  'option-role': createCommandOptionNode(Crown, 'Role Option'),
+  'option-channel': createCommandOptionNode(Hash, 'Channel Option'),
+  'option-text': createCommandOptionNode(MessageSquare, 'Text Option'),
+  'option-boolean': createCommandOptionNode(ToggleRight, 'Boolean Option'),
+  'add-role': createDiscordNode(Crown, 'roles', 'Add Role'),
+  'remove-role': createDiscordNode(Crown, 'roles', 'Remove Role'),
+  'kick-member': createDiscordNode(UserX, 'moderation', 'Kick Member'),
+  'ban-member': createDiscordNode(Ban, 'moderation', 'Ban Member'),
+  'timeout-member': createDiscordNode(Clock, 'moderation', 'Timeout Member'),
+  'create-channel': createDiscordNode(Hash, 'channels', 'Create Channel'),
+  'delete-channel': createDiscordNode(Hash, 'channels', 'Delete Channel'),
+  'modify-channel': createDiscordNode(Hash, 'channels', 'Modify Channel'),
+  'send-dm': createDiscordNode(MessageSquare, 'messaging', 'Send DM'),
+  'create-webhook': createDiscordNode(Webhook, 'webhooks', 'Create Webhook'),
+  'delete-webhook': createDiscordNode(Webhook, 'webhooks', 'Delete Webhook'),
+  'move-member': createDiscordNode(Volume2, 'voice', 'Move Member'),
+  'mute-member': createDiscordNode(Volume2, 'voice', 'Mute Member'),
+  'deafen-member': createDiscordNode(Volume2, 'voice', 'Deafen Member'),
+  'fetch-user': createDiscordNode(Users, 'members', 'Fetch User'),
+  'fetch-member': createDiscordNode(Users, 'members', 'Fetch Member'),
+  'create-invite': createDiscordNode(Link2, 'channels', 'Create Invite'),
+  'delete-invite': createDiscordNode(Link2, 'channels', 'Delete Invite'),
+  'add-reaction': createDiscordNode(Zap, 'messaging', 'Add Reaction'),
+  'remove-reaction': createDiscordNode(Zap, 'messaging', 'Remove Reaction'),
+  'pin-message': createDiscordNode(MessageSquare, 'messaging', 'Pin Message'),
+  'unpin-message': createDiscordNode(MessageSquare, 'messaging', 'Unpin Message'),
+  'delete-message': createDiscordNode(MessageSquare, 'messaging', 'Delete Message'),
+  'edit-message': createDiscordNode(MessageSquare, 'messaging', 'Edit Message'),
+  'bulk-delete': createDiscordNode(MessageSquare, 'messaging', 'Bulk Delete'),
+  'set-nickname': createDiscordNode(Users, 'moderation', 'Set Nickname'),
+  'create-role': createDiscordNode(Crown, 'roles', 'Create Role'),
+  'delete-role': createDiscordNode(Crown, 'roles', 'Delete Role'),
+  'modify-role': createDiscordNode(Crown, 'roles', 'Modify Role'),
+  'audit-log': createDiscordNode(Database, 'utilities', 'Audit Log'),
+  wait: createDiscordNode(Clock, 'logic', 'Wait/Delay'),
+  random: createDiscordNode(Zap, 'logic', 'Random'),
+  'unq-variable': createDiscordNode(Database, 'utilities', 'Variable'),
+};
+
+const initialNodes: Node[] = [
+  {
+    id: ROOT_NODE_ID,
+    type: 'root',
+    position: { x: 400, y: 100 },
+    data: {
+      label: 'Command Settings',
+      type: 'root',
+      config: { name: '', description: '', ephemeral: false, cooldown: 0 },
+    },
+    draggable: false,
+  },
 ];
 
+const initialEdges: Edge[] = [];
+
+const BLOCK_CATEGORIES: BlockCategory[] = [
+  {
+    id: 'options',
+    label: 'Command Options',
+    icon: Settings,
+    description: 'Define command options/parameters',
+  },
+  {
+    id: 'messaging',
+    label: 'Messaging',
+    icon: MessageSquare,
+    description: 'Send and manage messages',
+  },
+  {
+    id: 'moderation',
+    label: 'Moderation',
+    icon: Shield,
+    description: 'Moderation actions',
+  },
+  {
+    id: 'roles',
+    label: 'Roles & Permissions',
+    icon: Crown,
+    description: 'Role management',
+  },
+  {
+    id: 'channels',
+    label: 'Channels',
+    icon: Hash,
+    description: 'Channel operations',
+  },
+  {
+    id: 'members',
+    label: 'Members',
+    icon: Users,
+    description: 'Member management',
+  },
+  {
+    id: 'voice',
+    label: 'Voice',
+    icon: Volume2,
+    description: 'Voice channel operations',
+  },
+  {
+    id: 'webhooks',
+    label: 'Webhooks',
+    icon: Webhook,
+    description: 'Webhook management',
+  },
+  {
+    id: 'logic',
+    label: 'Logic & Flow',
+    icon: GitBranch,
+    description: 'Control flow',
+  },
+  {
+    id: 'utilities',
+    label: 'Utilities',
+    icon: Database,
+    description: 'Helper functions',
+  },
+];
 interface CommandFlowBuilderProps {
   serverId: string;
 }
@@ -3412,12 +3367,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       className='h-screen w-full relative overflow-hidden'
       style={{ backgroundColor: 'rgb(15 23 42)' }}
     >
-      {/* Fixed Top Bar */}
       <div className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-6 h-16 bg-[#181A20] border-b border-[#23262F] shadow-lg">
-        {/* Left: Logo/Icon */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center bg-[#23262F] rounded-md">
-            {/* Replace with your logo if needed */}
             <Settings className="w-6 h-6 text-white" />
           </div>
 

@@ -163,7 +163,7 @@ export class DiscordAPI {
 				'Content-Type': 'application/json',
 			},
 		});
-		
+
 		if (!response.ok) {
 			const errorText = await response.text();
 			throw new Error(
@@ -171,6 +171,27 @@ export class DiscordAPI {
 			);
 		}
 		return response.json();
+	}
+
+	async getGuildMembersWithBotToken(
+		guildId: string,
+		limit = 10,
+		after?: string
+	): Promise<DiscordMember[]> {
+		let url = `${this.baseURL}/guilds/${guildId}/members?limit=${limit}`;
+		if (after) url += `&after=${after}`;
+		const response = await fetch(url, {
+			headers: {
+				Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+			},
+		});
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(
+				`Discord API error: ${response.status} ${response.statusText} - ${errorText}`
+			);
+		}
+		return response.json() as Promise<DiscordMember[]>;
 	}
 }
 

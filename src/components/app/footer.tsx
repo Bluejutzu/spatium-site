@@ -29,7 +29,6 @@ export function DiscordFooter() {
         <div className='absolute top-20 right-20 w-96 h-96 bg-white/5 rounded-full blur-3xl' />
         <div className='absolute bottom-40 left-20 w-80 h-80 bg-discord-green/10 rounded-full blur-3xl' />
       </div>
-
       <div className='relative flex-1 flex flex-col'>
         <div className='flex-1 py-20'>
           {/* I fucking hate CSS, removing this breaks everything */}
@@ -83,12 +82,12 @@ export function DiscordFooter() {
                     whileHover={{ y: -2 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                   >
-                    <Link
-                      href={link.href}
+                    <a
+                      href={link.href as RoutePath}
                       className='text-white/70 hover:text-white transition-colors duration-300 font-medium'
                     >
                       {link.name}
-                    </Link>
+                    </a>
                   </motion.div>
                 ))}
               </div>

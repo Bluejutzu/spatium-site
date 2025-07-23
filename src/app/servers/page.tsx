@@ -2,33 +2,21 @@
 
 import { useUser } from '@clerk/nextjs';
 import { useQuery } from 'convex/react';
-import { motion, useScroll } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Activity,
   ArrowDown,
   BarChart3,
   Bot,
-  ChevronRight,
-  Crown,
-  ExternalLink,
-  Filter,
-  Globe,
-  Grid3X3,
-  List,
+  Loader2,
   Plus,
-  Search,
   Settings,
-  Shield,
   Sparkles,
   Star,
-  TrendingUp,
   Users,
-  Zap,
 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { DiscordFooter } from '@/components/app/footer';
 import { AnimatedHeader } from '@/components/app/header';
@@ -36,39 +24,61 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 import { api } from '../../../convex/_generated/api';
 
 const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=1384798729055375410&permissions=8&scope=bot%20applications.commands`;
 
 export default function ServerPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
+  const toast = useToast();
+  const [hasError, setHasError] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
   const servers = useQuery(
     api.discord.getUserServers,
     user ? { userId: user.externalAccounts[0]?.providerUserId } : 'skip'
   );
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-  const [scrollY, setScrollY] = useState('0%');
-  // Move useScroll to top-level, after refs
-  const scroll = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
-  const scrollYProgressRef = useRef(scroll.scrollYProgress);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted && containerRef.current) {
-      const unsubscribe = scroll.scrollYProgress.on('change', (latest) => {
-        setScrollY(`${latest * 50}%`);
-      });
-      scrollYProgressRef.current = scroll.scrollYProgress;
-      return () => unsubscribe();
+  React.useEffect(() => {
+    if (!isLoaded) return;
+    if (!user) {
+      setLoading(false);
+      setHasError(false);
     }
-  }, [mounted, scroll.scrollYProgress]);
+  }, [isLoaded, user]);
+
+  React.useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    if (servers === undefined) {
+      setLoading(true);
+      setHasError(false);
+      return;
+    }
+
+    if (servers === null) {
+      setHasError(true);
+      setLoading(false);
+      toast.error('Failed to fetch servers', 'There was a problem fetching your servers. Please try again later.');
+      return;
+    }
+
+    setLoading(false);
+    setHasError(false);
+  }, [servers, user, isLoaded, toast]);
+
+  if (!isLoaded) {
+    return (
+      <div className='bg-discord-dark font-minecraft min-h-screen flex items-center justify-center'>
+        <div className='flex items-center gap-3 text-white'>
+          <Loader2 className='h-6 w-6 animate-spin text-discord-blurple' />
+          <span className='text-xl'>Loading your servers...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -92,17 +102,35 @@ export default function ServerPage() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className='bg-discord-dark font-minecraft min-h-screen flex items-center justify-center'>
+        <div className='flex items-center gap-3 text-white'>
+          <Loader2 className='h-6 w-6 animate-spin text-discord-blurple' />
+          <span className='text-xl'>Loading your servers...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className='bg-discord-dark font-minecraft min-h-screen flex items-center justify-center'>
+        <div className='flex flex-col items-center gap-3 text-white'>
+          <Bot className='h-20 w-20 mb-4 text-discord-blurple' />
+          <span className='text-2xl font-bold'>Failed to load servers</span>
+          <span className='text-discord-text'>There was a problem fetching your servers. Please try again later.</span>
+          <Button onClick={() => window.location.reload()} className='mt-4'>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-discord-dark overflow-hidden font-minecraft min-h-screen" ref={containerRef}>
+    <div className="bg-discord-dark overflow-hidden font-minecraft min-h-screen">
       {/* Enhanced Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
-        {mounted && (
-          <motion.div
-            className='absolute inset-0 bg-grid-pattern opacity-5'
-            style={{ y: scrollY }}
-          />
-        )}
         <div className='floating-orb floating-orb-1' />
         <div className='floating-orb floating-orb-2' />
         <div className='floating-orb floating-orb-3' />
@@ -121,10 +149,6 @@ export default function ServerPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <Badge className='mb-8 bg-discord-green/20 text-discord-green border-discord-green/30 px-6 py-3 font-bold text-lg'>
-                <Crown className='mr-2 h-5 w-5' />
-                COMMAND CENTER ACTIVE
-              </Badge>
               <h1 className='text-6xl md:text-8xl lg:text-9xl font-black text-white mb-8 leading-tight tracking-tight'>
                 <span className='block mb-4'>YOUR</span>
                 <span className='block bg-gradient-to-r from-discord-blurple via-purple-500 to-pink-500 bg-clip-text text-transparent glow-text'>
@@ -132,11 +156,7 @@ export default function ServerPage() {
                 </span>
               </h1>
               <p className='text-xl md:text-2xl text-discord-text max-w-4xl mx-auto mb-12 leading-relaxed font-medium'>
-                Monitor, manage, and optimize your Discord empire with
-                <br />
-                <span className='text-white font-bold'>
-                  cutting-edge automation and analytics
-                </span>
+                Monitor, manage, and optimize your Discord servers
               </p>
             </motion.div>
 
@@ -178,57 +198,42 @@ export default function ServerPage() {
                             style={{ outline: 'none' }}
                           >
                             <CardContent className='p-6'>
-                                <div className='flex items-center gap-4 mb-4'>
-                                  <div className='relative'>
-                                    <div className='w-12 h-12 bg-gradient-to-br from-discord-blurple to-discord-purple rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden'>
-                                      {server.icon ? (
-                                        <Image
-                                          src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`}
-                                          alt={server.name}
-                                          width={48}
-                                          height={48}
-                                          className='w-12 h-12 rounded-lg object-cover'
-                                        />
-                                      ) : (
-                                        server.name.charAt(0).toUpperCase()
-                                      )}
-                                    </div>
-                                    <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-discord-dark animate-pulse' />
+                              <div className='flex items-center gap-4 mb-1'>
+                                <div className='relative'>
+                                  <div className='w-12 h-12 bg-gradient-to-br from-discord-blurple to-discord-purple rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden'>
+                                    {server.icon ? (
+                                      <Image
+                                        src={`https://cdn.discordapp.com/icons/${server.serverId}/${server.icon}.png`}
+                                        alt={server.name}
+                                        width={48}
+                                        height={48}
+                                        className='w-12 h-12 rounded-lg object-cover'
+                                      />
+                                    ) : (
+                                      server.name.charAt(0).toUpperCase()
+                                    )}
                                   </div>
-
-                                  <div className='flex-1 min-w-0'>
-                                    <h3 className='font-bold text-white truncate group-hover:text-discord-blurple transition-colors'>
-                                      {server.name}
-                                    </h3>
-                                    <div className='flex items-center gap-4 mt-1 text-sm text-discord-text'>
-                                      <span className='flex items-center gap-1'>
-                                        <Users className='h-3 w-3' />
-                                        {server.memberCount.toLocaleString()}
-                                      </span>
-                                      <span className='flex items-center gap-1'>
-                                        <div className='w-2 h-2 bg-green-500 rounded-full animate-pulse' />
-                                        {server.onlineCount} online
-                                      </span>
-                                    </div>
-                                  </div>
+                                  <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-discord-dark animate-pulse' />
                                 </div>
 
-                                <div className='grid grid-cols-1 gap-2 z-50'>
-                                  <Button
-                                    size='sm'
-                                    variant='outline'
-                                    className='discord-button-outline text-xs bg-transparent'
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      router.push(`/dashboard/${server.serverId}/settings`);
-                                    }}
-                                  >
-                                    <Settings className='h-3 w-3 mr-1' />
-                                    SETTINGS
-                                  </Button>
+                                <div className='flex-1 min-w-0'>
+                                  <h3 className='font-bold text-white truncate group-hover:text-discord-blurple transition-colors'>
+                                    {server.name}
+                                  </h3>
+                                  <div className='flex items-center gap-4 mt-1 text-sm text-discord-text'>
+                                    <span className='flex items-center gap-1'>
+                                      <Users className='h-3 w-3' />
+                                      {server.memberCount.toLocaleString()}
+                                    </span>
+                                    <span className='flex items-center gap-1'>
+                                      <div className='w-2 h-2 bg-green-500 rounded-full animate-pulse' />
+                                      {server.onlineCount} online
+                                    </span>
+                                  </div>
                                 </div>
-                              </CardContent>
-                            </Card>
+                              </div>
+                            </CardContent>
+                          </Card>
                         </div>
                       ))}
                     </div>
@@ -311,13 +316,8 @@ export default function ServerPage() {
                     features: ['Real-time analytics', 'Growth tracking', 'Engagement metrics', 'Performance reports'],
                   },
                 ].map((step, index) => (
-                  <motion.div
+                  <div
                     key={index}
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -10, scale: 1.02 }}
                     className="group"
                   >
                     <Card className='discord-card h-full text-center border-2 border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-500 overflow-hidden relative'>
@@ -329,17 +329,11 @@ export default function ServerPage() {
                       </div>
 
                       <CardContent className='p-8 relative z-10'>
-                        <motion.div
+                        <div
                           className={`p-6 rounded-2xl bg-gradient-to-r from-${step.accent}/20 to-${step.accent}/10 w-fit mx-auto mb-8 border border-${step.accent}/30`}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 17,
-                          }}
                         >
                           <step.icon className={`h-10 w-10 text-${step.accent}`} />
-                        </motion.div>
+                        </div>
 
                         <h3 className='text-2xl font-bold text-white mb-6 tracking-wide group-hover:text-discord-blurple transition-colors duration-300'>
                           {step.title}
@@ -351,24 +345,20 @@ export default function ServerPage() {
                         {/* Feature list */}
                         <div className="space-y-3">
                           {step.features.map((feature, featureIndex) => (
-                            <motion.div
+                            <div
                               key={featureIndex}
-                              initial={{ opacity: 0, x: -20 }}
-                              whileInView={{ opacity: 1, x: 0 }}
-                              transition={{ duration: 0.4, delay: index * 0.2 + featureIndex * 0.1 }}
-                              viewport={{ once: true }}
                               className="flex items-center gap-3 text-sm"
                             >
                               <div className={`w-2 h-2 rounded-full bg-${step.accent}`} />
                               <span className="text-discord-text group-hover:text-white transition-colors duration-300">
                                 {feature}
                               </span>
-                            </motion.div>
+                            </div>
                           ))}
                         </div>
                       </CardContent>
                     </Card>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>

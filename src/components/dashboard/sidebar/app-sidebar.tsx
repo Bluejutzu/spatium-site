@@ -41,7 +41,6 @@ export function AppSidebar({
   activeSection: string
   onSectionChange: (section: string) => void
 } & React.ComponentProps<typeof Sidebar>) {
-  // Navigation items based on old dashboard sidebar
   const navigationItems = [
     {
       id: "dashboard",

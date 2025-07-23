@@ -27,9 +27,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 }) => {
     const text = useMemo(() => {
         const hasTrailing = /\s|\u00A0$/.test(marqueeText);
-        return (
-            (hasTrailing ? marqueeText.replace(/\s+$/, "") : marqueeText) + "\u00A0"
-        );
+        return ((hasTrailing ? marqueeText.replace(/\s+$/, "") : marqueeText) + "\u00A0");
     }, [marqueeText]);
 
     const measureRef = useRef<SVGTextElement | null>(null);

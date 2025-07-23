@@ -3,7 +3,9 @@
 import { useUser } from "@clerk/nextjs"
 import { useQuery } from "convex/react"
 import { useParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { useState } from "react"
+import React from "react"
 
 import { CommandsContent } from "@/app/dashboard/[serverId]/commands/page";
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
@@ -46,8 +48,17 @@ export type DashboardSection =
 
 export default function DashboardPage() {
   const params = useParams<{ serverId: string }>()
+  const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState<DashboardSection>("dashboard")
   const { user } = useUser()
+  // On mount, check for ?tab=moderation
+  React.useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && tab.toLowerCase() === 'moderation') {
+      setActiveSection('moderation');
+    }
+    // eslint-disable-next-line
+  }, []);
   const servers = useQuery(
     api.discord.getUserServers,
     user ? { userId: user.externalAccounts[0]?.providerUserId } : "skip"

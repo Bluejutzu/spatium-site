@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "convex/react";
 import { motion, useInView } from "framer-motion"
 import {
   Activity,
@@ -11,27 +12,26 @@ import {
   FileText,
   Filter,
   MessageSquare,
-  MoreVertical,
   Search,
-  Settings,
   Shield,
   Timer,
   TrendingUp,
   Users,
   UserX,
-  XCircle,
   Zap,
 } from "lucide-react"
-import { useRef, useState } from "react"
+import { useRouter } from "next/navigation";
+import { useEffect,useRef, useState } from "react"
 
+import { api } from "@/../convex/_generated/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -41,11 +41,8 @@ interface ModerationContentProps {
 }
 
 // Enhanced Action Card Component
-function ActionCard({ action, index }: { action: any; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-50px" })
-  const [isHovered, setIsHovered] = useState(false)
-
+function ActionCard({ action, serverId, profileCache }: { action: any; serverId: string; profileCache: Record<string, any> }) {
+  const router = useRouter();
   const getActionIcon = (actionType: string) => {
     switch (actionType) {
       case "Ban": return <Ban className="w-5 h-5 text-discord-red" />
@@ -55,7 +52,6 @@ function ActionCard({ action, index }: { action: any; index: number }) {
       default: return <Shield className="w-5 h-5 text-discord-blurple" />
     }
   }
-
   const getActionColor = (actionType: string) => {
     switch (actionType) {
       case "Ban": return "discord-red"
@@ -65,101 +61,74 @@ function ActionCard({ action, index }: { action: any; index: number }) {
       default: return "discord-blurple"
     }
   }
-
-  const actionColor = getActionColor(action.action)
-
+  const actionColor = getActionColor(action.action);
+  // Get user and moderator profile
+  const userProfile = profileCache[action.user];
+  const modProfile = profileCache[action.moderator];
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: -20 }}
-      animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      whileHover={{ x: 5, scale: 1.01 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group"
+    <Card
+      className={`flex flex-row items-center gap-6 border border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-300 overflow-hidden relative cursor-pointer bg-discord-darker/80 hover:bg-discord-darker/95`}
+      onClick={() => router.push(`/dashboard/${serverId}/moderation/${action._id}`)}
+      tabIndex={0}
+      role="button"
+      aria-label={`View moderation action ${action.action}`}
     >
-      <Card className="discord-card border border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-300 overflow-hidden relative">
-        {/* Enhanced background gradient */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-${actionColor}/5 via-transparent to-${actionColor}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-        <CardContent className="p-6 relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <motion.div
-                className={`p-3 rounded-xl bg-gradient-to-r from-${actionColor}/20 to-${actionColor}/10 border border-${actionColor}/30 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
-                animate={isHovered ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                {getActionIcon(action.action)}
-              </motion.div>
-
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-white group-hover:text-discord-blurple transition-colors duration-300">
-                    {action.action} - {action.user}
-                  </h3>
-                  <Badge className={`bg-${actionColor}/20 text-${actionColor} border-${actionColor}/30 text-xs px-2 py-1`}>
-                    {action.action}
-                  </Badge>
-                </div>
-
-                <p className="text-discord-text text-sm mb-2 group-hover:text-white/90 transition-colors duration-300">
-                  <span className="font-medium">Reason:</span> {action.reason}
-                </p>
-
-                <div className="flex items-center gap-4 text-xs text-discord-text">
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    by {action.moderator}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {action.time}
-                  </span>
-                  {action.duration && (
-                    <span className="flex items-center gap-1">
-                      <Timer className="w-3 h-3" />
-                      {action.duration}
-                    </span>
+      <div className={`p-3 rounded-xl bg-gradient-to-r from-${actionColor}/20 to-${actionColor}/10 border border-${actionColor}/30 shadow-lg flex-shrink-0 ml-4`}>{getActionIcon(action.action)}</div>
+      {/* User avatar/username */}
+      <div className="flex flex-col items-center mr-4">
+        <Avatar className="h-10 w-10 mb-1">
+          {userProfile?.avatar ? (
+            <AvatarImage src={`https://cdn.discordapp.com/avatars/${userProfile.id}/${userProfile.avatar}.png?size=64`} alt={userProfile.username} />
+          ) : (
+            <AvatarFallback>{userProfile?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+          )}
+        </Avatar>
+        <span className="text-xs text-white font-semibold truncate max-w-[80px]">{userProfile?.username || action.user}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-bold text-white group-hover:text-discord-blurple transition-colors duration-300 truncate">
+            {action.action} - {userProfile?.username || action.user}
+          </h3>
+          <Badge className={`bg-${actionColor}/20 text-${actionColor} border-${actionColor}/30 text-xs px-2 py-1`}>
+            {action.action}
+          </Badge>
+        </div>
+        <p className="text-discord-text text-sm mb-2 truncate">
+          <span className="font-medium">Reason:</span> {action.reason}
+        </p>
+        <div className="flex items-center gap-4 text-xs text-discord-text">
+          <span className="flex items-center gap-1">
+            <Users className="w-3 h-3" />
+            by {modProfile ? (
+              <span className="flex items-center gap-1">
+                <Avatar className="h-5 w-5">
+                  {modProfile.avatar ? (
+                    <AvatarImage src={`https://cdn.discordapp.com/avatars/${modProfile.id}/${modProfile.avatar}.png?size=32`} alt={modProfile.username} />
+                  ) : (
+                    <AvatarFallback>{modProfile?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
                   )}
-                </div>
-              </div>
-            </div>
-
-            {/* Action menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-discord-text hover:text-white hover:bg-white/10 transition-all duration-300 opacity-0 group-hover:opacity-100"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-discord-darker border-discord-border shadow-2xl">
-                <DropdownMenuItem className="text-discord-text hover:text-white hover:bg-white/5 p-3">
-                  <Eye className="w-4 h-4 mr-3 text-blue-500" />
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-discord-text hover:text-white hover:bg-white/5 p-3">
-                  <FileText className="w-4 h-4 mr-3 text-green-500" />
-                  View Logs
-                </DropdownMenuItem>
-                {action.action === "Ban" && (
-                  <DropdownMenuItem className="text-discord-text hover:text-green-400 hover:bg-green-500/10 p-3">
-                    <CheckCircle className="w-4 h-4 mr-3 text-green-500" />
-                    Unban User
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  )
+                </Avatar>
+                <span className="text-white font-medium">{modProfile.username}</span>
+              </span>
+            ) : (
+              action.moderator
+            )}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {action.time}
+          </span>
+          {action.duration && (
+            <span className="flex items-center gap-1">
+              <Timer className="w-3 h-3" />
+              {action.duration}
+            </span>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 // Enhanced Stats Card Component
@@ -213,55 +182,49 @@ function ModerationStatsCard({ title, value, icon: Icon, color, change, index }:
 }
 
 export function ModerationContent({ serverId }: ModerationContentProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filterType, setFilterType] = useState("all")
-  const [timeRange, setTimeRange] = useState("24h")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [timeRange, setTimeRange] = useState("24h");
+  const actions = useQuery(
+    api.discord.getModerationActions,
+    serverId ? { serverId } : "skip"
+  );
+  // User profile cache
+  const [profileCache, setProfileCache] = useState<Record<string, any>>({});
+  const fetchingProfiles = useRef<Set<string>>(new Set());
+  // Fetch and cache Discord user profile
+  const fetchProfile = async (userId: string) => {
+    if (!userId || profileCache[userId] || fetchingProfiles.current.has(userId)) return;
+    fetchingProfiles.current.add(userId);
+    try {
+      const res = await fetch(`/api/discord/user?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setProfileCache(prev => ({ ...prev, [userId]: data }));
+      }
+    } finally {
+      fetchingProfiles.current.delete(userId);
+    }
+  };
+  // Fetch all needed profiles on actions change
+  useEffect(() => {
+    if (!actions) return;
+    actions.forEach((action: any) => {
+      if (action.user) fetchProfile(action.user);
+      if (action.moderator) fetchProfile(action.moderator);
+    });
+    // eslint-disable-next-line
+  }, [actions]);
 
-  const recentActions = [
-    {
-      action: "Ban",
-      user: "ToxicUser123",
-      reason: "Repeated spam and harassment",
-      moderator: "AdminUser",
-      time: "2 min ago",
-      duration: "Permanent",
-      id: "1"
-    },
-    {
-      action: "Kick",
-      user: "RuleBreaker456",
-      reason: "Inappropriate content in general chat",
-      moderator: "ModeratorX",
-      time: "15 min ago",
-      id: "2"
-    },
-    {
-      action: "Warn",
-      user: "NewUser789",
-      reason: "Minor rule violation - first offense",
-      moderator: "Helper99",
-      time: "1 hour ago",
-      id: "3"
-    },
-    {
-      action: "Timeout",
-      user: "SpamBot001",
-      reason: "Automated spam detection triggered",
-      moderator: "AutoMod",
-      time: "2 hours ago",
-      duration: "24 hours",
-      id: "4"
-    },
-    {
-      action: "Ban",
-      user: "BadActor999",
-      reason: "Doxxing and harassment",
-      moderator: "AdminUser",
-      time: "3 hours ago",
-      duration: "Permanent",
-      id: "5"
-    },
-  ]
+  const filteredActions = (actions || []).filter(action => {
+    const matchesSearch =
+      (action.user?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+      (action.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+    const matchesFilter =
+      filterType === "all" ||
+      (action.action?.toLowerCase() === filterType.toLowerCase());
+    return matchesSearch && matchesFilter;
+  });
 
   const stats = [
     { title: "Active Warnings", value: "3", icon: AlertTriangle, color: "discord-yellow", change: "+1 today" },
@@ -269,13 +232,6 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
     { title: "Kicks This Month", value: "8", icon: UserX, color: "discord-orange", change: "+3 vs last month" },
     { title: "Auto-Mod Actions", value: "45", icon: Shield, color: "discord-green", change: "+15 today" },
   ]
-
-  const filteredActions = recentActions.filter(action => {
-    const matchesSearch = action.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         action.reason.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterType === "all" || action.action.toLowerCase() === filterType.toLowerCase()
-    return matchesSearch && matchesFilter
-  })
 
   return (
     <div className="flex-1 overflow-auto bg-discord-dark">
@@ -417,7 +373,7 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
                   RECENT <span className="text-discord-green glow-text">ACTIONS</span>
                 </h2>
                 <p className="text-discord-text text-lg">
-                  {filteredActions.length} of {recentActions.length} actions
+                  {filteredActions.length} of {actions?.length || 0} actions
                   {searchQuery && ` matching "${searchQuery}"`}
                   {filterType !== "all" && ` filtered by ${filterType}`}
                 </p>
@@ -457,8 +413,8 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
 
           {filteredActions.length > 0 ? (
             <div className="space-y-4">
-              {filteredActions.map((action, index) => (
-                <ActionCard key={action.id} action={action} index={index} />
+              {filteredActions.map((action) => (
+                <ActionCard key={action._id} action={action} serverId={serverId!} profileCache={profileCache} />
               ))}
             </div>
           ) : (

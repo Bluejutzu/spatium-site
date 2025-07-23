@@ -1,7 +1,7 @@
 'use client';
 
-import { useMutation,useQuery } from 'convex/react';
-import { AnimatePresence,motion } from 'framer-motion';
+import { useMutation, useQuery } from 'convex/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
   Clock,
@@ -24,7 +24,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   AlertDialog,
@@ -510,11 +510,10 @@ export default function CommandsPage({ params }: any) {
                                     variant={
                                       isEnabled ? 'default' : 'secondary'
                                     }
-                                    className={`${
-                                      isEnabled
-                                        ? 'bg-green-600/90 text-white border-green-400/50 shadow-green-500/20'
-                                        : 'bg-gray-600/90 text-gray-200 border-gray-400/50'
-                                    } backdrop-blur-sm font-semibold px-3 py-1 shadow-lg`}
+                                    className={`${isEnabled
+                                      ? 'bg-green-600/90 text-white border-green-400/50 shadow-green-500/20'
+                                      : 'bg-gray-600/90 text-gray-200 border-gray-400/50'
+                                      } backdrop-blur-sm font-semibold px-3 py-1 shadow-lg`}
                                   >
                                     {isEnabled ? 'Active' : 'Disabled'}
                                   </Badge>

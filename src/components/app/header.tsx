@@ -1,7 +1,7 @@
 'use client';
 
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
-import { motion, useMotionValueEvent,useScroll } from 'framer-motion';
+import { motion, useMotionValueEvent, useScroll } from 'framer-motion';
 import { Bot, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -84,30 +84,20 @@ export function AnimatedHeader({ showNavigation = true }: AnimatedHeaderProps) {
           </motion.a>
 
           {showNavigation && (
-            <motion.nav
-              className='hidden md:flex items-center gap-8'
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
+            <nav className='hidden md:flex items-center gap-8'>
               {[
-                { href: '#features', label: 'Features' },
                 { href: '/pricing', label: 'Pricing' },
                 { href: '#docs', label: 'Documentation' },
               ].map((item, index) => (
-                <motion.a
+                <a
                   key={item.href}
                   href={item.href}
                   className='text-discord-text hover:text-white transition-colors font-medium font-minecraft'
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                  whileHover={{ y: -2 }}
                 >
                   {item.label}
-                </motion.a>
+                </a>
               ))}
-            </motion.nav>
+            </nav>
           )}
 
           <motion.div

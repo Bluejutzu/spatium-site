@@ -771,7 +771,6 @@ export function PlaygroundCommandFlowBuilder() {
           </Button>
         </div>
       </div>
-
       <ReactFlowProvider>
         <div className='flex h-full pt-16'>
           {showPalette && (
@@ -931,7 +930,6 @@ export function PlaygroundCommandFlowBuilder() {
           </div>
         </div>
       </ReactFlowProvider>
-
       {/* Save Dialog */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
         <DialogContent className="bg-discord-darker border-discord-border">

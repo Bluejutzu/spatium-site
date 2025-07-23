@@ -4,11 +4,13 @@ import Link from 'next/link';
 import React from 'react';
 
 import { Button } from '../ui/button';
+import DarkVeil from '../ui/DarkVeil';
 
 
 export default function Hero1() {
   return (
     <div className="relative w-full bg-neutral-950">
+      <DarkVeil />
       <div className="absolute top-0 z-[0] h-full w-full bg-neutral-900/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
       <section className="z-1 relative mx-auto max-w-full">
         <div className="pointer-events-none absolute h-full w-full overflow-hidden opacity-50 [perspective:200px]">
@@ -40,10 +42,9 @@ export default function Hero1() {
                 <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
                 <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-gray-950 text-lg font-medium text-gray-50 backdrop-blur-3xl">
                   <SignedIn>
-                    <Link className='group inline-flex w-full items-center justify-center rounded-full border-[1px] border-input bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent px-10 py-4 text-center text-white transition-colors hover:bg-transparent/90 sm:w-auto'
-                      href="/servers">
+                    <a href="/servers" className='group inline-flex w-full items-center justify-center rounded-full border-[1px] border-input bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent px-10 py-4 text-center text-white transition-colors hover:bg-transparent/90 sm:w-auto'>
                       Servers
-                    </Link>
+                    </a>
                   </SignedIn>
 
                   <SignedOut>

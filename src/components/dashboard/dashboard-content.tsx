@@ -1,13 +1,12 @@
 "use client"
 
+import { useQuery } from 'convex/react';
 import { motion, useInView } from "framer-motion"
 import {
   Activity,
-  AlertTriangle,
   ArrowUpRight,
   BarChart3,
   Bell,
-  Bot,
   CheckCircle,
   Clock,
   Crown,
@@ -31,6 +30,8 @@ import { useRef } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+import { api } from '../../../convex/_generated/api';
 
 interface DashboardContentProps {
   serverId?: string
@@ -164,9 +165,8 @@ function ActivityItem({ activity, index }: { activity: any; index: number }) {
       transition={{ duration: 0.4, delay: index * 0.1 }}
       whileHover={{ x: 5 }}
     >
-      <div className={`w-3 h-3 rounded-full ${
-        activity.success ? "bg-green-500" : "bg-red-500"
-      } animate-pulse shadow-lg`} />
+      <div className={`w-3 h-3 rounded-full ${activity.success ? "bg-green-500" : "bg-red-500"
+        } animate-pulse shadow-lg`} />
       <div className="flex-1">
         <p className="text-white font-medium group-hover:text-discord-blurple transition-colors duration-300">
           <span className="font-mono text-discord-blurple">/{activity.command}</span> executed by{" "}
@@ -174,11 +174,10 @@ function ActivityItem({ activity, index }: { activity: any; index: number }) {
         </p>
         <p className="text-xs text-discord-text">{activity.time}</p>
       </div>
-      <Badge className={`${
-        activity.success
+      <Badge className={`${activity.success
           ? 'bg-green-500/20 text-green-400 border-green-500/30'
           : 'bg-red-500/20 text-red-400 border-red-500/30'
-      }`}>
+        }`}>
         {activity.success ? 'Success' : 'Failed'}
       </Badge>
     </motion.div>
@@ -216,6 +215,10 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
     { command: "purge", user: "ModeratorX", time: "12 min ago", success: false },
     { command: "role", user: "Helper99", time: "15 min ago", success: true },
   ]
+
+  // Fetch commands and moderation actions from Convex
+  const commands = useQuery(api.discord.getCommands, serverId ? { serverId } : 'skip');
+  const moderationActions = useQuery(api.discord.getModerationActions, serverId ? { serverId } : 'skip');
 
   return (
     <div className="flex-1 overflow-auto bg-discord-dark">
@@ -635,19 +638,12 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   {[
-                    { label: "Commands Created", value: "0", change: "+0", color: "discord-blurple" },
-                    { label: "Active Automations", value: "0", change: "+0", color: "discord-green" },
-                    { label: "Mod Actions", value: "0", change: "+0", color: "discord-red" },
-                    { label: "API Calls", value: "0", change: "+0", color: "discord-purple" },
+                    { label: "Commands Created", value: String(commands?.length ?? 0), change: '', color: "discord-blurple" },
+                    { label: "Mod Actions", value: String(moderationActions?.length ?? 0), change: '', color: "discord-red" },
                   ].map((stat, index) => (
-                    <motion.div
+                    <div
                       key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
-                      viewport={{ once: true }}
                       className="flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors duration-300 group"
-                      whileHover={{ x: 5 }}
                     >
                       <span className="text-discord-text group-hover:text-white transition-colors duration-300">
                         {stat.label}
@@ -656,11 +652,13 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                         <div className={`text-xl font-bold text-${stat.color}`}>
                           {stat.value}
                         </div>
-                        <div className={`text-xs text-${stat.color}/70`}>
-                          {stat.change}
-                        </div>
+                        {stat.change && (
+                          <div className={`text-xs text-${stat.color}/70`}>
+                            {stat.change}
+                          </div>
+                        )}
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </CardContent>
               </Card>

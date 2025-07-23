@@ -1,7 +1,7 @@
 "use client"
 
-import { SignedIn,SignedOut, SignInButton } from "@clerk/nextjs"
-import { motion, useInView,useScroll, useTransform } from "framer-motion"
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs"
+import { motion, useInView, useScroll, useTransform } from "framer-motion"
 import {
   Activity,
   ArrowRight,
@@ -13,7 +13,6 @@ import {
   Crown,
   Database,
   Globe,
-  Layers,
   MessageSquare,
   Palette,
   Rocket,
@@ -26,7 +25,7 @@ import {
   Zap,
 } from "lucide-react"
 import Link from "next/link"
-import { useEffect,useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -35,14 +34,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import Hero1 from "../mvpblocks/hero-1"
 import { StaticNoise } from "../ui/AnimatedNoise"
 import CurvedLoop from "../ui/CurvedLoop"
-import DarkVeil from "../ui/DarkVeil"
+import RotatingText from "../ui/RotatingText"
 import { VelocityScroll } from "../ui/scrollbasedvelocity"
 import { DiscordFooter } from "./footer"
 import { AnimatedHeader } from "./header"
 
-
-
-// Enhanced Animated Counter Component with better performance
 function AnimatedCounter({
   end,
   duration = 2000,
@@ -446,10 +442,8 @@ export function LandingPage() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-discord-blurple/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
-
       <AnimatedHeader />
       <Hero1 />
-
       {/* Enhanced Features Section */}
       <section className="relative py-32 bg-discord-darker/50">
         <div className="container mx-auto px-6 relative z-10">
@@ -488,10 +482,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Stats Section */}
       <StatsSection />
-
       {/* Enhanced Feature Showcase Section */}
       <section className="relative py-32 bg-discord-dark">
         <div className="container mx-auto px-6">
@@ -734,10 +726,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Testimonials Section */}
       <TestimonialsSection />
-
       {/* Enhanced Velocity Scroll */}
       <div className="py-20">
         <VelocityScroll
@@ -747,7 +737,6 @@ export function LandingPage() {
         />
       </div>
 
-      {/* Enhanced CTA Section */}
       <section className="relative py-32 min-h-screen flex items-center justify-center bg-discord-darker">
         <StaticNoise opacity={0.05} />
         <div className="container mx-auto px-6 text-center relative z-10">
@@ -757,19 +746,25 @@ export function LandingPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <Badge className="bg-discord-blurple/20 text-discord-blurple border-discord-blurple/30 mb-8 px-6 py-3 text-lg font-bold">
-              <Crown className="mr-2 h-5 w-5" />
-              Ready to Get Started?
-            </Badge>
 
-            <h2 className="text-6xl md:text-9xl font-black text-white mb-10 leading-tight">
-              READY TO
-              <br />
-              <span className="bg-gradient-to-r from-discord-blurple via-purple-500 to-pink-500 bg-clip-text text-transparent glow-text">
-                TRANSFORM
+            <h2 className="text-6xl md:text-9xl font-black text-white mb-10 leading-tight text-center">
+              <span className="block">READY TO</span>
+              <span className="w-full flex justify-center items-center" style={{ minWidth: "12ch" }}>
+                <RotatingText
+                  texts={['TRANSFORM', 'FIX', 'MODERNIZE']}
+                  mainClassName="bg-gradient-to-r from-discord-blurple via-purple-500 to-pink-500 bg-clip-text text-transparent glow-text"
+                  staggerFrom={"center"}
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "120%" }}
+                  splitBy="characters"
+                  staggerDuration={0.025}
+                  splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+                  transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                  rotationInterval={2000}
+                />
               </span>
-              <br />
-              YOUR SERVER?
+              <span className="block">YOUR SERVER?</span>
             </h2>
             <p className="text-xl md:text-2xl text-discord-text mb-16 max-w-3xl mx-auto leading-relaxed">
               Start building amazing Discord experiences today with Spatium's powerful visual tools,
@@ -818,38 +813,10 @@ export function LandingPage() {
                 </Button>
               </motion.div>
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
-            >
-              {[
-                { icon: Shield, text: "Enterprise Security" },
-                { icon: Cloud, text: "99.9% Uptime" },
-                { icon: Users, text: "24/7 Support" },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-center gap-3 text-discord-text">
-                  <item.icon className="w-5 h-5 text-discord-blurple" />
-                  <span className="font-medium">{item.text}</span>
-                </div>
-              ))}
-            </motion.div>
           </motion.div>
         </div>
-        <CurvedLoop
-          marqueeText="Be ✦ Creative ✦ With ✦ Spatium ✦ Transform ✦ Your ✦ Discord ✦"
-          speed={2}
-          curveAmount={500}
-          direction="left"
-          interactive={true}
-          className="font-minecraft animate-pulse-glow"
-        />
       </section>
-
       <DiscordFooter />
     </div>
-  )
+  );
 }
