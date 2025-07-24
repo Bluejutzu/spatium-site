@@ -9,7 +9,12 @@
     "strict": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules", "dist"],
-  "include": ["src"],
-  "exclude": ["../../convex"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "../../convex"
+  ],
+  "include": [
+    "src"
+  ],
 }

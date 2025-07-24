@@ -60,7 +60,7 @@ export default function Hero1() {
           </div>
           <div className="mx-10 mt-24">
             <Image
-              src="/image.png"
+              src="/Demo.png"
               className="w-full rounded-lg border shadow-lg"
               alt=""
               width={1920}
