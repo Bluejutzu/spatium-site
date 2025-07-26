@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { DiscordAPI } from '@/features/discord/api';
 
 export async function GET(req: NextRequest) {
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
         m.nick?.toLowerCase().includes(s)
       );
     }
-    return NextResponse.json({ members: filtered, total: null });
+    return NextResponse.json({ members: filtered, total: filtered.length });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to fetch members' }, { status: 500 });
   }

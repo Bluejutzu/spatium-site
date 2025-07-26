@@ -2,11 +2,9 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist_Mono,Inter } from "next/font/google";
-import { cookies } from "next/headers";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
 import { ConvexClientProvider, SyncClerkToConvex } from "@/features/auth";
 
 const fontSans = Inter({

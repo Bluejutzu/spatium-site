@@ -99,7 +99,7 @@ export default defineSchema({
 		auditId: v.string(), // Discord audit log ID
 		serverId: v.string(),
 		action: v.string(), // ban, kick, mute, timeout, warn, unban, etc.
-		user: v.string(), // Discord user ID
+		userId: v.string(), // Discord user ID
 		reason: v.string(),
 		moderator: v.string(), // Discord moderator ID
 		time: v.string(),
@@ -110,10 +110,11 @@ export default defineSchema({
 		closedBy: v.optional(v.string()),
 		notificationMessage: v.optional(v.string()),
 		logMessage: v.optional(v.string()),
-		raw: v.any(),
+		deleteMessageHistory: v.optional(v.boolean()),
+		raw: v.optional(v.any()),
 	})
 		.index('by_server_id', ['serverId'])
-		.index('by_user', ['user'])
+		.index('by_user_id', ['userId'])
 		.index('by_moderator', ['moderator'])
 		.index('by_audit_id', ['auditId']),
 });

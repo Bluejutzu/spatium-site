@@ -11,11 +11,11 @@ import { CommandsContent } from "@/app/dashboard/[serverId]/commands/page";
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
 import { MembersContent } from "@/components/dashboard/members-content"
 import { ModerationContent } from "@/components/dashboard/moderation-content"
+import SettingsContent from "@/components/dashboard/settings-content"
 import { AppSidebar } from "@/components/dashboard/sidebar/app-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 
 import { api } from "../../../../convex/_generated/api"
-import { SettingsContent } from "./settings/page"
 
 export type DashboardSection =
   | "dashboard"
@@ -54,8 +54,8 @@ export default function DashboardPage() {
   // On mount, check for ?tab=moderation
   React.useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && tab.toLowerCase() === 'moderation') {
-      setActiveSection('moderation');
+    if (tab) {
+      setActiveSection(tab as DashboardSection)
     }
     // eslint-disable-next-line
   }, []);

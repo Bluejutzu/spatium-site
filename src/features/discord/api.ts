@@ -97,12 +97,9 @@ export class DiscordAPI {
 		);
 	}
 
-	async getGuildWithBotToken(
-		guildId: string,
-		withCounts: boolean
-	): Promise<DiscordGuild> {
+	async getGuildWithBotToken(guildId: string, with_counts = false): Promise<any> {
 		const response = await fetch(
-			`${this.baseURL}/guilds/${guildId}${withCounts ? '?with_counts=true' : ''}`,
+			`${this.baseURL}/guilds/${guildId}${with_counts ? `?with_counts=${with_counts}` : ""}`,
 			{
 				headers: {
 					Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
@@ -115,7 +112,7 @@ export class DiscordAPI {
 				`Discord API error: ${response.status} ${response.statusText} - ${errorText}`
 			);
 		}
-		return response.json() as Promise<DiscordGuild>;
+		return response.json();
 	}
 
 	async getGuildRolesWithBotToken(guildId: string): Promise<DiscordRole[]> {

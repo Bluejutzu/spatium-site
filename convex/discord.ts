@@ -418,14 +418,22 @@ export const updateModerationActionReason = mutation({
 
 export const upsertModerationAction = mutation({
 	args: {
-		auditId: v.string(),
+		auditId: v.string(), // Discord audit log ID
 		serverId: v.string(),
-		action: v.string(),
-		user: v.string(),
+		action: v.string(), // ban, kick, mute, timeout, warn, unban, etc.
+		userId: v.string(), // Discord user ID
 		reason: v.string(),
-		moderator: v.string(),
+		moderator: v.string(), // Discord moderator ID
 		time: v.string(),
-		raw: v.any(),
+		duration: v.optional(v.string()),
+		state: v.optional(v.string()), // open, closed, etc.
+		proof: v.optional(v.string()),
+		closedAt: v.optional(v.string()),
+		closedBy: v.optional(v.string()),
+		notificationMessage: v.optional(v.string()),
+		logMessage: v.optional(v.string()),
+		deleteMessageHistory: v.optional(v.boolean()),
+		raw: v.optional(v.any()),
 	},
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
@@ -464,7 +472,7 @@ export const updateModerationActionState = mutation({
 		const latest = await ctx.db
 			.query('moderationActions')
 			.withIndex('by_server_id', q => q.eq('serverId', args.serverId))
-			.filter(q => q.eq(q.field('user'), args.userId))
+			.filter(q => q.eq(q.field('userId'), args.userId))
 			.filter(q => q.eq(q.field('action'), args.action))
 			.order('desc')
 			.first();

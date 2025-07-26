@@ -25,20 +25,11 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Configure Git
-        run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-
       - name: Generate types
         run: node scripts/generate-types.mjs
 
       - name: Install & Build
         run: pnpm install && pnpm install discord.js && pnpm build
-        working-directory: ./packages/spatium-types
-
-      - name: Bump patch version
-        run: npm version patch
         working-directory: ./packages/spatium-types
 
       - name: Publish to npm
@@ -47,9 +38,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Push version changes
-        run: |
-          git push
-          git push --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

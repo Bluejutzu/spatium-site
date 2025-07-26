@@ -5,9 +5,8 @@
 
 @theme {
   --font-family-minecraft: 'Minecraft', 'Orbitron', monospace;
-
-  /* Base colors */
-  --color-background: oklch(0.141 0.005 285.823);
+    /* Base colors */
+    --color-background: oklch(0.141 0.005 285.823);
   --color-foreground: oklch(0.985 0 0);
   --color-card: oklch(0.21 0.006 285.885);
   --color-card-foreground: oklch(0.985 0 0);
@@ -65,6 +64,7 @@
 }
 
 @keyframes gradient-shift {
+
   0%,
   100% {
     background-position: 0% 50%;
@@ -76,6 +76,7 @@
 }
 
 @keyframes pulse-glow {
+
   0%,
   100% {
     opacity: 0.8;
@@ -121,12 +122,10 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   z-index: -1;
-  background: linear-gradient(
-    135deg,
-    var(--gradient-color, var(--color-discord-blurple)) 0%,
-    transparent 50%,
-    var(--gradient-color, var(--color-discord-blurple)) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--gradient-color, var(--color-discord-blurple)) 0%,
+      transparent 50%,
+      var(--gradient-color, var(--color-discord-blurple)) 100%);
 }
 
 .block-gradient-base:hover::before {
@@ -144,22 +143,14 @@
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   z-index: -1;
-  background: linear-gradient(
-    135deg,
-    color-mix(
-        in srgb,
+  background: linear-gradient(135deg,
+      color-mix(in srgb,
         var(--gradient-color, var(--color-discord-blurple)) 10%,
-        transparent
-      )
-      0%,
-    transparent 50%,
-    color-mix(
-        in srgb,
+        transparent) 0%,
+      transparent 50%,
+      color-mix(in srgb,
         var(--gradient-color, var(--color-discord-blurple)) 5%,
-        transparent
-      )
-      100%
-  );
+        transparent) 100%);
 }
 
 .block-gradient-base:hover::after {
@@ -205,59 +196,39 @@
 
 /* Animated gradient for selected blocks */
 .block-gradient-animated::before {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-color, var(--color-discord-blurple)) 0%,
-    color-mix(
-        in srgb,
+  background: linear-gradient(135deg,
+      var(--gradient-color, var(--color-discord-blurple)) 0%,
+      color-mix(in srgb,
         var(--gradient-color, var(--color-discord-blurple)) 80%,
-        white
-      )
-      25%,
-    transparent 50%,
-    color-mix(
-        in srgb,
+        white) 25%,
+      transparent 50%,
+      color-mix(in srgb,
         var(--gradient-color, var(--color-discord-blurple)) 80%,
-        white
-      )
-      75%,
-    var(--gradient-color, var(--color-discord-blurple)) 100%
-  );
+        white) 75%,
+      var(--gradient-color, var(--color-discord-blurple)) 100%);
   background-size: 200% 200%;
   animation: var(--animate-gradient-shift);
 }
 
 /* Glow effects */
 .block-glow {
-  filter: drop-shadow(
-    0 0 8px
-      color-mix(
-        in srgb,
+  filter: drop-shadow(0 0 8px color-mix(in srgb,
         var(--gradient-color, var(--color-discord-blurple)) 30%,
-        transparent
-      )
-  );
+        transparent));
   transition: filter 0.3s ease-out;
 }
 
 .block-glow:hover {
-  filter: drop-shadow(
-    0 0 16px
-      color-mix(
-        in srgb,
+  filter: drop-shadow(0 0 16px color-mix(in srgb,
         var(--gradient-color, var(--color-discord-blurple)) 50%,
-        transparent
-      )
-  );
+        transparent));
 }
 
 /* Discord component styles */
 .discord-card {
-  background-color: color-mix(
-    in srgb,
-    var(--color-discord-dark) 80%,
-    transparent
-  );
+  background-color: color-mix(in srgb,
+      var(--color-discord-dark) 80%,
+      transparent);
   backdrop-filter: blur(12px);
   border: 1px solid var(--color-discord-border);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -269,14 +240,12 @@
   font-weight: bold;
   border-radius: 0.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px
-    color-mix(in srgb, var(--color-discord-blurple) 30%, transparent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-discord-blurple) 30%, transparent);
 }
 
 .discord-button-primary:hover {
   background-color: var(--color-discord-blurple-hover);
-  box-shadow: 0 8px 24px
-    color-mix(in srgb, var(--color-discord-blurple) 50%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-discord-blurple) 50%, transparent);
 }
 
 .discord-button-outline {
@@ -308,6 +277,7 @@
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
@@ -323,6 +293,7 @@
 }
 
 @keyframes float-reverse {
+
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
@@ -397,6 +368,15 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @theme inline {
@@ -519,6 +499,7 @@ html {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
