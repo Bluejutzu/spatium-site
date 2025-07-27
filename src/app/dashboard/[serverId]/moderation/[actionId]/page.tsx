@@ -48,7 +48,7 @@ export default function ModerationActionPage() {
 
     useEffect(() => {
         if (!action) return;
-        if (action.user) fetchProfile(action.user);
+        if (action.userId) fetchProfile(action.userId);
         if (action.moderator) fetchProfile(action.moderator);
         setEditReason(action.reason);
         setEditDuration(action.duration || '');
@@ -72,7 +72,7 @@ export default function ModerationActionPage() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        userId: action.user,
+                        userId: action.userId,
                         serverId: action.serverId,
                         duration: durationMs,
                         auditId: action.auditId,
@@ -128,14 +128,14 @@ export default function ModerationActionPage() {
                         <span className="text-xs text-discord-text">User</span>
                         <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
-                                {profileCache[action.user]?.avatar ? (
-                                    <AvatarImage src={`https://cdn.discordapp.com/avatars/${profileCache[action.user].id}/${profileCache[action.user].avatar}.png?size=32`} alt={profileCache[action.user].username} />
+                                {profileCache[action.userId]?.avatar ? (
+                                    <AvatarImage src={`https://cdn.discordapp.com/avatars/${profileCache[action.userId]}/${profileCache[action.userId].avatar}.png?size=32`} alt={profileCache[action.userId].username} />
                                 ) : (
-                                    <AvatarFallback>{profileCache[action.user]?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                                    <AvatarFallback>{profileCache[action.userId]?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
                                 )}
                             </Avatar>
-                            <span className="text-white">{profileCache[action.user]?.username || action.user}</span>
-                            <span className="text-discord-text text-xs">{action.user}</span>
+                            <span className="text-white">{profileCache[action.userId] || action.userId}</span>
+                            <span className="text-discord-text text-xs">{action.userId}</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">

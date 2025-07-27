@@ -218,7 +218,7 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
 
   const filteredActions = (actions || []).filter(action => {
     const matchesSearch =
-      (action.user?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+      (action.userId?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
       (action.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesFilter =
       filterType === "all" ||

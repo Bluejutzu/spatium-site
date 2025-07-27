@@ -70,7 +70,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { BlockCategory, BlockType } from '@/types/common';
+import { BlockCategory, DEFAULT_NODE_CONFIGS } from '@/types/common';
 import type { DiscordEmbed } from '@/types/discord';
 
 import { api } from '../../../../../../convex/_generated/api';
@@ -382,7 +382,6 @@ const createDiscordNode =
       );
     };
 
-// 1. Define BLOCK_TYPES as a const array and extract type union
 const BLOCK_TYPES = [
   // Command Options
   {
@@ -683,8 +682,8 @@ type NodeTypeComponent = (props: NodeProps) => JSX.Element;
 type NodeTypesMap = {
   root: NodeTypeComponent;
 } & {
-  [K in BlockTypeId]: NodeTypeComponent;
-};
+    [K in BlockTypeId]: NodeTypeComponent;
+  };
 
 const nodeTypes: NodeTypesMap = {
   root: RootNode,
@@ -943,7 +942,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         data: {
           label: blockType?.label || type,
           type,
-          config: getDefaultConfig(type),
+          config: getDefaultConfig(type as keyof typeof DEFAULT_NODE_CONFIGS),
         },
       };
       setNodes(nds => [...nds, newNode]);
@@ -961,127 +960,8 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     [rfInstance, setNodes, setEdges]
   );
 
-  const getDefaultConfig = (type: string) => {
-    switch (type) {
-      case 'option-text':
-        return { name: '', description: '', required: true, value: '' };
-      case 'option-user':
-        return { name: '', description: '', required: true, value: '' };
-      case 'option-boolean':
-        return { name: '', description: '', required: true, value: "false" };
-      case 'option-role':
-        return { name: '', description: '', required: false, value: '' };
-      case 'option-channel':
-        return { name: '', description: '', required: false, value: '' };
-      case 'send-message':
-        return {
-          name: 'Send Message',
-          content: '',
-          embeds: [],
-          ephemeral: false,
-          tts: false,
-          channelId: '',
-          components: [],
-          storeIdAs: '',
-        };
-      case 'edit-message':
-        return {
-          name: 'Edit Message',
-          message_ref_id: '',
-          message_ref_block: {
-            id: '',
-            channelId: '',
-          },
-          content: '',
-          embeds: [],
-          tts: false,
-          channelId: '',
-          components: [],
-          storeIdAs: '',
-        };
-      case 'send-dm':
-        return { userId: '', content: '', embeds: [] };
-      case 'condition':
-        return { condition: '', operator: 'equals', value: '' };
-      case 'add-role':
-        return { roleId: '', userId: 'command-user', reason: '' };
-      case 'remove-role':
-        return { roleId: '', userId: 'command-user', reason: '' };
-      case 'kick-member':
-        return { userId: '', reason: '', deleteMessageDays: 0 };
-      case 'ban-member':
-        return { userId: '', reason: '', deleteMessageDays: 0 };
-      case 'timeout-member':
-        return { userId: '', duration: 60, reason: '' };
-      case 'set-nickname':
-        return { userId: '', nickname: '', reason: '' };
-      case 'create-channel':
-        return { name: '', type: 0, categoryId: '', topic: '', nsfw: false };
-      case 'delete-channel':
-        return { channelId: '', reason: '' };
-      case 'modify-channel':
-        return { channelId: '', name: '', topic: '', nsfw: false };
-      case 'send-dm':
-        return { userId: '', content: '', embeds: [] };
-      case 'create-webhook':
-        return { channelId: '', name: '', avatar: '' };
-      case 'delete-webhook':
-        return { webhookId: '', reason: '' };
-      case 'move-member':
-        return { userId: '', channelId: '', reason: '' };
-      case 'mute-member':
-        return { userId: '', mute: true, reason: '' };
-      case 'deafen-member':
-        return { userId: '', deafen: true, reason: '' };
-      case 'fetch-user':
-        return { userId: '', storeIdAs: '' };
-      case 'fetch-member':
-        return { userId: '', storeIdAs: '' };
-      case 'fetch-channel':
-        return { channelId: '', storeIdAs: '' };
-      case 'fetch-role':
-        return { roleId: '', storeIdAs: '' };
-      case 'create-invite':
-        return {
-          channelId: '',
-          maxUses: 0,
-          maxAge: 0,
-          temporary: false,
-          unique: false,
-        };
-      case 'delete-invite':
-        return { inviteCode: '', reason: '' };
-      case 'add-reaction':
-        return { messageId: '', emoji: '', channelId: '' };
-      case 'remove-reaction':
-        return { messageId: '', emoji: '', userId: '', channelId: '' };
-      case 'pin-message':
-        return { messageId: '', channelId: '' };
-      case 'unpin-message':
-        return { messageId: '', channelId: '' };
-      case 'delete-message':
-        return { messageId: '', channelId: '', reason: '' };
-      case 'bulk-delete':
-        return { channelId: '', count: 0, reason: '' };
-      case 'create-role':
-        return {
-          name: '',
-          color: 0,
-          permissions: '0',
-          hoist: false,
-          mentionable: false,
-        };
-      case 'delete-role':
-        return { roleId: '', reason: '' };
-      case 'audit-log':
-        return { userId: '', actionType: 0, limit: 0, storeIdAs: '' };
-      case 'wait':
-        return { duration: 0, unit: "milliseconds" }
-      case 'unq-variable':
-        return { name: '', value: '' }
-      default:
-        return 0
-    }
+  const getDefaultConfig = <T extends keyof typeof DEFAULT_NODE_CONFIGS>(type: T): typeof DEFAULT_NODE_CONFIGS[T] => {
+    return { ...DEFAULT_NODE_CONFIGS[type] };
   };
 
   const onConnect = useCallback(
@@ -1149,21 +1029,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     [setNodes, selectedNode]
   );
 
-  const deleteSelectedNode = useCallback(() => {
-    if (
-      selectedNode &&
-      selectedNode.id !== ROOT_NODE_ID &&
-      selectedNode.id !== ERROR_NODE_ID
-    ) {
-      setNodes(nds => nds.filter(n => n.id !== selectedNode.id));
-      setEdges(eds =>
-        eds.filter(
-          e => e.source !== selectedNode.id && e.target !== selectedNode.id
-        )
-      );
-      setSelectedNode(null);
-    }
-  }, [selectedNode, setNodes, setEdges]);
 
   const removeEdge = useCallback(
     (edgeId: string) => {
@@ -1204,7 +1069,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         options: existingCommand.options
       })
         .catch((e) => console.error(e))
-        .then((v) => {
+        .then(() => {
           toast.success('Share Code Created!', 'You can now share this command. ');
         });
 
