@@ -92,7 +92,7 @@ export function SettingsClient({ serverId }: { serverId: string }) {
 
         try {
             const res = await fetch(
-                '/api/discord/roles?serverId=' + serverId + '&userId=' + user?.id
+                '/api/discord/guild/roles?serverId=' + serverId + '&userId=' + user?.id
             );
             if (!res.ok) throw new Error('Failed to fetch roles');
             const data = await res.json();
@@ -112,7 +112,7 @@ export function SettingsClient({ serverId }: { serverId: string }) {
         setChannelsError(null);
         try {
             const res = await fetch(
-                '/api/discord/channels?serverId=' + serverId + '&userId=' + user?.id
+                '/api/discord/guild/channels?serverId=' + serverId + '&userId=' + user?.id
             );
             if (!res.ok) throw new Error('Failed to fetch channels');
             const data = await res.json();
@@ -677,7 +677,7 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
             if (!user || !serverId) return;
             setLoadingRoles(true);
             try {
-                const res = await fetch(`/api/discord/roles?serverId=${serverId}&userId=${user.id}`);
+                const res = await fetch(`/api/discord/guild/roles?serverId=${serverId}&userId=${user.id}`);
                 const data = await res.json();
                 if (Array.isArray(data)) setRoles(data);
             } catch (e) {
@@ -696,7 +696,7 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
             if (!user || !serverId) return;
             setLoadingChannels(true);
             try {
-                const res = await fetch(`/api/discord/channels?serverId=${serverId}&userId=${user.id}`);
+                const res = await fetch(`/api/discord/guild/channels?serverId=${serverId}&userId=${user.id}`);
                 const data = await res.json();
                 if (Array.isArray(data)) setChannels(data);
             } catch (e) {

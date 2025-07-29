@@ -1,3 +1,47 @@
+
+enum GUILD_INVITE_TYPE {
+	GUILD = 0,
+	GROUP_DM = 1,
+	FRIEND = 2
+}
+
+enum STICKER_TYPES {
+	STANDARD = 1,
+	GUILD = 2
+}
+
+enum STICKER_FORMAT_TYPES {
+	PNG = 1,
+	APNG = 2,
+	LOTTIE = 3,
+	GIF = 4
+}
+
+export interface DiscordEmoji {
+	id: string,
+	name?: string,
+	roles?: DiscordRole[],
+	user?: DiscordUser,
+	require_colons?: boolean,
+	managed?: boolean,
+	animated?: boolean,
+	available?: boolean
+}
+
+export interface DiscordSticker {
+	id: string,
+	pack_id?: string,
+	name: string,
+	description?: string,
+	tags: string,
+	type: STICKER_TYPES,
+	format_type: STICKER_FORMAT_TYPES,
+	available?: boolean,
+	guild_id?: string,
+	user?: DiscordUser,
+	sort_value?: number
+}
+
 export interface DiscordGuild {
 	id: string;
 	name: string;
@@ -7,6 +51,20 @@ export interface DiscordGuild {
 	features: string[];
 	approximate_member_count?: number;
 	approximate_presence_count?: number;
+}
+
+export interface DiscordPartialGuild {
+	id: string,
+	name: string,
+	icon?: string,
+	splash?: string,
+	discovery?: string,
+	emojis: DiscordEmoji[],
+	features: string[] // i cba to do that shit https://discord.com/developers/docs/resources/guild#guild-preview-object-guild-preview-structure
+	approximate_member_count: number,
+	approximate_presence_count: number,
+	description?: string,
+	stickers: DiscordSticker[]
 }
 
 export interface DiscordUser {
@@ -63,6 +121,12 @@ export interface DiscordRole {
 	permissions: string;
 	managed: boolean;
 	mentionable: boolean;
+}
+
+export interface DiscordInvite {
+	type: GUILD_INVITE_TYPE,
+	code: string
+	guild: DiscordPartialGuild
 }
 
 export interface DiscordUserAvatarDecoration {

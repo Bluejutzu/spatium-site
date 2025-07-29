@@ -11,10 +11,9 @@
   },
   "exclude": [
     "node_modules",
-    "dist",
     "../../convex"
   ],
   "include": [
-    "src"
+    "dist",
   ],
 }

@@ -1220,7 +1220,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     setRolesError(null);
 
     try {
-      const roles = await fetch(`/api/discord/roles?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
+      const roles = await fetch(`/api/discord/guild/roles?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
       setRoles(roles);
     } catch (err: any) {
       setRolesError(err.message);
@@ -1238,7 +1238,7 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     setChannelsError(null);
 
     try {
-      const channels = await fetch(`/api/discord/channels?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
+      const channels = await fetch(`/api/discord/guild/channels?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
       setChannels(channels);
     } catch (err: any) {
       setChannelsError(err.message);

@@ -40,7 +40,7 @@ export default function Hero1() {
             <p className="mx-auto max-w-2xl text-2xl text-gray-300/70">
               Spatium is a Discord bot that helps you manage your server faster and more efficiently. With <span className=" bg-gradient-to-r from-discord-blurple to-discord-purple bg-clip-text glow-text"> UX</span> being first.
             </p>
-          
+
           </div>
           <div className="mx-10 mt-24">
             <Image

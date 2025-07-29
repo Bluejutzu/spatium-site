@@ -21,7 +21,7 @@ import {
   Zap,
 } from "lucide-react"
 import { useRouter } from "next/navigation";
-import { useEffect,useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { api } from "@/../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -40,10 +40,113 @@ interface ModerationContentProps {
   serverId?: string
 }
 
+interface UserProfile {
+  id: string;
+  username: string;
+  avatar?: string;
+}
+
+// Custom hook for optimized profile fetching
+function useProfileCache() {
+  const [profileCache, setProfileCache] = useState<Record<string, UserProfile>>({});
+  const [loadingProfiles, setLoadingProfiles] = useState<Set<string>>(new Set());
+  const fetchingRef = useRef<Set<string>>(new Set());
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Batch fetch profiles to reduce API calls
+  const fetchProfiles = useCallback(async (userIds: string[]) => {
+    // Filter out already cached or currently fetching profiles
+    const uniqueIds = [...new Set(userIds)].filter(
+      id => id && !profileCache[id] && !fetchingRef.current.has(id)
+    );
+
+    if (uniqueIds.length === 0) return;
+
+    // Mark as fetching
+    uniqueIds.forEach(id => fetchingRef.current.add(id));
+    setLoadingProfiles(prev => new Set([...prev, ...uniqueIds]));
+
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+
+    try {
+      // Batch request - modify your API to accept multiple user IDs
+      const promises = uniqueIds.map(async (userId) => {
+        try {
+          const res = await fetch(`/api/discord/user?userId=${userId}`, {
+            signal: abortControllerRef.current!.signal
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return { userId, data };
+          }
+          return { userId, data: null };
+        } catch (error: any) {
+          if (error?.name !== 'AbortError') {
+            console.warn(`Failed to fetch profile for ${userId}:`, error);
+          }
+          return { userId, data: null };
+        }
+      });
+
+      const results = await Promise.allSettled(promises);
+
+      const newProfiles: Record<string, UserProfile> = {};
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled' && result.value.data) {
+          newProfiles[result.value.userId] = result.value.data;
+        }
+      });
+
+      // Update cache with successful fetches
+      if (Object.keys(newProfiles).length > 0) {
+        setProfileCache(prev => ({ ...prev, ...newProfiles }));
+      }
+
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        console.error('Batch profile fetch failed:', error);
+      }
+    } finally {
+      // Clean up loading states
+      uniqueIds.forEach(id => {
+        fetchingRef.current.delete(id);
+      });
+      setLoadingProfiles(prev => {
+        const newSet = new Set(prev);
+        uniqueIds.forEach(id => newSet.delete(id));
+        return newSet;
+      });
+    }
+  }, [profileCache]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  return { profileCache, loadingProfiles, fetchProfiles };
+}
+
 // Enhanced Action Card Component
-function ActionCard({ action, serverId, profileCache }: { action: any; serverId: string; profileCache: Record<string, any> }) {
+function ActionCard({ action, serverId, profileCache, loadingProfiles }: {
+  action: any;
+  serverId: string;
+  profileCache: Record<string, UserProfile>;
+  loadingProfiles: Set<string>;
+}) {
   const router = useRouter();
-  const getActionIcon = (actionType: string) => {
+
+  const getActionIcon = useCallback((actionType: string) => {
     switch (actionType) {
       case "Ban": return <Ban className="w-5 h-5 text-discord-red" />
       case "Kick": return <UserX className="w-5 h-5 text-discord-orange" />
@@ -51,8 +154,9 @@ function ActionCard({ action, serverId, profileCache }: { action: any; serverId:
       case "Timeout": return <Timer className="w-5 h-5 text-discord-purple" />
       default: return <Shield className="w-5 h-5 text-discord-blurple" />
     }
-  }
-  const getActionColor = (actionType: string) => {
+  }, []);
+
+  const getActionColor = useCallback((actionType: string) => {
     switch (actionType) {
       case "Ban": return "discord-red"
       case "Kick": return "discord-orange"
@@ -60,31 +164,50 @@ function ActionCard({ action, serverId, profileCache }: { action: any; serverId:
       case "Timeout": return "discord-purple"
       default: return "discord-blurple"
     }
-  }
+  }, []);
+
   const actionColor = getActionColor(action.action);
+
   // Get user and moderator profile
   const userProfile = profileCache[action.user];
   const modProfile = profileCache[action.moderator];
+  const isUserLoading = loadingProfiles.has(action.user);
+  const isModLoading = loadingProfiles.has(action.moderator);
+
+  const handleClick = useCallback(() => {
+    router.push(`/dashboard/${serverId}/moderation/${action._id}`);
+  }, [router, serverId, action._id]);
+
   return (
     <Card
       className={`flex flex-row items-center gap-6 border border-discord-border/50 hover:border-discord-blurple/50 transition-all duration-300 overflow-hidden relative cursor-pointer bg-discord-darker/80 hover:bg-discord-darker/95`}
-      onClick={() => router.push(`/dashboard/${serverId}/moderation/${action._id}`)}
+      onClick={handleClick}
       tabIndex={0}
       role="button"
       aria-label={`View moderation action ${action.action}`}
     >
-      <div className={`p-3 rounded-xl bg-gradient-to-r from-${actionColor}/20 to-${actionColor}/10 border border-${actionColor}/30 shadow-lg flex-shrink-0 ml-4`}>{getActionIcon(action.action)}</div>
+      <div className={`p-3 rounded-xl bg-gradient-to-r from-${actionColor}/20 to-${actionColor}/10 border border-${actionColor}/30 shadow-lg flex-shrink-0 ml-4`}>
+        {getActionIcon(action.action)}
+      </div>
+
       {/* User avatar/username */}
       <div className="flex flex-col items-center mr-4">
         <Avatar className="h-10 w-10 mb-1">
-          {userProfile?.avatar ? (
+          {isUserLoading ? (
+            <AvatarFallback>
+              <div className="animate-spin w-4 h-4 border-2 border-discord-blurple border-t-transparent rounded-full" />
+            </AvatarFallback>
+          ) : userProfile?.avatar ? (
             <AvatarImage src={`https://cdn.discordapp.com/avatars/${userProfile.id}/${userProfile.avatar}.png?size=64`} alt={userProfile.username} />
           ) : (
             <AvatarFallback>{userProfile?.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
           )}
         </Avatar>
-        <span className="text-xs text-white font-semibold truncate max-w-[80px]">{userProfile?.username || action.user}</span>
+        <span className="text-xs text-white font-semibold truncate max-w-[80px]">
+          {isUserLoading ? 'Loading...' : userProfile?.username || action.user}
+        </span>
       </div>
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="font-bold text-white group-hover:text-discord-blurple transition-colors duration-300 truncate">
@@ -100,7 +223,9 @@ function ActionCard({ action, serverId, profileCache }: { action: any; serverId:
         <div className="flex items-center gap-4 text-xs text-discord-text">
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3" />
-            by {modProfile ? (
+            by {isModLoading ? (
+              <span className="animate-pulse">Loading...</span>
+            ) : modProfile ? (
               <span className="flex items-center gap-1">
                 <Avatar className="h-5 w-5">
                   {modProfile.avatar ? (
@@ -185,53 +310,69 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [timeRange, setTimeRange] = useState("24h");
+
   const actions = useQuery(
     api.discord.getModerationActions,
     serverId ? { serverId } : "skip"
   );
-  // User profile cache
-  const [profileCache, setProfileCache] = useState<Record<string, any>>({});
-  const fetchingProfiles = useRef<Set<string>>(new Set());
-  // Fetch and cache Discord user profile
-  const fetchProfile = async (userId: string) => {
-    if (!userId || profileCache[userId] || fetchingProfiles.current.has(userId)) return;
-    fetchingProfiles.current.add(userId);
-    try {
-      const res = await fetch(`/api/discord/user?userId=${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProfileCache(prev => ({ ...prev, [userId]: data }));
-      }
-    } finally {
-      fetchingProfiles.current.delete(userId);
-    }
-  };
-  // Fetch all needed profiles on actions change
-  useEffect(() => {
-    if (!actions) return;
+
+  const bansMonth = actions?.filter(e => e.action === "ban").length ?? 0;
+  const kicksMonth = actions?.filter(e => e.action === "kick").length ?? 0;
+  const warnsMonth = actions?.filter(e => e.action === "warn").length ?? 0;
+
+  const { profileCache, loadingProfiles, fetchProfiles } = useProfileCache();
+
+  // Extract unique user IDs from actions and batch fetch profiles
+  const uniqueUserIds = useMemo(() => {
+    if (!actions) return [];
+
+    const userIds = new Set<string>();
     actions.forEach((action: any) => {
-      if (action.user) fetchProfile(action.user);
-      if (action.moderator) fetchProfile(action.moderator);
+      if (action.user) userIds.add(action.user);
+      if (action.moderator) userIds.add(action.moderator);
     });
-    // eslint-disable-next-line
+
+    return Array.from(userIds);
   }, [actions]);
 
-  const filteredActions = (actions || []).filter(action => {
-    const matchesSearch =
-      (action.userId?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
-      (action.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesFilter =
-      filterType === "all" ||
-      (action.action?.toLowerCase() === filterType.toLowerCase());
-    return matchesSearch && matchesFilter;
-  });
+  // Fetch profiles when actions change
+  useEffect(() => {
+    if (uniqueUserIds.length > 0) {
+      fetchProfiles(uniqueUserIds);
+    }
+  }, [uniqueUserIds, fetchProfiles]);
 
-  const stats = [
-    { title: "Active Warnings", value: "3", icon: AlertTriangle, color: "discord-yellow", change: "+1 today" },
-    { title: "Bans This Month", value: "12", icon: Ban, color: "discord-red", change: "-2 vs last month" },
-    { title: "Kicks This Month", value: "8", icon: UserX, color: "discord-orange", change: "+3 vs last month" },
+  // Memoize filtered actions to prevent unnecessary recalculations
+  const filteredActions = useMemo(() => {
+    if (!actions) return [];
+
+    return actions.filter(action => {
+      const userProfile = profileCache[action.userId];
+      const matchesSearch =
+        (userProfile?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+        (action.userId?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+        (action.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+
+      const matchesFilter =
+        filterType === "all" ||
+        (action.action?.toLowerCase() === filterType.toLowerCase());
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [actions, profileCache, searchQuery, filterType]);
+
+  // Memoize stats to prevent recalculation
+  const stats = useMemo(() => [
+    { title: "Active Warnings", value: `${warnsMonth}`, icon: AlertTriangle, color: "discord-yellow", change: "+1 today" },
+    { title: "Bans This Month", value: `${bansMonth}`, icon: Ban, color: "discord-red", change: "-2 vs last month" },
+    { title: "Kicks This Month", value: `${kicksMonth}`, icon: UserX, color: "discord-orange", change: "+3 vs last month" },
     { title: "Auto-Mod Actions", value: "45", icon: Shield, color: "discord-green", change: "+15 today" },
-  ]
+  ], [warnsMonth, bansMonth, kicksMonth]);
+
+  const handleClearFilters = useCallback(() => {
+    setSearchQuery("");
+    setFilterType("all");
+  }, []);
 
   return (
     <div className="flex-1 overflow-auto bg-discord-dark">
@@ -414,7 +555,13 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
           {filteredActions.length > 0 ? (
             <div className="space-y-4">
               {filteredActions.map((action) => (
-                <ActionCard key={action._id} action={action} serverId={serverId!} profileCache={profileCache} />
+                <ActionCard
+                  key={action._id}
+                  action={action}
+                  serverId={serverId!}
+                  profileCache={profileCache}
+                  loadingProfiles={loadingProfiles}
+                />
               ))}
             </div>
           ) : (
@@ -436,10 +583,7 @@ export function ModerationContent({ serverId }: ModerationContentProps) {
               </p>
               {(searchQuery || filterType !== "all") && (
                 <Button
-                  onClick={() => {
-                    setSearchQuery("")
-                    setFilterType("all")
-                  }}
+                  onClick={handleClearFilters}
                   variant="outline"
                   className="discord-button-outline"
                 >

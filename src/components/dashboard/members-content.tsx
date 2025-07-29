@@ -40,8 +40,9 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
 import { useUserPresence } from "@/hooks/use-user-presence"
-import { DiscordMember, DiscordRole } from "@/types/discord"
+import { DiscordInvite, DiscordMember, DiscordRole } from "@/types/discord"
 
 interface MembersContentProps {
   serverId?: string
@@ -264,6 +265,7 @@ function MemberRow({
 }
 
 export function MembersContent({ serverId }: MembersContentProps) {
+  const toast = useToast()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterRole, setFilterRole] = useState("all")
   const [sortBy, setSortBy] = useState("joined")
@@ -284,6 +286,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const [rolesError, setRolesError] = useState<string | null>(null)
 
   const [serverRoles, setServerRoles] = useState<any[]>([])
+  const [serverInvites, setServerInvites] = useState<DiscordInvite[]>()
 
   // Add these state variables after the existing ones
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
@@ -297,7 +300,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
   // Fetch server roles for display in member cards
   useEffect(() => {
     if (serverId) {
-      fetch(`/api/discord/roles?serverId=${serverId}`)
+      fetch(`/api/discord/guild/roles?serverId=${serverId}`)
         .then((res) => res.json())
         .then((data) => {
           setServerRoles(data || [])
@@ -320,7 +323,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
       if (after) params.append("after", after)
       if (searchQuery) params.append("search", searchQuery)
       // Discord API does not support role filter directly, so filter client-side
-      const res = await fetch(`/api/discord/members?${params.toString()}`)
+      const res = await fetch(`/api/discord/guild/members?${params.toString()}`)
       const data = await res.json()
       let filtered = data.members
       if (filterRole !== "all") {
@@ -333,6 +336,35 @@ export function MembersContent({ serverId }: MembersContentProps) {
     },
     [serverId, searchQuery, filterRole],
   )
+
+  const handleInvite =
+    async () => {
+      if (serverInvites && serverInvites?.length > 0) {
+        console.log(serverInvites[0])
+        toast.promise(
+          navigator.clipboard.writeText(`https://discord.gg/${serverInvites[0].code}`),
+          {
+            loading: "Copying...",
+            success: `Copied https://discord.gg/${serverInvites[0].code} to clipboard!`,
+            error: "Failed to copy invite to clipboard"
+          }
+        )
+        return
+      }
+      const res = await fetch(`/api/discord/guild/invite?serverId=${serverId}&with_counts=1`);
+      const data = await res.json();
+      setServerInvites(data.invites)
+
+      toast.promise(
+        navigator.clipboard.writeText(`https://discord.gg/${data.invites[0].code}`),
+        {
+          loading: "Copying...",
+          success: `Copied https://discord.gg/${data.invites[0].code} to clipboard!`,
+          error: "Failed to copy invite to clipboard",
+        }
+      )
+    }
+
 
   useEffect(() => {
     // Reset to first page on filter/search change
@@ -392,7 +424,6 @@ export function MembersContent({ serverId }: MembersContentProps) {
     })
   }
 
-  // Add these functions after the existing handler functions
   const handleSelectMember = (memberId: string, selected: boolean) => {
     setSelectedMembers((prev) => {
       const newSet = new Set(prev)
@@ -430,7 +461,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
     if (modalType === "roles" && serverId) {
       setRolesLoading(true)
       setRolesError(null)
-      fetch(`/api/discord/roles?serverId=${serverId}`)
+      fetch(`/api/discord/guild/roles?serverId=${serverId}`)
         .then((res) => res.json())
         .then((data) => {
           setAllRoles(data || [])
@@ -587,17 +618,13 @@ export function MembersContent({ serverId }: MembersContentProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Invite Button */}
-          {/* <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            > */}
-          <Button className="bg-gradient-to-r from-discord-blurple to-purple-600 hover:from-discord-blurple-hover hover:to-purple-700 text-white font-bold h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+          <Button
+            onClick={handleInvite}
+            className="bg-gradient-to-r from-discord-blurple to-purple-600 hover:from-discord-blurple-hover hover:to-purple-700 text-white font-bold h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
             <UserPlus className="w-4 h-4 mr-2" />
             Invite Members
           </Button>
-          {/* </motion.div> */}
-          {/* </motion.div> */}
+
         </div>
       </header>
 

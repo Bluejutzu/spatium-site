@@ -1,6 +1,7 @@
 import {
 	DiscordChannel,
 	DiscordGuild,
+	DiscordInvite,
 	DiscordMember,
 	DiscordPresence,
 	DiscordRole,
@@ -189,6 +190,66 @@ export class DiscordAPI {
 			);
 		}
 		return response.json() as Promise<DiscordMember[]>;
+	}
+
+	async getGuildInvitesWithBotToken(
+		serverId: string,
+		with_counts: string
+	): Promise<DiscordInvite[]> {
+		const response = await fetch(`http://localhost:4000/v1/guild/invites?serverId=${serverId}&with_counts=${with_counts}`, {
+			method: "GET"
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(
+				`Discord API error: ${response.status} ${response.statusText} - ${errorText}`
+			);
+		}
+
+		return response.json() as Promise<DiscordInvite[]>;
+	}
+
+	async deleteGuildInvite(
+		serverId: string,
+		inviteCode: string
+	): Promise<DiscordInvite> {
+		const response = await fetch(`http://localhost:4000/v1/guild/invite/delete`, {
+			method: "POST",
+			body: new URLSearchParams({
+				inviteCode: inviteCode,
+				serverId: serverId
+			})
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(
+				`Discord API error: ${response.status} ${response.statusText} - ${errorText}`
+			);
+		}
+
+		return response.json() as Promise<DiscordInvite>
+	}
+
+	async createGuildInvite(
+		serverId: string,
+	): Promise<DiscordInvite> {
+		const response = await fetch(`http://localhost:4000/v1/guild/invite/create`, {
+			method: "POST",
+			body: new URLSearchParams({
+				serverId: serverId
+			})
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(
+				`Discord API error: ${response.status} ${response.statusText} - ${errorText}`
+			);
+		}
+
+		return response.json() as Promise<DiscordInvite>
 	}
 }
 

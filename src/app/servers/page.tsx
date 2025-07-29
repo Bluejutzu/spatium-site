@@ -20,6 +20,7 @@ import React from 'react';
 
 import { DiscordFooter } from '@/components/app/footer';
 import { AnimatedHeader } from '@/components/app/header';
+import { StaticNoise } from '@/components/ui/AnimatedNoise';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,6 +131,9 @@ export default function ServerPage() {
     <div className="bg-discord-dark overflow-hidden font-minecraft min-h-screen">
       {/* Enhanced Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
+        <StaticNoise
+        opacity={.05}
+        />
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
         <div className='floating-orb floating-orb-1' />
         <div className='floating-orb floating-orb-2' />
