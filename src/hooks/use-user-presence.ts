@@ -16,6 +16,7 @@ function IUseUserPresence(serverId: string, userId?: string) {
 	const [presence, setPresence] = useState<DiscordPresence | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [userNotFound, setUserNotFound] = useState(false);
 
 	useEffect(() => {
 		const fetchPresence = async () => {
@@ -31,6 +32,11 @@ function IUseUserPresence(serverId: string, userId?: string) {
 				return;
 			}
 
+			// Don't fetch if user was previously not found (to avoid repeated 404s)
+			if (userNotFound) {
+				return;
+			}
+
 			setIsLoading(true);
 			setError(null);
 
@@ -40,7 +46,14 @@ function IUseUserPresence(serverId: string, userId?: string) {
 				if (userId) {
 					// Fetch user via API route
 					const userRes = await fetch(`http://localhost:3000/api/discord/user?userId=${userId}`);
-					if (!userRes.ok) throw new Error('Failed to fetch user data');
+					if (!userRes.ok) {
+						if (userRes.status === 404) {
+							setUserNotFound(true);
+							setPresence(null);
+							return;
+						}
+						throw new Error('Failed to fetch user data');
+					}
 					const json = await userRes.json();
 
 					userData = {
@@ -63,7 +76,17 @@ function IUseUserPresence(serverId: string, userId?: string) {
 				const presenceRes = await fetch(
 					`http://localhost:4000/v1/presence?serverId=${serverId}&userId=${userIdToUse}`
 				);
-				if (!presenceRes.ok) throw new Error('Failed to fetch presence data');
+
+				if (!presenceRes.ok) {
+					if (presenceRes.status === 404) {
+						// User no longer exists in server, stop polling
+						setUserNotFound(true);
+						setPresence(null);
+						return;
+					}
+					throw new Error('Failed to fetch presence data');
+				}
+
 				const presenceJson = await presenceRes.json();
 
 				if (presenceJson.status) {
@@ -87,9 +110,13 @@ function IUseUserPresence(serverId: string, userId?: string) {
 		};
 
 		fetchPresence();
-		const interval = setInterval(fetchPresence, 30000);
-		return () => clearInterval(interval);
-	}, [serverId, userId, clerkUser]);
+
+		// Only set up polling if user exists in server
+		if (!userNotFound) {
+			const interval = setInterval(fetchPresence, 30000);
+			return () => clearInterval(interval);
+		}
+	}, [serverId, userId, clerkUser, userNotFound]);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -118,5 +145,6 @@ function IUseUserPresence(serverId: string, userId?: string) {
 		statusText: getStatusText(presence?.status || 'offline'),
 		isLoading,
 		error,
+		userNotFound,
 	};
 }

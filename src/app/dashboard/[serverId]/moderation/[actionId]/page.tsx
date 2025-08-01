@@ -95,7 +95,31 @@ export default function ModerationActionPage() {
 
         // Set form values
         setEditReason(action.reason || '');
-        setEditDuration(action.duration || '');
+
+        // Convert timestamp to duration string for editing
+        if (action.duration && typeof action.duration === 'number') {
+          const now = Date.now();
+          const timeLeft = action.duration - now;
+          if (timeLeft > 0) {
+            // Convert milliseconds to duration string
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            let durationStr = '';
+            if (days > 0) durationStr += `${days}d`;
+            if (hours > 0) durationStr += `${hours}h`;
+            if (minutes > 0) durationStr += `${minutes}m`;
+            if (seconds > 0) durationStr += `${seconds}s`;
+
+            setEditDuration(durationStr);
+          } else {
+            setEditDuration('');
+          }
+        } else {
+          setEditDuration('');
+        }
 
         // Cleanup on unmount
         return () => {
@@ -121,14 +145,17 @@ export default function ModerationActionPage() {
             });
 
             if (durationChanged) {
+                // Convert duration to timestamp format
                 const durationMs = parseDuration(editDuration);
+                const endTime = Date.now() + durationMs;
+
                 await fetch(`http://localhost:4000/v1/moderationAction`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userId: action.userId || action.userId,
                         serverId: action.serverId,
-                        duration: durationMs,
+                        duration: endTime, // Send timestamp instead of ISO string
                         auditId: action.auditId,
                     }),
                 });
@@ -281,7 +308,7 @@ export default function ModerationActionPage() {
                     <div className="flex flex-col gap-2">
                         <span className="text-xs text-discord-text uppercase tracking-wide">Created</span>
                         <span className="text-white">
-                            {action.time || new Date(action._creationTime).toLocaleString()}
+                            {action.time ? new Date(action.time).toLocaleString() : new Date(action._creationTime).toLocaleString()}
                         </span>
                     </div>
 

@@ -242,12 +242,12 @@ function ActionCard({ action, serverId, profileCache, loadingProfiles }: {
           </span>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {action.time}
+            {action.time ? new Date(action.time).toLocaleString() : 'Unknown'}
           </span>
           {action.duration && (
             <span className="flex items-center gap-1">
               <Timer className="w-3 h-3" />
-              {action.duration}
+              {typeof action.duration === 'number' ? new Date(action.duration).toLocaleString() : action.duration}
             </span>
           )}
         </div>

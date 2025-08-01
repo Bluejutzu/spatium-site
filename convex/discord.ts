@@ -71,14 +71,29 @@ export const syncDiscordServers = mutation({
 					.order('desc')
 					.first();
 
-				await ctx.db.insert('serverMetrics', {
-					serverId: server.serverId,
-					memberCount: server.memberCount,
-					onlineCount: server.onlineCount,
-					commandsUsed: latestMetric?.commandsUsed ?? 0,
-					activeChannels: latestMetric?.activeChannels ?? 0,
-					timestamp: Date.now(),
-				});
+				const metricChanged =
+					!latestMetric ||
+					latestMetric.memberCount !== server.memberCount ||
+					latestMetric.onlineCount !== server.onlineCount ||
+					latestMetric.commandsUsed !== (latestMetric?.commandsUsed ?? 0);
+
+				if (metricChanged && latestMetric) {
+					await ctx.db.patch(latestMetric._id, {
+						memberCount: server.memberCount,
+						onlineCount: server.onlineCount,
+						commandsUsed: latestMetric.commandsUsed ?? 0,
+						timestamp: Date.now(),
+					});
+				}
+				if (!latestMetric) {
+					await ctx.db.insert('serverMetrics', {
+						serverId: server.serverId,
+						memberCount: server.memberCount,
+						onlineCount: server.onlineCount,
+						commandsUsed: 0,
+						timestamp: Date.now(),
+					});
+				}
 			} else {
 				await ctx.db.insert('discordServers', {
 					...server,
@@ -91,7 +106,6 @@ export const syncDiscordServers = mutation({
 					memberCount: server.memberCount,
 					onlineCount: server.onlineCount,
 					commandsUsed: 0,
-					activeChannels: 0,
 					timestamp: Date.now(),
 				});
 			}
@@ -142,15 +156,29 @@ export const updateServerMetrics = mutation({
 		serverId: v.string(),
 		memberCount: v.number(),
 		onlineCount: v.number(),
-		messageCount: v.number(),
 		commandsUsed: v.number(),
-		activeChannels: v.number(),
 	},
 	handler: async (ctx, args) => {
-		await ctx.db.insert('serverMetrics', {
-			...args,
-			timestamp: Date.now(),
-		});
+		// Fetch the latest metrics for this server
+		const latest = await ctx.db
+			.query('serverMetrics')
+			.withIndex('by_server_timestamp', q => q.eq('serverId', args.serverId))
+			.order('desc')
+			.first();
+
+		// If there are no previous metrics, or any field is different, insert new metrics
+		if (
+			!latest ||
+			latest.memberCount !== args.memberCount ||
+			latest.onlineCount !== args.onlineCount ||
+			latest.commandsUsed !== args.commandsUsed
+		) {
+			await ctx.db.insert('serverMetrics', {
+				...args,
+				timestamp: Date.now(),
+			});
+		}
+		// Otherwise, do nothing (metrics are unchanged)
 	},
 });
 
@@ -194,9 +222,7 @@ export const _updateServerMetrics = internalMutation({
 				serverId: args.serverId,
 				memberCount: guild.approximate_member_count ?? 0,
 				onlineCount: guild.approximate_presence_count ?? 0,
-				messageCount: Math.floor(Math.random() * 100),
-				commandsUsed: Math.floor(Math.random() * 50),
-				activeChannels: Math.floor(Math.random() * 10),
+				commandsUsed: 0,
 			});
 		} catch (error) {
 			console.error(
@@ -424,11 +450,11 @@ export const upsertModerationAction = mutation({
 		userId: v.string(), // Discord user ID
 		reason: v.string(),
 		moderator: v.string(), // Discord moderator ID
-		time: v.string(),
-		duration: v.optional(v.string()),
+		time: v.number(), // timestamp in milliseconds
+		duration: v.optional(v.number()), // expiration timestamp in milliseconds
 		state: v.optional(v.string()), // open, closed, etc.
 		proof: v.optional(v.string()),
-		closedAt: v.optional(v.string()),
+		closedAt: v.optional(v.number()), // timestamp in milliseconds
 		closedBy: v.optional(v.string()),
 		notificationMessage: v.optional(v.string()),
 		logMessage: v.optional(v.string()),
@@ -484,3 +510,18 @@ export const updateModerationActionState = mutation({
 		return { updated: false };
 	},
 });
+
+export const getTempBans = query({
+	handler: async (ctx) => {
+		const now = Date.now(); // current timestamp in milliseconds
+		return await ctx.db
+			.query("moderationActions")
+			.filter(q => q.and(
+				q.eq(q.field("state"), "open"),
+				q.eq(q.field("action"), "ban"),
+				q.lte(q.field("duration"), now)
+			))
+			.order("desc")
+			.collect();
+	},
+})

@@ -10,6 +10,7 @@ export type ServerMetric = Doc<'serverMetrics'>;
 export type ServerSettings = Doc<'serverSettings'>;
 export type Alert = Doc<'alerts'>;
 export type Commands = Doc<'commands'>;
+export type ModerationAction = Doc<'moderationActions'>;
 
 export type CommandType = {
 	serverId: string;

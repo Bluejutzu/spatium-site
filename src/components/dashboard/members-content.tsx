@@ -3,13 +3,11 @@
 import {
   ArrowDown,
   ArrowUp,
-  Ban,
   Calendar,
   Crown,
   Filter,
   Globe,
   MessageSquare,
-  MoreVertical,
   Plus,
   Search,
   Settings,
@@ -42,7 +40,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useUserPresence } from "@/hooks/use-user-presence"
-import { DiscordInvite, DiscordMember, DiscordRole } from "@/types/discord"
+import type { DiscordInvite, DiscordMember, DiscordRole } from "@/types/discord"
 
 interface MembersContentProps {
   serverId?: string
@@ -57,17 +55,35 @@ function MemberRow({
   onAction,
   isSelected,
   onSelect,
+  showOwnerHighlight,
+  setContextMenu,
+  getStatusColor,
+  getDiscordJoinDate,
+  onMemberNotFound,
 }: {
   member: DiscordMember
-  serverRoles: any[]
+  serverRoles: DiscordRole[]
   ownerId: string | null
   serverId: string
-  onAction: (type: string, member: DiscordMember) => void
+  onAction: (type: "moderate" | "member" | "profile" | "message" | "roles", member: DiscordMember) => void
   isSelected: boolean
   onSelect: (memberId: string, selected: boolean) => void
+  showOwnerHighlight: boolean
+  setContextMenu: (menu: { show: boolean; x: number; y: number; member: DiscordMember | null }) => void
+  getStatusColor: (status: string) => string
+  getDiscordJoinDate: (userId?: string) => string
+  onMemberNotFound?: (memberId: string) => void
 }) {
-  const [showActions, setShowActions] = useState(false)
-  const presence = useUserPresence(serverId, member.user.id);
+  // Remove the showActions state since we're not using hover anymore
+  const roleColorCache = useRef<{ [key: string]: string }>({})
+  const presence = useUserPresence(serverId, member.user.id)
+
+  // Notify parent component when member is not found
+  useEffect(() => {
+    if (presence.userNotFound && onMemberNotFound) {
+      onMemberNotFound(member.user.id);
+    }
+  }, [presence.userNotFound, onMemberNotFound, member.user.id]);
 
   // Helper function to get role name from role ID
   const getRoleName = (roleId: string) => {
@@ -77,24 +93,16 @@ function MemberRow({
 
   // Helper function to get role color
   const getRoleColor = (roleId: string) => {
+    if (roleColorCache.current[roleId]) return roleColorCache.current[roleId]
     const role = serverRoles.find((r: any) => r.id === roleId)
-    if (role?.color) {
-      return typeof role.color === "string" ? role.color : `#${role.color.toString(16).padStart(6, "0")}`
-    }
-    return "#5865F2" // Default Discord blurple
-  }
+    const color = role?.color
+      ? typeof role.color === "string"
+        ? role.color
+        : `#${role.color.toString(16).padStart(6, "0")}`
+      : "#5865F2"
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "online":
-        return "bg-green-500"
-      case "idle":
-        return "bg-yellow-500"
-      case "dnd":
-        return "bg-red-500"
-      default:
-        return "bg-gray-500"
-    }
+    roleColorCache.current[roleId] = color
+    return color
   }
 
   const getAvatarUrl = () => {
@@ -103,28 +111,21 @@ function MemberRow({
     } else if (member.user?.avatar) {
       return `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.png`
     }
-    return "/placeholder.svg?height=40&width=40"
-  }
-
-  // Calculate Discord join date (this would come from API in real implementation)
-  const getDiscordJoinDate = () => {
-    // For demo purposes, using a calculated date based on user ID
-    // In real implementation, this would come from Discord API
-    const userId = member.user?.id
-    if (userId) {
-      // Discord snowflake timestamp extraction (simplified)
-      const timestamp = (Number.parseInt(userId) >> 22) + 1420070400000
-      return new Date(timestamp).toLocaleDateString()
-    }
-    return "Unknown"
   }
 
   return (
     <div
       className={`group flex items-center px-4 py-3 transition-colors duration-200 border-b border-discord-border/20 hover:bg-discord-darker/40 ${isSelected ? "bg-discord-blurple/20" : ""
-        } ${ownerId && member.user?.id === ownerId ? "bg-yellow-500/10 border-l-4 border-yellow-400" : ""}`}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+        } ${ownerId && member.user?.id === ownerId && showOwnerHighlight ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-l-4 border-yellow-400 shadow-lg" : ""}`}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        setContextMenu({
+          show: true,
+          x: e.clientX,
+          y: e.clientY,
+          member: member,
+        })
+      }}
     >
       {/* Selection checkbox */}
       <div className="flex items-center mr-4">
@@ -136,7 +137,7 @@ function MemberRow({
       </div>
 
       {/* User info with integrated actions */}
-      <div className="flex items-center gap-3 min-w-[200px] relative">
+      <div className="flex items-center gap-3 min-w-[200px]">
         <div className="relative">
           <Avatar className="h-10 w-10 cursor-pointer" onClick={() => onAction("profile", member)}>
             <AvatarImage src={getAvatarUrl() || "/placeholder.svg"} alt={member.user?.username} />
@@ -145,7 +146,7 @@ function MemberRow({
             </AvatarFallback>
           </Avatar>
           <div
-            className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-discord-dark ${presence.status}`}
+            className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-discord-dark ${getStatusColor(presence.status)}`}
           />
         </div>
         <div className="flex-1">
@@ -153,62 +154,16 @@ function MemberRow({
             <span className="cursor-pointer hover:underline" onClick={() => onAction("profile", member)}>
               {member.user?.username}
             </span>
-            {ownerId && member.user?.id === ownerId && <Crown className="w-4 h-4 text-yellow-400" />}
+            {ownerId && member.user?.id === ownerId && showOwnerHighlight && (
+              <div className="flex items-center gap-1">
+                <Crown className="w-4 h-4 text-yellow-400" />
+                <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-bold">
+                  OWNER
+                </span>
+              </div>
+            )}
           </div>
           {member.user?.discriminator && <div className="text-discord-text text-xs">#{member.user.discriminator}</div>}
-        </div>
-
-        {/* Quick action buttons - appear on hover */}
-        <div
-          className={`absolute right-0 flex items-center gap-1 transition-opacity duration-200 ${showActions ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onAction("message", member)}
-            className="h-8 w-8 p-0 text-discord-text hover:text-white hover:bg-blue-500/20"
-            title="Send Message"
-          >
-            <MessageSquare className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onAction("roles", member)}
-            className="h-8 w-8 p-0 text-discord-text hover:text-white hover:bg-purple-500/20"
-            title="Manage Roles"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-discord-text hover:text-white hover:bg-white/10"
-                title="More Actions"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 bg-discord-darker border-discord-border shadow-2xl">
-              <DropdownMenuItem
-                onClick={() => onAction("profile", member)}
-                className="text-discord-text hover:text-white hover:bg-white/5 p-3"
-              >
-                <UserCheck className="w-4 h-4 mr-3 text-green-500" />
-                View Profile
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-discord-border/30" />
-              <DropdownMenuItem
-                onClick={() => onAction("moderate", member)}
-                className="text-discord-text hover:text-red-400 hover:bg-red-500/10 p-3"
-              >
-                <Ban className="w-4 h-4 mr-3 text-red-500" />
-                Moderate
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
 
@@ -241,7 +196,6 @@ function MemberRow({
           )}
         </div>
       </div>
-
       {/* Server join date */}
       <div className="w-32 text-discord-text text-xs">
         <div className="flex items-center gap-1">
@@ -254,7 +208,7 @@ function MemberRow({
       <div className="w-32 text-discord-text text-xs">
         <div className="flex items-center gap-1">
           <MessageSquare className="w-3 h-3" />
-          {getDiscordJoinDate()}
+          {getDiscordJoinDate(member.user?.id)}
         </div>
       </div>
 
@@ -271,13 +225,12 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const [sortBy, setSortBy] = useState("joined")
   const [page, setPage] = useState(0)
   const [afterCursors, setAfterCursors] = useState<string[]>([""])
-  const [members, setMembers] = useState<any[]>([])
+  const [members, setMembers] = useState<DiscordMember[]>([])
   const [total, setTotal] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
-  const cache = useRef<{ [key: string]: any[] }>({})
   const [selectedMember, setSelectedMember] = useState<DiscordMember | null>(null)
+  const [ownerId, setOwnerId] = useState<string | null>(null)
   const [modalType, setModalType] = useState<null | "profile" | "roles" | "moderate" | "message">(null)
-  const PAGE_SIZE = 10
 
   // Add state for all roles and editing roles
   const [allRoles, setAllRoles] = useState<DiscordRole[]>([])
@@ -285,7 +238,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const [rolesLoading, setRolesLoading] = useState(false)
   const [rolesError, setRolesError] = useState<string | null>(null)
 
-  const [serverRoles, setServerRoles] = useState<any[]>([])
+  const [serverRoles, setServerRoles] = useState<DiscordRole[]>([])
   const [serverInvites, setServerInvites] = useState<DiscordInvite[]>()
 
   // Add these state variables after the existing ones
@@ -295,7 +248,46 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const [sortKey, setSortKey] = useState<"join" | "name" | "role">("join")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
 
-  const ownerId = "69897317924614144"
+  // Add these state variables after the existing ones
+  const [contextMenu, setContextMenu] = useState<{
+    show: boolean
+    x: number
+    y: number
+    member: DiscordMember | null
+  }>({ show: false, x: 0, y: 0, member: null })
+  const [showOwnerHighlight, setShowOwnerHighlight] = useState(true)
+
+  const cache = useRef<{ [key: string]: any[] }>({})
+
+  const PAGE_SIZE = 10
+
+  // Helper functions (moved from MemberRow to be shared)
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "online":
+        return "bg-green-500"
+      case "idle":
+        return "bg-yellow-500"
+      case "dnd":
+        return "bg-red-500"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  const getDiscordJoinDate = (userId?: string) => {
+    // For demo purposes, using a calculated date based on user ID
+    // In real implementation, this would come from Discord API
+    if (userId) {
+      // Discord snowflake timestamp extraction (simplified)
+      const timestamp = (Number.parseInt(userId) >> 22) + 1420070400000
+      return new Date(timestamp).toLocaleDateString()
+    }
+    return "Unknown"
+  }
+
+  // Add this line at the top of the MembersContent component, after the other hooks
+  const selectedMemberPresence = useUserPresence(serverId!, selectedMember?.user?.id || "")
 
   // Fetch server roles for display in member cards
   useEffect(() => {
@@ -307,6 +299,20 @@ export function MembersContent({ serverId }: MembersContentProps) {
         })
         .catch((err) => {
           console.error("Failed to fetch server roles:", err)
+        })
+    }
+  }, [serverId])
+
+  useEffect(() => {
+    if (serverId) {
+      fetch(`/api/discord/guild?serverId=${serverId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data)
+          setOwnerId(data.owner_id)
+        })
+        .catch((err) => {
+          console.error("Failed to fetch server owner:", err)
         })
     }
   }, [serverId])
@@ -337,34 +343,43 @@ export function MembersContent({ serverId }: MembersContentProps) {
     [serverId, searchQuery, filterRole],
   )
 
-  const handleInvite =
-    async () => {
-      if (serverInvites && serverInvites?.length > 0) {
-        console.log(serverInvites[0])
-        toast.promise(
-          navigator.clipboard.writeText(`https://discord.gg/${serverInvites[0].code}`),
-          {
-            loading: "Copying...",
-            success: `Copied https://discord.gg/${serverInvites[0].code} to clipboard!`,
-            error: "Failed to copy invite to clipboard"
-          }
-        )
-        return
-      }
-      const res = await fetch(`/api/discord/guild/invite?serverId=${serverId}&with_counts=1`);
-      const data = await res.json();
+  const handleInvite = async () => {
+    if (serverInvites && serverInvites?.length > 0) {
+      console.log(serverInvites[0])
+      const id = toast.loading("Copying...")
+      await navigator.clipboard
+        .writeText(`https://discord.gg/${serverInvites[0].code}`)
+        .then(() => {
+          toast.dismiss(id)
+          toast.success(`Copied ${serverInvites[0].code}!`)
+        })
+        .catch(() => {
+          toast.dismiss(id)
+          toast.error("Failed to copy invite to clipboard")
+        })
+      return
+    }
+    const res = await fetch(`/api/discord/guild/invite?serverId=${serverId}&with_counts=1`)
+    const data = await res.json()
+    if (data.invites && data.invites.length > 0) {
       setServerInvites(data.invites)
-
-      toast.promise(
-        navigator.clipboard.writeText(`https://discord.gg/${data.invites[0].code}`),
-        {
-          loading: "Copying...",
-          success: `Copied https://discord.gg/${data.invites[0].code} to clipboard!`,
-          error: "Failed to copy invite to clipboard",
-        }
-      )
+    } else {
+      toast.error("Uhhh, Something went horribly wrong??")
+      return
     }
 
+    const id = toast.loading("Copying...")
+    await navigator.clipboard
+      .writeText(`https://discord.gg/${data.invites[0].code}`)
+      .then(() => {
+        toast.dismiss(id)
+        toast.success(`Copied ${data.invites[0].code}!`)
+      })
+      .catch(() => {
+        toast.dismiss(id)
+        toast.error("Failed to copy invite to clipboard")
+      })
+  }
 
   useEffect(() => {
     // Reset to first page on filter/search change
@@ -386,7 +401,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const handleNextPage = () => {
     if (members.length > 0) {
       const last = members[members.length - 1]
-      const after = last.user?.id || last.user?.userId || last.user?.discordUserId || last.user?._id || ""
+      const after = last.user?.id || ""
       setAfterCursors((prev) => {
         const next = [...prev]
         next[page + 1] = after
@@ -439,10 +454,27 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const handleSelectAll = (selected: boolean) => {
     setSelectAll(selected)
     if (selected) {
-      setSelectedMembers(new Set(members.map((m) => m.user?.id || m.id)))
+      setSelectedMembers(new Set(members.map((m) => m.user?.id)))
     } else {
       setSelectedMembers(new Set())
     }
+  }
+
+  // Handle member not found (user left or was kicked)
+  const handleMemberNotFound = (memberId: string) => {
+    // Remove the member from the current list and refresh
+    setMembers(prev => prev.filter(m => m.user?.id !== memberId))
+    // Also remove from selected members if selected
+    setSelectedMembers(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(memberId)
+      return newSet
+    })
+    // Show a toast notification
+    toast.info(
+      "Member left server",
+      "A member has left the server and has been removed from the list.",
+    )
   }
 
   // Modal state and handlers
@@ -530,64 +562,65 @@ export function MembersContent({ serverId }: MembersContentProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="discord-button-outline h-12 px-6 bg-transparent">
                 <Filter className="w-4 h-4 mr-2" />
-                Filter & Sort
+                Sort & Filter
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64 bg-discord-darker border-discord-border shadow-2xl">
               <div className="p-3 border-b border-discord-border/30">
-                <Label className="text-discord-text text-xs font-semibold uppercase tracking-wide">Sort By</Label>
+                <Label className="text-discord-text text-xs font-semibold uppercase tracking-wide">Sort Members</Label>
               </div>
               <DropdownMenuItem
-                onClick={() => setSortKey("join")}
-                className={`text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2 ${sortKey === "join" ? "bg-discord-blurple/20 text-discord-blurple" : ""}`}
+                onClick={() => {
+                  setSortKey("join")
+                  setSortDir("desc")
+                }}
+                className="text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2"
               >
                 <Calendar className="w-4 h-4" />
-                Server Join Date
-                {sortKey === "join" &&
-                  (sortDir === "asc" ? (
-                    <ArrowUp className="w-3 h-3 ml-auto" />
-                  ) : (
-                    <ArrowDown className="w-3 h-3 ml-auto" />
-                  ))}
+                Newest Members
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => setSortKey("name")}
-                className={`text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2 ${sortKey === "name" ? "bg-discord-blurple/20 text-discord-blurple" : ""}`}
+                onClick={() => {
+                  setSortKey("join")
+                  setSortDir("asc")
+                }}
+                className="text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2"
               >
-                <Users className="w-4 h-4" />
-                Display Name
-                {sortKey === "name" &&
-                  (sortDir === "asc" ? (
-                    <ArrowUp className="w-3 h-3 ml-auto" />
-                  ) : (
-                    <ArrowDown className="w-3 h-3 ml-auto" />
-                  ))}
+                <Calendar className="w-4 h-4" />
+                Oldest Members
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => setSortKey("role")}
-                className={`text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2 ${sortKey === "role" ? "bg-discord-blurple/20 text-discord-blurple" : ""}`}
+                onClick={() => {
+                  setSortKey("name")
+                  setSortDir("asc")
+                }}
+                className="text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />A → Z
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSortKey("name")
+                  setSortDir("desc")
+                }}
+                className="text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />Z → A
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSortKey("role")
+                  setSortDir("desc")
+                }}
+                className="text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2"
               >
                 <Shield className="w-4 h-4" />
                 Role Hierarchy
-                {sortKey === "role" &&
-                  (sortDir === "asc" ? (
-                    <ArrowUp className="w-3 h-3 ml-auto" />
-                  ) : (
-                    <ArrowDown className="w-3 h-3 ml-auto" />
-                  ))}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-discord-border/30" />
-              <DropdownMenuItem
-                onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-                className="text-discord-text hover:text-white hover:bg-white/5 p-3 flex items-center gap-2"
-              >
-                {sortDir === "asc" ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-                {sortDir === "asc" ? "Ascending" : "Descending"}
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-discord-border/30" />
               <div className="p-3 border-b border-discord-border/30">
                 <Label className="text-discord-text text-xs font-semibold uppercase tracking-wide">
-                  Filter By Role
+                  Filter by Role
                 </Label>
               </div>
               <DropdownMenuItem
@@ -596,7 +629,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
               >
                 All Members
               </DropdownMenuItem>
-              {serverRoles.slice(0, 5).map((role: any) => (
+              {serverRoles.slice(0, 8).map((role: any) => (
                 <DropdownMenuItem
                   key={role.id}
                   onClick={() => setFilterRole(role.id)}
@@ -620,11 +653,11 @@ export function MembersContent({ serverId }: MembersContentProps) {
 
           <Button
             onClick={handleInvite}
-            className="bg-gradient-to-r from-discord-blurple to-purple-600 hover:from-discord-blurple-hover hover:to-purple-700 text-white font-bold h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            className="bg-gradient-to-r from-discord-blurple to-purple-600 hover:from-discord-blurple-hover hover:to-purple-700 text-white font-bold h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+          >
             <UserPlus className="w-4 h-4 mr-2" />
             Invite Members
           </Button>
-
         </div>
       </header>
 
@@ -813,11 +846,16 @@ export function MembersContent({ serverId }: MembersContentProps) {
                     serverRoles={serverRoles}
                     ownerId={ownerId}
                     serverId={serverId!}
-                    isSelected={selectedMembers.has(member.user?.id || member.id)}
+                    isSelected={selectedMembers.has(member.user?.id)}
                     onSelect={handleSelectMember}
+                    showOwnerHighlight={showOwnerHighlight}
+                    setContextMenu={setContextMenu}
+                    getStatusColor={getStatusColor}
+                    getDiscordJoinDate={getDiscordJoinDate}
                     onAction={(type: string, memberObj: any) =>
                       openModal(type as "profile" | "roles" | "moderate" | "message" | null, memberObj)
                     }
+                    onMemberNotFound={handleMemberNotFound}
                   />
                 ))}
               </div>
@@ -883,42 +921,255 @@ export function MembersContent({ serverId }: MembersContentProps) {
             </Button>
           </div>
         </section>
+        <div className="fixed bottom-6 z-30">
+          <Button
+            onClick={() => setShowOwnerHighlight(!showOwnerHighlight)}
+            variant="outline"
+            size="sm"
+            className={`discord-button-outline ${showOwnerHighlight ? "bg-yellow-500/20 border-yellow-400 text-yellow-400" : "bg-transparent"}`}
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            {showOwnerHighlight ? "Hide" : "Show"} Owner
+          </Button>
+        </div>
       </div>
+      {contextMenu.show && (
+        <div className="fixed inset-0 z-50" onClick={() => setContextMenu({ show: false, x: 0, y: 0, member: null })}>
+          <div
+            className="absolute bg-discord-darker border border-discord-border rounded-lg shadow-2xl py-2 min-w-[200px]"
+            style={{
+              left: contextMenu.x,
+              top: contextMenu.y,
+              transform: "translate(-50%, -10px)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="w-full px-4 py-2 text-left text-discord-text hover:text-white hover:bg-white/5 flex items-center gap-3"
+              onClick={() => {
+                if (contextMenu.member) openModal("profile", contextMenu.member)
+                setContextMenu({ show: false, x: 0, y: 0, member: null })
+              }}
+            >
+              <UserCheck className="w-4 h-4 text-blue-400" />
+              Profile
+            </button>
+            <button
+              className="w-full px-4 py-2 text-left text-discord-text hover:text-white hover:bg-white/5 flex items-center gap-3"
+              onClick={() => {
+                if (contextMenu.member) openModal("moderate", contextMenu.member)
+                setContextMenu({ show: false, x: 0, y: 0, member: null })
+              }}
+            >
+              <Shield className="w-4 h-4 text-orange-400" />
+              Moderate
+            </button>
+            <button
+              className="w-full px-4 py-2 text-left text-discord-text hover:text-white hover:bg-white/5 flex items-center gap-3"
+              onClick={() => {
+                if (contextMenu.member) openModal("message", contextMenu.member)
+                setContextMenu({ show: false, x: 0, y: 0, member: null })
+              }}
+            >
+              <MessageSquare className="w-4 h-4 text-green-400" />
+              Send Message
+            </button>
+            <button
+              className="w-full px-4 py-2 text-left text-discord-text hover:text-white hover:bg-white/5 flex items-center gap-3"
+              onClick={() => {
+                if (contextMenu.member) openModal("roles", contextMenu.member)
+                setContextMenu({ show: false, x: 0, y: 0, member: null })
+              }}
+            >
+              <Settings className="w-4 h-4 text-purple-400" />
+              Roles
+            </button>
+          </div>
+        </div>
+      )}
       {/* Modals */}
       {/* Profile Modal */}
       <Dialog open={modalType === "profile"} onOpenChange={closeModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedMember?.user?.username}'s Profile</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={`https://cdn.discordapp.com/avatars/${selectedMember?.user.id}/${selectedMember?.avatar || selectedMember?.user.avatar}` || "/placeholder.svg"} />
-              <AvatarFallback>
-                {selectedMember?.user?.username ? selectedMember.user.username.charAt(0).toUpperCase() : ""}
-              </AvatarFallback>
-            </Avatar>
-            <div className="text-lg text-white font-bold">{selectedMember?.user?.username}</div>
-            <div className="text-discord-text">{selectedMember?.user?.email}</div>
-            <div className="flex gap-2 flex-wrap">
-              {allRoles
-                .filter((role) => selectedMember?.roles?.includes(role.id))
-                .map((role) => (
-                  <Badge
-                    key={role.id}
-                    className="bg-discord-blurple/20 text-discord-text border-discord-blurple/30 text-xs px-2 py-1"
-                  >
-                    {role.name}
-                  </Badge>
-                ))}
-            </div>
-            <div className="text-discord-text text-sm">
-              Joined: {selectedMember?.joined_at ? new Date(selectedMember.joined_at).toLocaleDateString() : ""}
+        <DialogContent className="max-w-3xl bg-discord-darker border-discord-border">
+          <div className="relative">
+            {/* Banner */}
+            <div
+              className="h-32 w-full rounded-t-lg bg-gradient-to-r from-discord-blurple to-purple-600"
+              style={{
+                backgroundImage: selectedMember?.banner
+                  ? `url(https://cdn.discordapp.com/banners/${selectedMember.user.id}/${selectedMember.banner}.png?size=600)`
+                  : undefined,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+
+            {/* Avatar positioned over banner */}
+            <div className="absolute -bottom-12 left-6">
+              <Avatar className="h-24 w-24 border-4 border-discord-darker">
+                <AvatarImage
+                  src={`https://cdn.discordapp.com/avatars/${selectedMember?.user.id}/${selectedMember?.avatar || selectedMember?.user.avatar}.png?size=128`}
+                />
+                <AvatarFallback className="bg-gradient-to-r from-discord-blurple to-purple-600 text-white font-bold text-2xl">
+                  {selectedMember?.user?.username ? selectedMember.user.username.charAt(0).toUpperCase() : ""}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={closeModal}>Close</Button>
-          </DialogFooter>
+
+          <div className="pt-16 px-6 pb-6">
+            <div className="flex items-start justify-between mb-8">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-2xl font-bold text-white">{selectedMember?.user?.username}</h2>
+                  {ownerId && selectedMember?.user?.id === ownerId && (
+                    <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-1 rounded-full">
+                      <Crown className="w-4 h-4 text-white" />
+                      <span className="text-xs font-bold text-white">OWNER</span>
+                    </div>
+                  )}
+                </div>
+                {selectedMember?.user?.discriminator && (
+                  <p className="text-discord-text text-lg mb-1">#{selectedMember.user.discriminator}</p>
+                )}
+                {selectedMember?.nick && (
+                  <p className="text-discord-text text-sm">
+                    Server Nickname: <span className="text-white font-medium">{selectedMember.nick}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 ml-6">
+                <Button
+                  size="sm"
+                  onClick={() => openModal("message", selectedMember)}
+                  className="bg-green-600/90 hover:bg-green-600 text-white border-0 px-4 py-2 h-8 text-sm font-medium"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                  Message
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openModal("roles", selectedMember)}
+                  className="border-purple-500/60 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 bg-transparent px-4 py-2 h-8 text-sm font-medium"
+                >
+                  <Settings className="w-3.5 h-3.5 mr-1.5" />
+                  Manage
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 min-h-[300px]">
+              {/* Member Info */}
+              <div className="space-y-6 min-w-0">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <UserCheck className="w-5 h-5 text-discord-blurple" />
+                    Member Information
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center py-2 border-b border-discord-border/20">
+                      <span className="text-discord-text font-medium">User ID:</span>
+                      <span className="text-white font-mono text-xs bg-discord-dark/50 px-2 py-1 rounded">
+                        {selectedMember?.user?.id}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-discord-border/20">
+                      <span className="text-discord-text font-medium">Joined Server:</span>
+                      <span className="text-white">
+                        {selectedMember?.joined_at
+                          ? new Date(selectedMember.joined_at).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
+                          : "Unknown"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-discord-border/20">
+                      <span className="text-discord-text font-medium">Discord Since:</span>
+                      <span className="text-white">{getDiscordJoinDate(selectedMember?.user?.id)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-discord-text font-medium">Status:</span>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${getStatusColor(selectedMemberPresence.status)}`} />
+                        <span className="text-white capitalize font-medium">
+                          {selectedMemberPresence.status || "offline"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Roles */}
+              <div className="space-y-6 min-w-0">
+                <div className="h-full">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-1 text-purple-400" />
+                    Roles ({selectedMember?.roles?.length || 0})
+                  </h3>
+                  <div className="space-y-3 flex flex-col">
+                    {selectedMember?.roles && selectedMember.roles.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-2 flex-1">
+                        {selectedMember.roles.map((roleId: string) => {
+                          const role = serverRoles.find((r: any) => r.id === roleId)
+                          const roleName = role?.name || roleId
+                          const roleColor = role?.color
+                            ? typeof role.color === "string"
+                              ? role.color
+                              : `#${role.color.toString(16).padStart(6, "0")}`
+                            : "#5865F2"
+                          return (
+                            <span
+                              key={roleId}
+                              className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all"
+                              style={{
+                                background: roleColor + "15",
+                                borderColor: roleColor + "40",
+                                color: roleColor,
+                                border: `1px solid ${roleColor}40`,
+                              }}
+                            >
+                              <span className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: roleColor }} />
+                              {roleName}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center py-8 min-h-[160px]">
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-discord-dark/50 flex items-center justify-center">
+                          <Shield className="w-6 h-6 text-discord-text/50" />
+                        </div>
+                        <span className="text-discord-text text-sm italic">No roles assigned</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Section */}
+            <div className="mt-8 pt-6 border-t border-discord-border/30">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-400" />
+                Recent Activity
+              </h3>
+              <div className="bg-discord-dark/30 rounded-lg p-6 border border-discord-border/20">
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-discord-dark/50 flex items-center justify-center">
+                    <TrendingUp className="w-8 h-8 text-discord-text/50" />
+                  </div>
+                  <p className="text-discord-text text-sm">
+                    Activity tracking would be displayed here in a real implementation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
       {/* Manage Roles Modal */}
@@ -1056,7 +1307,7 @@ function ModerationPanel({ member, onModerate, onClose }: { member: any; onModer
     try {
       const options: any = { reason }
       if (action === "mute" || action === "ban") {
-        if (duration) options.duration = parseDuration(duration)
+        if (duration) options.duration = getDurationTimestamp(duration)
       }
       if (action === "ban") {
         options.deleteMessageHistory = deleteMsg
@@ -1089,6 +1340,21 @@ function ModerationPanel({ member, onModerate, onClose }: { member: any; onModer
       default:
         return undefined
     }
+  }
+
+  // Helper to convert duration string to timestamp
+  function getDurationTimestamp(durationStr: string | null): number {
+    if (!durationStr) {
+      return Date.now(); // immediate expiration
+    }
+
+    const durationSeconds = parseDuration(durationStr);
+    if (!durationSeconds) {
+      return Date.now(); // immediate expiration
+    }
+
+    // Calculate end time by adding duration to current time
+    return Date.now() + (durationSeconds * 1000);
   }
 
   return (

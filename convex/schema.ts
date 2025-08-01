@@ -33,7 +33,6 @@ export default defineSchema({
 		memberCount: v.number(),
 		onlineCount: v.number(),
 		commandsUsed: v.number(),
-		activeChannels: v.number(),
 	})
 		.index('by_server_timestamp', ['serverId', 'timestamp'])
 		.index('by_server_id', ['serverId']),
@@ -102,11 +101,11 @@ export default defineSchema({
 		userId: v.string(), // Discord user ID
 		reason: v.string(),
 		moderator: v.string(), // Discord moderator ID
-		time: v.string(),
-		duration: v.optional(v.string()),
+		time: v.number(), // timestamp in milliseconds
+		duration: v.optional(v.number()), // expiration timestamp in milliseconds
 		state: v.optional(v.string()), // open, closed, etc.
 		proof: v.optional(v.string()),
-		closedAt: v.optional(v.string()),
+		closedAt: v.optional(v.number()), // timestamp in milliseconds
 		closedBy: v.optional(v.string()),
 		notificationMessage: v.optional(v.string()),
 		logMessage: v.optional(v.string()),

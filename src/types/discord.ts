@@ -17,6 +17,24 @@ enum STICKER_FORMAT_TYPES {
 	GIF = 4
 }
 
+enum USER_FLAGS {
+	STAFF = 1 << 0,
+	PARTNER = 1 << 1,
+	HYPESQUAD = 1 << 2,
+	BUG_HUNTER_LEVEL_1 = 1 << 3,
+	HYPESQUAD_ONLINE_HOUSE_1 = 1 << 6,
+	HYPESQUAD_ONLINE_HOUSE_2 = 1 << 7,
+	HYPESQUAD_ONLINE_HOUSE_3 = 1 << 8,
+	PREMIUM_EARLY_SUPPORTER = 1 << 9,
+	TEAM_PSEUDO_USER = 1 << 10, // this one makes no sense to me "User is a team"
+	BUG_HUNTER_LEVEL_2 = 1 << 14,
+	VERIFIED_BOT = 1 << 16,
+	VERIFIED_DEVELOPER = 1 << 17,
+	CERTIFIED_MODERATOR = 1 << 18,
+	BOT_HTTP_INTERACTIONS = 1 << 19,
+	ACTIVE_DEVELOPER = 1 << 22
+}
+
 export interface DiscordEmoji {
 	id: string,
 	name?: string,
@@ -42,12 +60,33 @@ export interface DiscordSticker {
 	sort_value?: number
 }
 
+export interface DiscordCollectible {
+	nameplate: {
+		sku_id: string,
+		asset: string,
+		label: string,
+		// background color of the nameplate, one of:
+		// crimson, berry, sky, teal, forest, bubble_gum, violet, cobalt, clover, lemon, white
+		pallete: string
+	}
+}
+
+export interface DiscordUserPrimaryGuild {
+	identity_guild_id?: string,
+	identity_enabled?: boolean
+	tag?: string // the guild tag
+	badge?: string // its a hash
+}
+
 export interface DiscordGuild {
 	id: string;
 	name: string;
-	icon: string | null;
-	owner: boolean;
-	permissions: string;
+	icon?: string, // hash
+	splash?: string, // hash,
+	discovery_splash?: string // hash
+	owner?: boolean;
+	owner_id: string,
+	permissions?: string;
 	features: string[];
 	approximate_member_count?: number;
 	approximate_presence_count?: number;
@@ -68,13 +107,25 @@ export interface DiscordPartialGuild {
 }
 
 export interface DiscordUser {
-	id: string;
-	username: string;
-	discriminator: string;
-	avatar: string | null;
-	email?: string;
-	bot?: boolean;
-	system?: boolean;
+	id: string,
+	username: string,
+	discriminator: string, // Probably just #0
+	global_name?: string,
+	avatar?: string // its a hash cdn.discordapp.com/avatars/{userId}/{avatar}
+	bot?: boolean
+	system?: boolean // system as in official discord system user
+	mfa_enabled?: boolean,
+	banner?: string,
+	accent_color?: number,
+	locale?: string, // language option https://discord.com/developers/docs/reference#locales
+	verified?: boolean // is the email verified
+	email?: string, // prolly not using this as i have Clerk
+	flags?: USER_FLAGS
+	premium_type?: number
+	public_flags?: USER_FLAGS
+	avatar_decoration_data?: DiscordUserAvatarDecoration
+	collectibles?: DiscordCollectible
+	primary_guild?: DiscordUserPrimaryGuild
 }
 
 export interface DiscordChannel {
