@@ -372,6 +372,7 @@ export type NodeConfig =
 	| RandomNodeConfig;
 
 export type NodeConfigMap = {
+	'root': RootNodeConfig;
 	'option-user': OptionUserNodeConfig;
 	'send-message': SendMessageNodeConfig;
 	'send-dm': SendDMNodeConfig;
@@ -414,49 +415,6 @@ export type NodeConfigMap = {
  * @deprecated Use NodeConfig and DEFAULT_NODE_CONFIGS instead.
  */
 export type BlockTypeConfigMap = never;
-
-export type BLOCK_TYPES = [
-	'option-user' |
-	'option-role' |
-	'option-channel' |
-	'option-text' |
-	'option-boolean' |
-	'send-message' |
-	'send-dm' |
-	'edit-message' |
-	'delete-message' |
-	'bulk-delete' |
-	'pin-message' |
-	'unpin-message' |
-	'add-reaction' |
-	'remove-reaction' |
-	'kick-member' |
-	'ban-member' |
-	'timeout-member' |
-	'set-nickname' |
-	'add-role' |
-	'remove-role' |
-	'create-role' |
-	'delete-role' |
-	'modify-role' |
-	'create-channel' |
-	'delete-channel' |
-	'modify-channel' |
-	'create-invite' |
-	'delete-invite' |
-	'fetch-user' |
-	'fetch-member' |
-	'move-member' |
-	'mute-member' |
-	'deafen-member' |
-	'create-webhook' |
-	'delete-webhook' |
-	'condition' |
-	'wait' |
-	'random' |
-	'unq-variable' |
-	'audit-log'
-]
-
-export type BlockTypeId = BLOCK_TYPES[number]
+export type BLOCK_TYPES = keyof NodeConfigMap;
+export type BlockTypeId = BLOCK_TYPES[number];
 
