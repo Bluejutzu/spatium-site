@@ -21,6 +21,7 @@ import {
     Users,
 } from 'lucide-react';
 import { Rubik } from 'next/font/google';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import React from 'react';
 
@@ -32,6 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { useDiscordCache } from '@/store/discordCache';
 
 import { api } from '../../../convex/_generated/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -49,10 +51,9 @@ export default function SettingsContent({ serverId }: { serverId: string }) {
 export function SettingsClient({ serverId }: { serverId: string }) {
     const { user, isLoaded } = useUser();
     const toast = useToast();
-
+    const router = useRouter();
     const settings = useQuery(api.serverSettings.getServerSettings, { serverId });
     const updateSettings = useMutation(api.serverSettings.updateServerSettings);
-
     const [form, setForm] = useState({
         prefix: '',
         welcomeMessage: '',
@@ -66,90 +67,35 @@ export function SettingsClient({ serverId }: { serverId: string }) {
         welcomeChannelId: '',
         autoRoleId: '',
     });
-
     const [isLoading, setIsLoading] = useState(false);
-    const [roles, setRoles] = useState<import('@/types/discord').DiscordRole[]>(
-        []
-    );
-    const [rolesLoading, setRolesLoading] = useState(false);
     const [rolesError, setRolesError] = useState<string | null>(null);
-    const [channels, setChannels] = useState<import('@/types/discord').DiscordChannel[]>([]);
-    const [channelsLoading, setChannelsLoading] = useState(false);
     const [channelsError, setChannelsError] = useState<string | null>(null);
     const [channelQuery, setChannelQuery] = useState('');
     const [showChannelDropdown, setShowChannelDropdown] = useState(false);
     const channelInputRef = useRef<HTMLInputElement>(null);
     const [channelRefreshLoading, setChannelRefreshLoading] = useState(false);
     const [lastChannelRefresh, setLastChannelRefresh] = useState<number>(0);
-
-    const fetchRoles = useCallback(async () => {
-        if (!isLoaded || !user) {
-            return console.log('No user or loading state is false ', isLoaded);
-        }
-
-        setRolesLoading(true);
-        setRolesError(null);
-
-        try {
-            const res = await fetch(
-                '/api/discord/guild/roles?serverId=' + serverId + '&userId=' + user?.id
-            );
-            if (!res.ok) throw new Error('Failed to fetch roles');
-            const data = await res.json();
-            setRoles(data);
-        } catch (err: any) {
-            setRolesError(err.message);
-        } finally {
-            setRolesLoading(false);
-        }
-    }, [serverId, isLoaded, user]);
-
-    const fetchChannels = useCallback(async () => {
-        if (!isLoaded || !user) {
-            return console.log('No user or loading state is false ', isLoaded);
-        }
-        setChannelsLoading(true);
-        setChannelsError(null);
-        try {
-            const res = await fetch(
-                '/api/discord/guild/channels?serverId=' + serverId + '&userId=' + user?.id
-            );
-            if (!res.ok) throw new Error('Failed to fetch channels');
-            const data = await res.json();
-            setChannels(data.filter((c: any) => c.type === 0)); // Only text channels
-        } catch (err: any) {
-            setChannelsError(err.message);
-        } finally {
-            setChannelsLoading(false);
-        }
-    }, [serverId, isLoaded, user]);
-
-    const handleRefreshChannels = useCallback(async () => {
-        const now = Date.now();
-        if (now - lastChannelRefresh < 10000) return; // 10s debounce
-        setChannelRefreshLoading(true);
-        try {
-            await fetchChannels();
-            setLastChannelRefresh(now);
-        } finally {
-            setChannelRefreshLoading(false);
-        }
-    }, [fetchChannels, lastChannelRefresh]);
+    const [highPermRole, setHighPermRole] = useState<string | null>(null);
+    const [initialSettings, setInitialSettings] = useState<typeof form | null>(null);
+    // Zustand roles/channels
+    const { rolesCache, loadingRoles, fetchRoles, channelsCache, loadingChannels, fetchChannels } = useDiscordCache();
+    const cacheKey = user ? `${serverId}:${user.id}` : '';
+    const roles = rolesCache[cacheKey] || [];
+    const channels = channelsCache[cacheKey] || [];
+    const rolesLoading = loadingRoles.has(cacheKey);
+    const channelsLoading = loadingChannels.has(cacheKey);
 
     useEffect(() => {
-        if (form.autoRole) {
-            fetchRoles();
+        if (user && isLoaded) {
+            fetchRoles(serverId, user.id);
+            fetchChannels(serverId, user.id);
         }
-    }, [form.autoRole, fetchRoles]);
-
-    useEffect(() => {
-        fetchChannels();
-    }, [fetchChannels]);
+    }, [serverId, user, isLoaded, fetchRoles, fetchChannels]);
 
     // Sync form state with loaded settings
     useEffect(() => {
         if (settings) {
-            setForm({
+            const loaded = {
                 prefix: settings.prefix || '!',
                 welcomeMessage: settings.welcomeMessage || '',
                 autoRole: settings.autoRole || false,
@@ -160,54 +106,64 @@ export function SettingsClient({ serverId }: { serverId: string }) {
                 leaveNotifications: settings.leaveNotifications || false,
                 logChannelId: settings.logChannelId || '',
                 welcomeChannelId: settings.welcomeChannelId || '',
-                autoRoleId:
-                    'autoRoleId' in settings ? (settings as any).autoRoleId || '' : '',
-            });
+                autoRoleId: 'autoRoleId' in settings ? (settings as any).autoRoleId || '' : '',
+            };
+            console.log('[useEffect settings] setForm and setInitialSettings:', loaded);
+            setForm(loaded);
+            setInitialSettings(loaded);
         }
     }, [settings]);
 
+    // Unsaved changes detection
+    const hasUnsavedChanges = initialSettings && Object.keys(form).some(
+        key => form[key as keyof typeof form] !== initialSettings[key as keyof typeof form]
+    );
+
+    // Warn on page unload or route change
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [hasUnsavedChanges]);
+
+    // Only update local state on change
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
         const { id, value, type } = e.target;
         let newValue: string | boolean = value;
-
         if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
             newValue = e.target.checked;
         }
-
-        setForm(prev => ({
-            ...prev,
-            [id]: newValue,
-        }));
+        console.log(`[handleChange] id: ${id}, value:`, value, 'type:', type, 'newValue:', newValue);
+        setForm(prev => {
+            const updated = { ...prev, [id]: newValue };
+            console.log('[handleChange] setForm updated:', updated);
+            return updated;
+        });
     };
-
     const handleSwitch = (id: string, value: boolean) => {
         setForm(prev => ({ ...prev, [id]: value }));
     };
 
+    // Save settings only on confirmation
     const handleSaveSettings = async () => {
         if (isLoading) return;
-
         setIsLoading(true);
         const ref = toast.loading('Saving settings...', 'Your changes are being applied');
-
         try {
             await updateSettings({
                 serverId,
-                prefix: form.prefix,
-                welcomeMessage: form.welcomeMessage,
-                welcomeChannelId: form.welcomeChannelId,
-                autoRole: form.autoRole,
-                moderationEnabled: form.moderationEnabled,
-                spamFilter: form.spamFilter,
-                linkFilter: form.linkFilter,
-                joinNotifications: form.joinNotifications,
-                leaveNotifications: form.leaveNotifications,
-                logChannelId: form.logChannelId,
-                ...(form.autoRoleId ? { autoRoleId: form.autoRoleId } : {}),
+                ...form,
             });
-
+            setInitialSettings(form);
             toast.dismiss(ref);
             toast.success(
                 'Settings saved successfully!',
@@ -223,7 +179,6 @@ export function SettingsClient({ serverId }: { serverId: string }) {
             setIsLoading(false);
         }
     };
-
     const selectedRole = roles.find(role => role.id === form.autoRoleId);
     const isRiskyRole =
         selectedRole &&
@@ -233,6 +188,15 @@ export function SettingsClient({ serverId }: { serverId: string }) {
             (BigInt(selectedRole.permissions) &
                 (BigInt(0x8) | BigInt(0x20) | BigInt(0x10) | BigInt(0x4))) !==
             BigInt(0));
+
+    const handleRefreshChannels = async () => {
+        if (!user) return;
+        if (channelRefreshLoading || Date.now() - lastChannelRefresh < 10000) return;
+        setChannelRefreshLoading(true);
+        await fetchChannels(serverId, user.id);
+        setLastChannelRefresh(Date.now());
+        setChannelRefreshLoading(false);
+    };
 
     return (
         <div className='bg-discord-dark min-h-screen font-minecraft'>
@@ -644,24 +608,28 @@ export function SettingsClient({ serverId }: { serverId: string }) {
                     </div>
                 </section>
             </div>
+            {hasUnsavedChanges && (
+                <div className="fixed bottom-0 left-0 right-0 z-50 bg-yellow-400 text-black text-center py-2 font-bold shadow-lg">
+                    You have unsaved changes. Don't forget to save!
+                </div>
+            )}
         </div>
     );
 }
 
 export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
-    const serverSettings = useQuery(api.serverSettings.getServerSettings, {
-        serverId
-    });
-
+    const serverSettings = useQuery(api.serverSettings.getServerSettings, { serverId });
     const updateSettings = useMutation(api.serverSettings.updateServerSettings);
-    const { user } = useUser();
+    const { user, isLoaded } = useUser();
     const toast = useToast();
-    const [roles, setRoles] = useState<any[]>([]);
-    const [loadingRoles, setLoadingRoles] = useState(false);
+    // Zustand roles/channels
+    const { rolesCache, loadingRoles, fetchRoles, channelsCache, loadingChannels, fetchChannels } = useDiscordCache();
+    const cacheKey = user ? `${serverId}:${user.id}` : '';
+    const roles = rolesCache[cacheKey] || [];
+    const channels = channelsCache[cacheKey] || [];
+    const rolesLoading = loadingRoles.has(cacheKey);
+    const channelsLoading = loadingChannels.has(cacheKey);
     const [highPermRole, setHighPermRole] = useState<string | null>(null);
-    const [channels, setChannels] = useState<any[]>([]);
-    const [loadingChannels, setLoadingChannels] = useState(false);
-
     const [localSettings, setLocalSettings] = useState({
         welcomeMessage: "",
         welcomeChannelId: "",
@@ -670,46 +638,13 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
         joinNotifications: false,
         leaveNotifications: false,
     });
-
-    // Fetch roles on mount
+    const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
-        async function fetchRoles() {
-            if (!user || !serverId) return;
-            setLoadingRoles(true);
-            try {
-                const res = await fetch(`/api/discord/guild/roles?serverId=${serverId}&userId=${user.id}`);
-                const data = await res.json();
-                if (Array.isArray(data)) setRoles(data);
-            } catch (e) {
-                toast.error("Failed to fetch roles", "Could not load Discord roles.");
-            } finally {
-                setLoadingRoles(false);
-            }
+        if (user && isLoaded) {
+            fetchRoles(serverId, user.id);
+            fetchChannels(serverId, user.id);
         }
-        fetchRoles();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, serverId]);
-
-    // Fetch channels on mount
-    useEffect(() => {
-        async function fetchChannels() {
-            if (!user || !serverId) return;
-            setLoadingChannels(true);
-            try {
-                const res = await fetch(`/api/discord/guild/channels?serverId=${serverId}&userId=${user.id}`);
-                const data = await res.json();
-                if (Array.isArray(data)) setChannels(data);
-            } catch (e) {
-                toast.error("Failed to fetch channels", "Could not load Discord channels.");
-            } finally {
-                setLoadingChannels(false);
-            }
-        }
-        fetchChannels();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, serverId]);
-
-    // Update local state when server settings load
+    }, [serverId, user, isLoaded, fetchRoles, fetchChannels]);
     useEffect(() => {
         if (serverSettings) {
             setLocalSettings(prev => ({
@@ -722,12 +657,9 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                 leaveNotifications: serverSettings.leaveNotifications,
             }));
         }
-
     }, [serverSettings]);
-
     // Helper: Check if a role has high permissions
     function hasHighPermissions(permissions: string) {
-        // Discord permission bits: https://discord.com/developers/docs/topics/permissions
         const ADMINISTRATOR = BigInt(0x8);
         const MANAGE_GUILD = BigInt(0x20);
         const BAN_MEMBERS = BigInt(0x4);
@@ -742,9 +674,8 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
             (perms & MANAGE_ROLES) !== BigInt(0)
         );
     }
-
-    const handleSettingChange = async (key: string, value: any) => {
-        // If changing autoRoleId, check for high permissions
+    // Only update local state, not server, on setting change
+    const handleSettingChange = (key: string, value: any) => {
         if (key === "autoRoleId") {
             const selectedRole = roles.find(r => r.id === value);
             if (selectedRole && hasHighPermissions(selectedRole.permissions)) {
@@ -758,27 +689,40 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
             }
         }
         setLocalSettings(prev => ({ ...prev, [key]: value }));
-        if (!serverSettings) return;
-        await updateSettings({
-            serverId,
-            prefix: serverSettings.prefix,
-            welcomeMessage: key === "welcomeMessage" ? value : serverSettings.welcomeMessage,
-            welcomeChannelId: key === "welcomeChannelId" ? value : serverSettings.welcomeChannelId,
-            autoRole: key === "autoRole" ? value : serverSettings.autoRole,
-            autoRoleId: key === "autoRoleId" ? value : serverSettings.autoRoleId,
-            moderationEnabled: serverSettings.moderationEnabled,
-            spamFilter: serverSettings.spamFilter,
-            linkFilter: serverSettings.linkFilter,
-            logChannelId: serverSettings.logChannelId,
-            joinNotifications: key === "joinNotifications" ? value : serverSettings.joinNotifications,
-            leaveNotifications: key === "leaveNotifications" ? value : serverSettings.leaveNotifications,
-        });
     };
-
+    // Save all welcome settings on confirmation
+    const handleSaveWelcomeSettings = async () => {
+        if (!serverSettings) return;
+        setIsLoading(true);
+        try {
+            await updateSettings({
+                serverId,
+                prefix: serverSettings.prefix,
+                moderationEnabled: serverSettings.moderationEnabled,
+                spamFilter: serverSettings.spamFilter,
+                linkFilter: serverSettings.linkFilter,
+                logChannelId: serverSettings.logChannelId,
+                // Welcome section fields:
+                welcomeMessage: localSettings.welcomeMessage,
+                welcomeChannelId: localSettings.welcomeChannelId,
+                autoRole: localSettings.autoRole,
+                autoRoleId: localSettings.autoRoleId,
+                joinNotifications: localSettings.joinNotifications,
+                leaveNotifications: localSettings.leaveNotifications,
+            });
+            toast.success('Welcome settings saved!');
+        } catch (e) {
+            toast.error('Failed to save welcome settings');
+        } finally {
+            setIsLoading(false);
+        }
+    };
     const previewMessage = localSettings.welcomeMessage
-        .replace("{user}", "NewMember")
-        .replace("{server}", "Gaming Community");
-
+        .replace("{userName}", `${user?.externalAccounts[0].username}`)
+        .replace("{userMention}", `@${user?.externalAccounts[0].username}`)
+        .replace("{serverName}", "Gaming Community")
+        .replace("{guildMemberCount}", "1000")
+        .replace("{newGuildMemberCount}", "1001");
     if (!serverSettings) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -786,14 +730,12 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
             </div>
         );
     }
-
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-white">Welcome System</h1>
                 <p className="text-discord-text">Configure welcome messages and member onboarding</p>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
                 <Card className="bg-discord-darker border-discord-border lg:col-span-3">
                     <CardHeader>
@@ -801,7 +743,7 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                             <MessageSquare className="h-5 w-5" />
                             Welcome Message
                         </CardTitle>
-                        <CardDescription className="text-discord-text">
+                        <CardDescription className="text-discord-text font-mono">
                             Customize the welcome message for new members
                         </CardDescription>
                     </CardHeader>
@@ -811,14 +753,14 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                             <Select
                                 value={localSettings.welcomeChannelId}
                                 onValueChange={(val) => handleSettingChange("welcomeChannelId", val)}
-                                disabled={loadingChannels || channels.length === 0}
+                                disabled={channelsLoading || channels.length === 0}
                             >
                                 <SelectTrigger className="bg-discord-dark border-discord-border text-white">
-                                    <SelectValue placeholder={loadingChannels ? "Loading channels..." : "Select a channel"} />
+                                    <SelectValue placeholder={channelsLoading ? "Loading channels..." : "Select a channel"} />
                                 </SelectTrigger>
                                 <SelectContent className="bg-discord-dark border-discord-border text-white max-h-60 overflow-y-auto">
                                     {channels
-                                        .filter((ch) => ch.type === 0) // Only text channels
+                                        .filter((ch) => ch.type === 0)
                                         .map((ch) => (
                                             <SelectItem key={ch.id} value={ch.id} className="text-white">
                                                 #{ch.name}
@@ -826,29 +768,35 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                                         ))}
                                 </SelectContent>
                             </Select>
-                            <p className="text-sm text-discord-text">Channel where welcome messages will be sent</p>
+                            <p className="text-sm text-discord-text font-mono">Channel where welcome messages will be sent</p>
                         </div>
-
                         <div className="space-y-2">
                             <Label className="text-white">Welcome Message</Label>
                             <Textarea
+                                id="welcomeMessage"
                                 placeholder="Welcome {user} to {server}! 🎉"
                                 value={localSettings.welcomeMessage}
-                                onChange={(e) => handleSettingChange("welcomeMessage", e.target.value)}
+                                onChange={e => {
+                                    setLocalSettings(prev => ({ ...prev, welcomeMessage: e.target.value }));
+                                    console.log('[Textarea onChange] localSettings after change:', {
+                                        ...localSettings,
+                                        welcomeMessage: e.target.value
+                                    });
+                                }}
                                 className="bg-discord-dark border-discord-border text-white min-h-[120px]"
                             />
                             <div className="mt-4">
                                 <Label className="text-white mb-2 block">Available Variables</Label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {[
-                                        { key: "{user}", desc: "The username of the new member" },
+                                        { key: "{userName}", desc: "The username of the new member" },
                                         { key: "{userMention}", desc: "Mentions the new member" },
                                         { key: "{userAvatarUrl}", desc: "Avatar URL of the new member" },
                                         { key: "{guildIconUrl}", desc: "Icon URL of the server" },
                                         { key: "{guildBannerUrl}", desc: "Banner URL of the server" },
                                         { key: "{guildMemberCount}", desc: "Total member count before join" },
                                         { key: "{newGuildMemberCount}", desc: "Total member count after join" },
-                                        { key: "{server}", desc: "The server name" },
+                                        { key: "{serverName}", desc: "The server name" },
                                     ].map((v) => (
                                         <div key={v.key} className="flex items-center gap-2 bg-discord-dark border border-discord-border rounded px-2 py-1">
                                             <span className="font-mono text-discord-text text-sm select-all">{v.key}</span>
@@ -871,23 +819,21 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                                 </div>
                             </div>
                         </div>
-
                         <div className="space-y-2">
                             <Label className="text-white">Message Preview</Label>
-                            <div className={`p-3 rounded-lg bg-discord-dark border border-discord-border ${fontRubik.variable} antialiased text-white`}>
+                            <div className={`p-3 rounded-lg bg-discord-dark border border-discord-border font-sans font-bold antialiased text-white`}>
                                 {previewMessage || "No message configured"}
                             </div>
                         </div>
                     </CardContent>
                 </Card>
-
                 <Card className="bg-discord-darker border-discord-border lg:col-span-2">
                     <CardHeader>
                         <CardTitle className="text-white flex items-center gap-2">
                             <UserPlus className="h-5 w-5" />
                             Auto Role
                         </CardTitle>
-                        <CardDescription className="text-discord-text">
+                        <CardDescription className="text-discord-text font-mono">
                             Automatically assign roles to new members
                         </CardDescription>
                     </CardHeader>
@@ -895,24 +841,22 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label className="text-white">Enable Auto Role</Label>
-                                <p className="text-sm text-discord-text">Automatically assign a role to new members</p>
                             </div>
                             <Switch
                                 checked={localSettings.autoRole}
                                 onCheckedChange={(checked) => handleSettingChange("autoRole", checked)}
                             />
                         </div>
-
                         {localSettings.autoRole && (
                             <div className="space-y-2">
                                 <Label className="text-white">Auto Role</Label>
                                 <Select
                                     value={localSettings.autoRoleId}
                                     onValueChange={(val) => handleSettingChange("autoRoleId", val)}
-                                    disabled={loadingRoles || roles.length === 0}
+                                    disabled={rolesLoading || roles.length === 0}
                                 >
                                     <SelectTrigger className="bg-discord-dark border-discord-border text-white">
-                                        <SelectValue placeholder={loadingRoles ? "Loading roles..." : "Select a role"} />
+                                        <SelectValue placeholder={rolesLoading ? "Loading roles..." : "Select a role"} />
                                     </SelectTrigger>
                                     <SelectContent className="bg-discord-dark border-discord-border text-white max-h-60 overflow-y-auto">
                                         {roles.map((role) => (
@@ -926,14 +870,13 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                                 {highPermRole && (
                                     <p className="text-sm text-red-400">Warning: The selected role has high permissions!</p>
                                 )}
-                                <p className="text-sm text-discord-text">Role that will be automatically assigned</p>
+                                <p className="text-sm text-discord-text ">Role that will be automatically assigned</p>
                             </div>
                         )}
-
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label className="text-white">Join Notifications</Label>
-                                <p className="text-sm text-discord-text">Send notifications when members join</p>
+                                <p className="text-sm text-discord-text font-mono">Send notifications when members join</p>
                             </div>
                             <Switch
                                 checked={localSettings.joinNotifications}
@@ -941,11 +884,10 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                                 disabled={!serverSettings?.logChannelId}
                             />
                         </div>
-
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label className="text-white">Leave Notifications</Label>
-                                <p className="text-sm text-discord-text">Send notifications when members leave</p>
+                                <p className="text-sm text-discord-text font-mono">Send notifications when members leave</p>
                             </div>
                             <Switch
                                 checked={localSettings.leaveNotifications}
@@ -955,6 +897,26 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+            {/* Save Button for Welcome Settings */}
+            <div className="text-center pt-8">
+                <Button
+                    onClick={handleSaveWelcomeSettings}
+                    disabled={isLoading}
+                    className="discord-button-primary text-xl px-12 py-6 min-w-[200px]"
+                >
+                    {isLoading ? (
+                        <>
+                            <RefreshCw className='mr-2 h-6 w-6 animate-spin' />
+                            SAVING...
+                        </>
+                    ) : (
+                        <>
+                            <Save className='mr-2 h-6 w-6' />
+                            SAVE WELCOME SETTINGS
+                        </>
+                    )}
+                </Button>
             </div>
         </div>
     );

@@ -70,10 +70,253 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { BlockCategory, DEFAULT_NODE_CONFIGS } from '@/types/common';
+import { BlockCategory } from '@/types/common';
 import type { DiscordEmbed } from '@/types/discord';
 
 import { api } from '../../../../../../convex/_generated/api';
+
+export const DEFAULT_NODE_CONFIGS = {
+  root: {
+    type: "root",
+    name: "command",
+    description: "",
+    ephemeral: false,
+    cooldown: 0,
+  },
+  'send-message': {
+    type: "send-message",
+    content: "",
+    embeds: [],
+    tts: false,
+    components: [],
+    ephemeral: false,
+    storeIdAs: "",
+  },
+  'option-user': {
+    type: "option-user",
+    name: "",
+    description: "",
+    required: true,
+    value: "",
+  },
+  'edit-message': {
+    type: "edit-message",
+    message_ref_block: "",
+    content: "",
+    embeds: [],
+    components: [],
+    storeIdAs: "",
+  },
+  condition: {
+    type: "condition",
+    conditionType: "",
+    roleId: "",
+  },
+  wait: {
+    type: "wait",
+    duration: 0,
+    unit: "milliseconds",
+  },
+  'unq-variable': {
+    type: "unq-variable",
+    name: "",
+    value: "",
+  },
+  'add-role': {
+    type: "add-role",
+    roleId: "",
+    userId: "",
+    reason: "",
+  },
+  'remove-role': {
+    type: "remove-role",
+    roleId: "",
+    userId: "",
+    reason: "",
+  },
+  'kick-member': {
+    type: "kick-member",
+    userId: "",
+    reason: "",
+    deleteMessageDays: 0,
+  },
+  'ban-member': {
+    type: "ban-member",
+    userId: "",
+    reason: "",
+    deleteMessageDays: 0,
+  },
+  'timeout-member': {
+    type: "timeout-member",
+    userId: "",
+    duration: 0,
+    reason: "",
+  },
+  'set-nickname': {
+    type: "set-nickname",
+    userId: "",
+    nickname: "",
+    reason: "",
+  },
+  'create-channel': {
+    type: "create-channel",
+    name: "",
+    channelType: 0,
+    categoryId: "",
+    topic: "",
+    nsfw: false,
+  },
+  'delete-channel': {
+    type: "delete-channel",
+    channelId: "",
+    reason: "",
+  },
+  'modify-channel': {
+    type: "modify-channel",
+    channelId: "",
+    name: "",
+    topic: "",
+    nsfw: false,
+  },
+  'send-dm': {
+    type: "send-dm",
+    userId: "",
+    content: "",
+    embeds: [],
+  },
+  'create-webhook': {
+    type: "create-webhook",
+    channelId: "",
+    name: "",
+    avatar: "",
+  },
+  'delete-webhook': {
+    type: "delete-webhook",
+    webhookId: "",
+    reason: "",
+  },
+  'move-member': {
+    type: "move-member",
+    userId: "",
+    channelId: "",
+    reason: "",
+  },
+  'mute-member': {
+    type: "mute-member",
+    userId: "",
+    mute: false,
+    reason: "",
+  },
+  'deafen-member': {
+    type: "deafen-member",
+    userId: "",
+    deafen: false,
+    reason: "",
+  },
+  'fetch-user': {
+    type: "fetch-user",
+    userId: "",
+    storeIdAs: "",
+  },
+  'fetch-member': {
+    type: "fetch-member",
+    userId: "",
+    storeIdAs: "",
+  },
+  'fetch-channel': {
+    type: "fetch-channel",
+    channelId: "",
+    storeIdAs: "",
+  },
+  'fetch-role': {
+    type: "fetch-role",
+    roleId: "",
+    storeIdAs: "",
+  },
+  'create-invite': {
+    type: "create-invite",
+    channelId: "",
+    maxUses: 0,
+    maxAge: 0,
+    temporary: false,
+    unique: false,
+  },
+  'delete-invite': {
+    type: "delete-invite",
+    inviteCode: "",
+    reason: "",
+  },
+  'add-reaction': {
+    type: "add-reaction",
+    messageId: "",
+    emoji: "",
+    channelId: "",
+  },
+  'remove-reaction': {
+    type: "remove-reaction",
+    messageId: "",
+    emoji: "",
+    userId: "",
+    channelId: "",
+  },
+  'pin-message': {
+    type: "pin-message",
+    messageId: "",
+    channelId: "",
+  },
+  'unpin-message': {
+    type: "unpin-message",
+    messageId: "",
+    channelId: "",
+  },
+  'delete-message': {
+    type: "delete-message",
+    messageId: "",
+    channelId: "",
+    reason: "",
+  },
+  'bulk-delete': {
+    type: "bulk-delete",
+    channelId: "",
+    count: 0,
+    reason: "",
+  },
+  'create-role': {
+    type: "create-role",
+    name: "",
+    color: 0,
+    permissions: "",
+    hoist: false,
+    mentionable: false,
+  },
+  'delete-role': {
+    type: "delete-role",
+    roleId: "",
+    reason: "",
+  },
+  'modify-role': {
+    type: "modify-role",
+    roleId: "",
+    name: "",
+    color: 0,
+    permissions: "",
+    hoist: false,
+    mentionable: false,
+  },
+  'audit-log': {
+    type: "audit-log",
+    userId: "",
+    actionType: 0,
+    limit: 0,
+    storeIdAs: "",
+  },
+  random: {
+    type: "random",
+    min: 0,
+    max: 0,
+    storeIdAs: "",
+  },
+};
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -959,6 +1202,22 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     },
     [rfInstance, setNodes, setEdges]
   );
+
+  const deleteSelectedNode = useCallback(() => {
+    if (
+      selectedNode &&
+      selectedNode.id !== ROOT_NODE_ID &&
+      selectedNode.id !== ERROR_NODE_ID
+    ) {
+      setNodes(nds => nds.filter(n => n.id !== selectedNode.id));
+      setEdges(eds =>
+        eds.filter(
+          e => e.source !== selectedNode.id && e.target !== selectedNode.id
+        )
+      );
+      setSelectedNode(null);
+    }
+  }, [selectedNode, setNodes, setEdges]);
 
   const getDefaultConfig = <T extends keyof typeof DEFAULT_NODE_CONFIGS>(type: T): typeof DEFAULT_NODE_CONFIGS[T] => {
     return { ...DEFAULT_NODE_CONFIGS[type] };
@@ -3599,6 +3858,21 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                       }}
                     >
                       Duplicate Block
+                    </Button>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      className='w-full transition-all duration-200 bg-transparent'
+                      style={{
+                        backgroundColor: 'rgb(153 27 27)',
+                        borderColor: 'rgb(220 38 38)',
+                        color: 'white',
+                      }}
+                      onClick={() => {
+                        deleteSelectedNode();
+                      }}
+                    >
+                      Delete Block
                     </Button>
                     {selectedNode.data.type === 'send-message' && (
                       <Button

@@ -1,18 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
+import {
   Activity,
-  BarChart3, 
-  Bell, 
+  BarChart3,
+  Bell,
   Crown,
   ExternalLink,
   Globe,
-  MessageSquare, 
-  Search, 
-  Settings, 
+  MessageSquare,
+  Search,
+  Settings,
   Shield,
-  Users, 
+  Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -36,11 +36,11 @@ interface DashboardHeaderProps {
   memberCount?: number;
 }
 
-export function DashboardHeader({ 
-  serverId, 
+export function DashboardHeader({
+  serverId,
   serverName = "Gaming Community",
   onlineCount = 0,
-  memberCount = 0 
+  memberCount = 0
 }: DashboardHeaderProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [notifications] = useState(3);
@@ -53,7 +53,7 @@ export function DashboardHeader({
   ];
 
   return (
-    <motion.header 
+    <motion.header
       className='border-b bg-discord-darker/95 backdrop-blur-xl px-8 py-6 shadow-lg border-discord-border/50'
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -63,7 +63,7 @@ export function DashboardHeader({
         {/* Left Section */}
         <div className='flex items-center gap-6'>
           <SidebarTrigger className="hover:bg-white/10 transition-colors duration-300" />
-          
+
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -74,7 +74,7 @@ export function DashboardHeader({
             <div className="w-12 h-12 bg-gradient-to-r from-discord-blurple to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
               🎮
             </div>
-            
+
             <div>
               <h1 className='text-2xl font-bold text-white tracking-wide'>{serverName}</h1>
               <div className="flex items-center gap-4 text-sm text-discord-text">
@@ -166,7 +166,7 @@ export function DashboardHeader({
 
           {/* System Status */}
           <Badge className='bg-discord-green/20 text-discord-green border-discord-green/30 px-3 py-2 font-bold'>
-            <motion.div 
+            <motion.div
               className='w-2 h-2 bg-discord-green rounded-full mr-2'
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}

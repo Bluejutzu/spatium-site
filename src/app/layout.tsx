@@ -34,7 +34,7 @@ export default async function RootLayout({
               colorSuccess: 'var(--color-discord-green)',
               colorWarning: 'var(--color-discord-red)',
               colorShimmer: 'var(--color-discord-blurple-hover)',
-              colorText: "var(--color-discord-text)",
+              colorText: "white",
               colorInputBackground: 'white',
               colorTextSecondary: "var(--color-discord-text)",
               colorInputText: 'white',

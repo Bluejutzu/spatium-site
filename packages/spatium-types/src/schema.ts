@@ -106,7 +106,7 @@ export default defineSchema({
 		state: v.optional(v.string()), // open, closed, etc.
 		proof: v.optional(v.string()),
 		closedAt: v.optional(v.number()), // timestamp in milliseconds
-		closedBy: v.optional(v.string()),
+		closedBy: v.string(),
 		notificationMessage: v.optional(v.string()),
 		logMessage: v.optional(v.string()),
 		deleteMessageHistory: v.optional(v.boolean()),

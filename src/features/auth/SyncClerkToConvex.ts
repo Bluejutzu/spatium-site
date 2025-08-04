@@ -7,79 +7,95 @@ import { useEffect } from 'react';
 import { api } from '../../../convex/_generated/api';
 
 export function SyncClerkToConvex() {
-  const { user, isLoaded } = useUser();
-  const syncUser = useMutation(api.users.syncUser);
-  // Fetch the current user from Convex by Clerk ID
-  const dbUser = useQuery(
-    api.users.getUserByClerkId,
-    user ? { clerkId: user.id } : 'skip'
-  );
+	const { user, isLoaded } = useUser();
+	const syncUser = useMutation(api.users.syncUser);
+	// Fetch the current user from Convex by Clerk ID
+	const dbUser = useQuery(
+		api.users.getUserByClerkId,
+		user ? { clerkId: user.id } : 'skip'
+	);
 
-  useEffect(() => {
-    if (!isLoaded || !user) {
-      return console.log('No user or loading state is false ', isLoaded);
-    }
+	useEffect(() => {
+		if (!isLoaded || !user || !dbUser) {
+			return console.log('No user or loading state is false ', isLoaded);
+		}
 
-    const discordAccount = user.externalAccounts.find(
-      acc => acc.provider.toString() === 'discord'
-    );
+		const discordAccount = user.externalAccounts.find(
+			acc => acc.provider.toString() === 'discord'
+		);
 
-    if (!discordAccount) {
-      return console.log(
-        'No discord account found on the user ' +
-          user.externalAccounts[0]?.provider
-      );
-    }
+		if (!discordAccount) {
+			return console.log(
+				'No discord account found on the user ' +
+				user.externalAccounts[0]?.provider
+			);
+		}
 
-    // Prepare the user data to sync
-    const userData = {
-      clerkId: user.id,
-      discordUserId: discordAccount.providerUserId,
-      username: discordAccount.username || user.username || '',
-      email:
-        discordAccount.emailAddress ||
-        user.primaryEmailAddress?.emailAddress ||
-        '',
-      avatarUrl: discordAccount.imageUrl || user.imageUrl,
-    };
+		// Prepare the user data to sync
+		const userData = {
+			clerkId: user.id,
+			discordUserId: discordAccount.providerUserId,
+			username: discordAccount.username || user.username || '',
+			email:
+				discordAccount.emailAddress ||
+				user.primaryEmailAddress?.emailAddress ||
+				'',
+			avatarUrl: discordAccount.imageUrl || user.imageUrl,
+		};
 
-    // Only sync if dbUser is undefined (no entry) or if any field is different
-    const shouldSync =
-      !dbUser ||
-      dbUser.discordUserId !== userData.discordUserId ||
-      dbUser.username !== userData.username ||
-      dbUser.email !== userData.email ||
-      dbUser.avatarUrl !== userData.avatarUrl;
+		// Only sync if dbUser is undefined (no entry) or if any field is different
+		const shouldSync =
+			!dbUser ||
+			dbUser.discordUserId !== userData.discordUserId ||
+			dbUser.username !== userData.username ||
+			dbUser.email !== userData.email ||
+			dbUser.avatarUrl !== userData.avatarUrl;
 
-    console.log(`[SHOULDSYNC] ${shouldSync}`);
+		console.log(`[SHOULDSYNC] ${shouldSync}`);
+		if (shouldSync) {
+			const changedFields: Record<string, { old: any, new: any }> = {};
+			if (!dbUser || dbUser.discordUserId !== userData.discordUserId) {
+				changedFields.discordUserId = { old: dbUser?.discordUserId, new: userData.discordUserId };
+			}
+			if (!dbUser || dbUser.username !== userData.username) {
+				changedFields.username = { old: dbUser?.username, new: userData.username };
+			}
+			if (!dbUser || dbUser.email !== userData.email) {
+				changedFields.email = { old: dbUser?.email, new: userData.email };
+			}
+			if (!dbUser || dbUser.avatarUrl !== userData.avatarUrl) {
+				changedFields.avatarUrl = { old: dbUser?.avatarUrl, new: userData.avatarUrl };
+			}
+			console.log('Changed fields:', changedFields);
+		}
 
-    if (shouldSync) {
-      syncUser(userData);
-      syncDiscordData(user.id);
-    }
-  }, [isLoaded, user, dbUser, syncUser]);
+		if (shouldSync) {
+			syncUser(userData);
+			syncDiscordData(user.id);
+		}
+	}, [isLoaded, user, dbUser, syncUser]);
 
-  const syncDiscordData = async (userId: string) => {
-    console.log(`[SYNCDISCORDATA:userId] ${userId}`);
-    try {
-      const response = await fetch('/api/discord/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
+	const syncDiscordData = async (userId: string) => {
+		console.log(`[SYNCDISCORDATA:userId] ${userId}`);
+		try {
+			const response = await fetch('/api/discord/sync', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ userId }),
+			});
 
-      if (!response.ok) {
-        console.log('Failed to sync Discord data:', response.statusText);
-      } else {
-        const result = await response.json();
-        console.log('Discord sync successful:', result);
-      }
-    } catch (error) {
-      console.log('Failed to sync Discord data:', error);
-    }
-  };
+			if (!response.ok) {
+				console.log('Failed to sync Discord data:', response.statusText);
+			} else {
+				const result = await response.json();
+				console.log('Discord sync successful:', result);
+			}
+		} catch (error) {
+			console.log('Failed to sync Discord data:', error);
+		}
+	};
 
-  return null;
+	return null;
 }

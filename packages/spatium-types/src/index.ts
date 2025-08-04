@@ -412,9 +412,8 @@ export type NodeConfigMap = {
 }
 
 /**
- * @deprecated Use NodeConfig and DEFAULT_NODE_CONFIGS instead.
+ * @deprecated Use NodeConfig and NodeConfigMap instead.
  */
 export type BlockTypeConfigMap = never;
-export type BLOCK_TYPES = keyof NodeConfigMap;
-export type BlockTypeId = BLOCK_TYPES[number];
+export type BlockTypeId = keyof NodeConfigMap;
 

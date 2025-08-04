@@ -3,6 +3,7 @@
 import {
   IconChartBar,
   IconDashboard,
+  IconRefresh,
   IconRobot,
   IconSettings,
   IconShield,
@@ -10,6 +11,8 @@ import {
 } from "@tabler/icons-react"
 import Image from 'next/image';
 import * as React from "react"
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { NavUser } from "@/components/dashboard/sidebar/nav-user"
 import {
@@ -27,6 +30,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useDiscordCache } from "@/store/discordCache";
 
 export function AppSidebar({
   user,
@@ -41,6 +46,26 @@ export function AppSidebar({
   activeSection: string
   onSectionChange: (section: string) => void
 } & React.ComponentProps<typeof Sidebar>) {
+  const { clearCache, populateCache } = useDiscordCache();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshDebounce, setDebounce] = useState(false)
+
+  const handleRefresh = async () => {
+    if (refreshDebounce) return
+    if (!selectedServer || !user) return;
+    setDebounce(true);
+    setIsRefreshing(true);
+    clearCache();
+    try {
+      await populateCache(selectedServer.serverId, user.id);
+      toast.success("Cache refreshed successfully!");
+    } catch (error) {
+      toast.error("Failed to refresh cache.");
+    }
+    setIsRefreshing(false);
+    setTimeout(() => setDebounce(false), 5000);
+  };
+
   const navigationItems = [
     {
       id: "dashboard",
@@ -96,7 +121,7 @@ export function AppSidebar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5 cursor-pointer">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 bg-discord-dark">
                     {serverIcon ? (
                       <Image src={serverIcon} alt={serverName} width={32} height={32} className="w-8 h-8 rounded-lg" />
                     ) : (
@@ -105,7 +130,6 @@ export function AppSidebar({
                       </div>
                     )}
                     <span className="text-base font-semibold">{serverName}</span>
-                    <span className="text-xs text-discord-text ml-2">ID: {serverId}</span>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -147,8 +171,8 @@ export function AppSidebar({
                 isActive={activeSection === item.id}
                 onClick={() => onSectionChange(item.id)}
                 className={`w-full justify-start gap-3 px-4 py-3 text-discord-text hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 font-minecraft ${activeSection === item.id
-                    ? "bg-discord-blurple/20 text-discord-blurple border-r-2 border-discord-blurple"
-                    : ""
+                  ? "bg-discord-blurple/20 text-discord-blurple border-r-2 border-discord-blurple"
+                  : ""
                   }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -159,6 +183,25 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarMenuButton
+                  onClick={handleRefresh}
+                  disabled={isRefreshing || refreshDebounce}
+                  className="w-full justify-start gap-3 px-4 py-3 text-discord-text hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 font-minecraft"
+                >
+                  <IconRefresh className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`} />
+                  <span className="font-bold tracking-wide">REFRESH CACHE</span>
+                </SidebarMenuButton>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{refreshDebounce ? "Cooldown..." : "Refresh members, roles, etc"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <NavUser serverId={serverId} user={userData} />
       </SidebarFooter>
     </Sidebar>

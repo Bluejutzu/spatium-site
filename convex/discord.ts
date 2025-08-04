@@ -455,7 +455,7 @@ export const upsertModerationAction = mutation({
 		state: v.optional(v.string()), // open, closed, etc.
 		proof: v.optional(v.string()),
 		closedAt: v.optional(v.number()), // timestamp in milliseconds
-		closedBy: v.optional(v.string()),
+		closedBy: v.string(),
 		notificationMessage: v.optional(v.string()),
 		logMessage: v.optional(v.string()),
 		deleteMessageHistory: v.optional(v.boolean()),
@@ -493,6 +493,7 @@ export const updateModerationActionState = mutation({
 		userId: v.string(),
 		action: v.string(),
 		state: v.string(),
+		moderatorId: v.string()
 	},
 	handler: async (ctx, args) => {
 		const latest = await ctx.db
@@ -504,7 +505,7 @@ export const updateModerationActionState = mutation({
 			.first();
 
 		if (latest && latest.state !== args.state) {
-			await ctx.db.patch(latest._id, { state: args.state });
+			await ctx.db.patch(latest._id, { state: args.state, closedBy: args.moderatorId, closedAt: Date.now() });
 			return { updated: true, id: latest._id };
 		}
 		return { updated: false };

@@ -7,6 +7,8 @@ import {
   Crown,
   Filter,
   Globe,
+  Hourglass,
+  Loader2,
   MessageSquare,
   Plus,
   Search,
@@ -17,7 +19,7 @@ import {
   UserPlus,
   Users,
   UserX,
-  X,
+  X
 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -40,6 +42,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useUserPresence } from "@/hooks/use-user-presence"
+import { useDiscordCache } from '@/store/discordCache';
 import type { DiscordInvite, DiscordMember, DiscordRole } from "@/types/discord"
 
 interface MembersContentProps {
@@ -65,7 +68,7 @@ function MemberRow({
   serverRoles: DiscordRole[]
   ownerId: string | null
   serverId: string
-  onAction: (type: "moderate" | "member" | "profile" | "message" | "roles", member: DiscordMember) => void
+  onAction: (type: "moderate" | "member" | "message" | "roles", member: DiscordMember) => void
   isSelected: boolean
   onSelect: (memberId: string, selected: boolean) => void
   showOwnerHighlight: boolean
@@ -139,7 +142,7 @@ function MemberRow({
       {/* User info with integrated actions */}
       <div className="flex items-center gap-3 min-w-[200px]">
         <div className="relative">
-          <Avatar className="h-10 w-10 cursor-pointer" onClick={() => onAction("profile", member)}>
+          <Avatar className="h-10 w-10 cursor-pointer">
             <AvatarImage src={getAvatarUrl() || "/placeholder.svg"} alt={member.user?.username} />
             <AvatarFallback className="bg-gradient-to-r from-discord-blurple to-purple-600 text-white font-bold">
               {member.user?.username ? member.user.username.charAt(0).toUpperCase() : ""}
@@ -151,7 +154,7 @@ function MemberRow({
         </div>
         <div className="flex-1">
           <div className="font-semibold text-white text-sm flex items-center gap-2">
-            <span className="cursor-pointer hover:underline" onClick={() => onAction("profile", member)}>
+            <span className="cursor-pointer hover:underline">
               {member.user?.username}
             </span>
             {ownerId && member.user?.id === ownerId && showOwnerHighlight && (
@@ -230,7 +233,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const [loading, setLoading] = useState(false)
   const [selectedMember, setSelectedMember] = useState<DiscordMember | null>(null)
   const [ownerId, setOwnerId] = useState<string | null>(null)
-  const [modalType, setModalType] = useState<null | "profile" | "roles" | "moderate" | "message">(null)
+  const [modalType, setModalType] = useState<null | "roles" | "moderate" | "message">(null)
 
   // Add state for all roles and editing roles
   const [allRoles, setAllRoles] = useState<DiscordRole[]>([])
@@ -256,11 +259,10 @@ export function MembersContent({ serverId }: MembersContentProps) {
     member: DiscordMember | null
   }>({ show: false, x: 0, y: 0, member: null })
   const [showOwnerHighlight, setShowOwnerHighlight] = useState(true)
-
-  const cache = useRef<{ [key: string]: any[] }>({})
-
   const PAGE_SIZE = 10
 
+
+  const { membersCache, loadingMembers, fetchMembers } = useDiscordCache()
   // Helper functions (moved from MemberRow to be shared)
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -276,15 +278,14 @@ export function MembersContent({ serverId }: MembersContentProps) {
   }
 
   const getDiscordJoinDate = (userId?: string) => {
-    // For demo purposes, using a calculated date based on user ID
-    // In real implementation, this would come from Discord API
     if (userId) {
-      // Discord snowflake timestamp extraction (simplified)
-      const timestamp = (Number.parseInt(userId) >> 22) + 1420070400000
-      return new Date(timestamp).toLocaleDateString()
+      const discordEpoch = 1420070400000n;
+      const snowflake = BigInt(userId);
+      const timestamp = (snowflake >> 22n) + discordEpoch;
+      return new Date(Number(timestamp)).toLocaleDateString();
     }
-    return "Unknown"
-  }
+    return "Unknown";
+  };
 
   // Add this line at the top of the MembersContent component, after the other hooks
   const selectedMemberPresence = useUserPresence(serverId!, selectedMember?.user?.id || "")
@@ -317,31 +318,16 @@ export function MembersContent({ serverId }: MembersContentProps) {
     }
   }, [serverId])
 
-  // Fetch paginated, filtered members from API
-  const fetchMembers = useCallback(
-    async (pageIdx: number, after: string) => {
-      if (!serverId) return
-      setLoading(true)
-      const params = new URLSearchParams({
-        serverId,
-        limit: PAGE_SIZE.toString(),
-      })
-      if (after) params.append("after", after)
-      if (searchQuery) params.append("search", searchQuery)
-      // Discord API does not support role filter directly, so filter client-side
-      const res = await fetch(`/api/discord/guild/members?${params.toString()}`)
-      const data = await res.json()
-      let filtered = data.members
-      if (filterRole !== "all") {
-        filtered = filtered.filter((m: any) => (m.roles || []).includes(filterRole))
-      }
-      cache.current[`${pageIdx}:${after}`] = filtered
-      setMembers(filtered)
-      setTotal(data.total)
-      setLoading(false)
-    },
-    [serverId, searchQuery, filterRole],
-  )
+  useEffect(() => {
+    if (serverId) {
+      fetchMembers({ serverId: serverId, pageIdx: page, after: afterCursors[page] || '', filterRole, searchQuery, pageSize: PAGE_SIZE })
+      setMembers(Object.values(membersCache).flat())
+    }
+  }, [afterCursors, fetchMembers, filterRole, page, searchQuery, serverId, membersCache])
+
+  // Use the cache key: `${serverId}:${pageIdx}:${after}:${searchQuery}:${filterRole}`
+  const cacheKey = `${serverId}:${page}:${afterCursors[page] || ''}:${searchQuery}:${filterRole}`;
+  const isLoading = loadingMembers.has(cacheKey);
 
   const handleInvite = async () => {
     if (serverInvites && serverInvites?.length > 0) {
@@ -381,22 +367,6 @@ export function MembersContent({ serverId }: MembersContentProps) {
       })
   }
 
-  useEffect(() => {
-    // Reset to first page on filter/search change
-    setPage(0)
-    setAfterCursors([""])
-    fetchMembers(0, "")
-  }, [serverId, searchQuery, filterRole, fetchMembers])
-
-  useEffect(() => {
-    const after = afterCursors[page] || ""
-    if (cache.current[`${page}:${after}`]) {
-      setMembers(cache.current[`${page}:${after}`])
-    } else {
-      fetchMembers(page, after)
-    }
-  }, [page, afterCursors, fetchMembers])
-
   // Pagination logic
   const handleNextPage = () => {
     if (members.length > 0) {
@@ -413,7 +383,6 @@ export function MembersContent({ serverId }: MembersContentProps) {
   const handlePrevPage = () => {
     if (page > 0) setPage((p) => p - 1)
   }
-  const pageCount = null // Discord API does not provide total
 
   // Actions
   async function handleManageRoles(member: any, newRoles: string[]) {
@@ -499,7 +468,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
           setAllRoles(data || [])
           setRolesLoading(false)
         })
-        .catch((err) => {
+        .catch(() => {
           setRolesError("Failed to fetch roles")
           setRolesLoading(false)
         })
@@ -528,25 +497,10 @@ export function MembersContent({ serverId }: MembersContentProps) {
       {/* Enhanced Header */}
       <header className="sticky top-0 z-20 bg-discord-darker/95 backdrop-blur-xl border-b border-discord-border/50 p-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          {/* Remove motion.div for header title */}
-          {/* <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          > */}
 
           <h1 className="text-4xl font-black text-white font-minecraft tracking-wide mb-2">COMMUNITY MEMBERS</h1>
           <p className="text-discord-text text-lg">Manage server members, roles, and permissions</p>
-          {/* </motion.div> */}
 
-          {/* Remove motion.div for header buttons */}
-          {/* <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto"
-          > */}
-          {/* Enhanced Search */}
           <div className="relative flex-1 lg:flex-initial">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-discord-text w-5 h-5" />
             <Input
@@ -839,7 +793,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
 
               {/* Member rows */}
               <div className="divide-y divide-discord-border/20">
-                {members.map((member, index) => (
+                {members.map((member: DiscordMember, index: number) => (
                   <MemberRow
                     key={member.user?.id || index}
                     member={member}
@@ -853,7 +807,7 @@ export function MembersContent({ serverId }: MembersContentProps) {
                     getStatusColor={getStatusColor}
                     getDiscordJoinDate={getDiscordJoinDate}
                     onAction={(type: string, memberObj: any) =>
-                      openModal(type as "profile" | "roles" | "moderate" | "message" | null, memberObj)
+                      openModal(type as "roles" | "moderate" | "message" | null, memberObj)
                     }
                     onMemberNotFound={handleMemberNotFound}
                   />
@@ -885,31 +839,43 @@ export function MembersContent({ serverId }: MembersContentProps) {
                 </div>
               )}
             </div>
-          ) : (
+          ) : isLoading ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-discord-blurple to-purple-600 flex items-center justify-center shadow-2xl">
-                <UserX className="w-12 h-12 text-white" />
+                <Hourglass className="w-12 h-12 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">No members found</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">Loading your members..</h3>
               <p className="text-discord-text mb-6 max-w-md mx-auto">
-                {searchQuery || filterRole !== "all"
-                  ? "Try adjusting your search or filter criteria"
-                  : "No members to display"}
+                If this takes too long, refresh the page!
               </p>
-              {(searchQuery || filterRole !== "all") && (
-                <Button
-                  onClick={() => {
-                    setSearchQuery("")
-                    setFilterRole("all")
-                  }}
-                  variant="outline"
-                  className="discord-button-outline"
-                >
-                  Clear Filters
-                </Button>
-              )}
             </div>
-          )}
+          ) :
+            (
+              <div className="text-center py-20">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-discord-blurple to-purple-600 flex items-center justify-center shadow-2xl">
+                  <UserX className="w-12 h-12 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">No members found</h3>
+                <p className="text-discord-text mb-6 max-w-md mx-auto">
+                  {searchQuery || filterRole !== "all"
+                    ? "Try adjusting your search or filter criteria"
+                    : "No members to display"}
+                </p>
+                {(searchQuery || filterRole !== "all") && (
+                  <Button
+                    onClick={() => {
+                      setSearchQuery("")
+                      setFilterRole("all")
+                    }}
+                    variant="outline"
+                    className="discord-button-outline"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            )
+          }
           {/* Pagination Controls */}
           <div className="flex justify-center mt-6 gap-2">
             <Button disabled={page === 0 || loading} onClick={handlePrevPage}>
@@ -947,16 +913,6 @@ export function MembersContent({ serverId }: MembersContentProps) {
             <button
               className="w-full px-4 py-2 text-left text-discord-text hover:text-white hover:bg-white/5 flex items-center gap-3"
               onClick={() => {
-                if (contextMenu.member) openModal("profile", contextMenu.member)
-                setContextMenu({ show: false, x: 0, y: 0, member: null })
-              }}
-            >
-              <UserCheck className="w-4 h-4 text-blue-400" />
-              Profile
-            </button>
-            <button
-              className="w-full px-4 py-2 text-left text-discord-text hover:text-white hover:bg-white/5 flex items-center gap-3"
-              onClick={() => {
                 if (contextMenu.member) openModal("moderate", contextMenu.member)
                 setContextMenu({ show: false, x: 0, y: 0, member: null })
               }}
@@ -988,197 +944,12 @@ export function MembersContent({ serverId }: MembersContentProps) {
         </div>
       )}
       {/* Modals */}
-      {/* Profile Modal */}
-      <Dialog open={modalType === "profile"} onOpenChange={closeModal}>
-        <DialogContent className="max-w-3xl bg-discord-darker border-discord-border">
-          <div className="relative">
-            {/* Banner */}
-            <div
-              className="h-32 w-full rounded-t-lg bg-gradient-to-r from-discord-blurple to-purple-600"
-              style={{
-                backgroundImage: selectedMember?.banner
-                  ? `url(https://cdn.discordapp.com/banners/${selectedMember.user.id}/${selectedMember.banner}.png?size=600)`
-                  : undefined,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
-
-            {/* Avatar positioned over banner */}
-            <div className="absolute -bottom-12 left-6">
-              <Avatar className="h-24 w-24 border-4 border-discord-darker">
-                <AvatarImage
-                  src={`https://cdn.discordapp.com/avatars/${selectedMember?.user.id}/${selectedMember?.avatar || selectedMember?.user.avatar}.png?size=128`}
-                />
-                <AvatarFallback className="bg-gradient-to-r from-discord-blurple to-purple-600 text-white font-bold text-2xl">
-                  {selectedMember?.user?.username ? selectedMember.user.username.charAt(0).toUpperCase() : ""}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-
-          <div className="pt-16 px-6 pb-6">
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-bold text-white">{selectedMember?.user?.username}</h2>
-                  {ownerId && selectedMember?.user?.id === ownerId && (
-                    <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-1 rounded-full">
-                      <Crown className="w-4 h-4 text-white" />
-                      <span className="text-xs font-bold text-white">OWNER</span>
-                    </div>
-                  )}
-                </div>
-                {selectedMember?.user?.discriminator && (
-                  <p className="text-discord-text text-lg mb-1">#{selectedMember.user.discriminator}</p>
-                )}
-                {selectedMember?.nick && (
-                  <p className="text-discord-text text-sm">
-                    Server Nickname: <span className="text-white font-medium">{selectedMember.nick}</span>
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-3 ml-6">
-                <Button
-                  size="sm"
-                  onClick={() => openModal("message", selectedMember)}
-                  className="bg-green-600/90 hover:bg-green-600 text-white border-0 px-4 py-2 h-8 text-sm font-medium"
-                >
-                  <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
-                  Message
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => openModal("roles", selectedMember)}
-                  className="border-purple-500/60 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 bg-transparent px-4 py-2 h-8 text-sm font-medium"
-                >
-                  <Settings className="w-3.5 h-3.5 mr-1.5" />
-                  Manage
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-8 min-h-[300px]">
-              {/* Member Info */}
-              <div className="space-y-6 min-w-0">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <UserCheck className="w-5 h-5 text-discord-blurple" />
-                    Member Information
-                  </h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between items-center py-2 border-b border-discord-border/20">
-                      <span className="text-discord-text font-medium">User ID:</span>
-                      <span className="text-white font-mono text-xs bg-discord-dark/50 px-2 py-1 rounded">
-                        {selectedMember?.user?.id}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-discord-border/20">
-                      <span className="text-discord-text font-medium">Joined Server:</span>
-                      <span className="text-white">
-                        {selectedMember?.joined_at
-                          ? new Date(selectedMember.joined_at).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })
-                          : "Unknown"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-discord-border/20">
-                      <span className="text-discord-text font-medium">Discord Since:</span>
-                      <span className="text-white">{getDiscordJoinDate(selectedMember?.user?.id)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-discord-text font-medium">Status:</span>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${getStatusColor(selectedMemberPresence.status)}`} />
-                        <span className="text-white capitalize font-medium">
-                          {selectedMemberPresence.status || "offline"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Roles */}
-              <div className="space-y-6 min-w-0">
-                <div className="h-full">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-1 text-purple-400" />
-                    Roles ({selectedMember?.roles?.length || 0})
-                  </h3>
-                  <div className="space-y-3 flex flex-col">
-                    {selectedMember?.roles && selectedMember.roles.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-2 flex-1">
-                        {selectedMember.roles.map((roleId: string) => {
-                          const role = serverRoles.find((r: any) => r.id === roleId)
-                          const roleName = role?.name || roleId
-                          const roleColor = role?.color
-                            ? typeof role.color === "string"
-                              ? role.color
-                              : `#${role.color.toString(16).padStart(6, "0")}`
-                            : "#5865F2"
-                          return (
-                            <span
-                              key={roleId}
-                              className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all"
-                              style={{
-                                background: roleColor + "15",
-                                borderColor: roleColor + "40",
-                                color: roleColor,
-                                border: `1px solid ${roleColor}40`,
-                              }}
-                            >
-                              <span className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: roleColor }} />
-                              {roleName}
-                            </span>
-                          )
-                        })}
-                      </div>
-                    ) : (
-                      <div className="flex-1 flex flex-col items-center justify-center py-8 min-h-[160px]">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-discord-dark/50 flex items-center justify-center">
-                          <Shield className="w-6 h-6 text-discord-text/50" />
-                        </div>
-                        <span className="text-discord-text text-sm italic">No roles assigned</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Activity Section */}
-            <div className="mt-8 pt-6 border-t border-discord-border/30">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-400" />
-                Recent Activity
-              </h3>
-              <div className="bg-discord-dark/30 rounded-lg p-6 border border-discord-border/20">
-                <div className="text-center py-4">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-discord-dark/50 flex items-center justify-center">
-                    <TrendingUp className="w-8 h-8 text-discord-text/50" />
-                  </div>
-                  <p className="text-discord-text text-sm">
-                    Activity tracking would be displayed here in a real implementation.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
       {/* Manage Roles Modal */}
       <Dialog open={modalType === "roles"} onOpenChange={closeModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Manage Roles for {selectedMember?.user?.username}</DialogTitle>
           </DialogHeader>
-          {/* User-friendly roles UI */}
           {rolesLoading ? (
             <div className="text-discord-text">Loading roles...</div>
           ) : rolesError ? (

@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from 'convex/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity,
   Clock,
   Command,
   Crown,
@@ -43,12 +42,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { isPromise } from '@/lib/utils';
 
 import { api } from '../../../../../convex/_generated/api';
-
-function isPromise<T>(value: any): value is Promise<T> {
-  return value && typeof value.then === 'function';
-}
 
 // Helper function to get command icon based on blocks
 const getCommandIcon = (blocks: string) => {
