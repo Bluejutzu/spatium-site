@@ -1,4 +1,0 @@
-> spatium-types@1.5.12 build /home/runner/work/spatium-site/spatium-site/packages/spatium-types
-> tsc
-error TS18003: No inputs were found in config file '/home/runner/work/spatium-site/spatium-site/packages/spatium-types/tsconfig.json'. Specified 'include' paths were '["dist"]' and 'exclude' paths were '["node_modules","../../convex"]'.
- ELIFECYCLE  Command failed with exit code 2.
