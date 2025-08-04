@@ -286,7 +286,7 @@ export default function CommandsPage({ params }: any) {
 
   if (loading || !commands) {
     return (
-      <div className='bg-discord-dark font-minecraft min-h-screen'>
+      <div className='bg-discord-dark min-h-screen'>
         {/* Atmospheric Background */}
         <div className='fixed inset-0 z-0'>
           <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
@@ -318,7 +318,7 @@ export default function CommandsPage({ params }: any) {
   }
 
   return (
-    <div className='bg-discord-dark font-minecraft min-h-screen'>
+    <div className='bg-discord-dark min-h-screen'>
       {/* Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />

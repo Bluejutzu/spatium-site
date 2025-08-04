@@ -83,7 +83,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="bg-discord-dark min-h-screen font-minecraft">
+    <div className="bg-discord-dark min-h-screen">
       {/* Atmospheric Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black" />

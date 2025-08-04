@@ -1,7 +1,7 @@
 import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist_Mono,Inter } from "next/font/google";
+import { Geist_Mono, Inter, Open_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -10,6 +10,11 @@ import { ConvexClientProvider, SyncClerkToConvex } from "@/features/auth";
 const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+const fontOpenSans = Open_Sans({
+  subsets: ["latin"],
+  variable: "--font-open-sans",
 });
 
 const fontMono = Geist_Mono({
@@ -25,7 +30,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
+        className={`${fontSans.variable} ${fontMono.variable} ${fontOpenSans.variable} font-sans antialiased`}
       >
         <ClerkProvider
           appearance={{

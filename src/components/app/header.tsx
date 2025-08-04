@@ -62,88 +62,98 @@ export function AnimatedHeader({ showNavigation = true }: AnimatedHeaderProps) {
       }}
     >
       <div className='container mx-auto px-6 py-4'>
-        <div className='flex items-center justify-between'>
-          <motion.a
-            href='/'
-            className='flex items-center gap-4'
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <motion.div
-              className='p-3 bg-discord-blurple rounded-xl shadow-glow-blurple'
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+        <div className='grid grid-cols-3 items-center'>
+          <div className='flex justify-start'>
+            <motion.a
+              href='/'
+              className='flex items-center gap-4'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <Bot className='h-6 w-6 text-white' />
+              <motion.div
+                className='p-3 bg-discord-blurple rounded-xl shadow-glow-blurple'
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <Bot className='h-6 w-6 text-white' />
+              </motion.div>
+              <span className='text-xl font-bold text-white tracking-wide font-minecraft'>
+                SPATIUM DASHBOARD
+              </span>
+            </motion.a>
+          </div>
+
+          <div className='flex justify-center'>
+            {showNavigation && (
+              <nav className='hidden md:flex items-center gap-8'>
+                {[
+                  { href: '/pricing', label: 'Pricing' },
+                  { href: '#docs', label: 'Documentation' },
+                ].map((item, index) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className='text-discord-text hover:text-white transition-colors font-medium font-minecraft'
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            )}
+          </div>
+
+          <div className='flex justify-end'>
+            <motion.div
+              className='flex items-center gap-4'
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <ThemeToggle />
+              <SignedOut>
+                <SignInButton mode='modal'>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                  >
+                    <Button className='bg-discord-blurple hover:bg-discord-blurple-hover text-white font-bold px-6 py-2 rounded-lg transition-all duration-300 font-minecraft'>
+                      SIGN IN
+                    </Button>
+                  </motion.div>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                {window.location.pathname === "/servers" ? (
+                  <></>
+                ) : (
+                  <Link href='/servers'>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    >
+                      <Button className='discord-button-outline font-minecraft'>
+                        <LayoutDashboard className='h-4 w-4 mr-2' />
+                        DASHBOARD
+                      </Button>
+                    </motion.div>
+                  </Link>
+                )}
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: 'h-8 w-8',
+                    },
+                  }}
+                />
+              </SignedIn>
             </motion.div>
-            <span className='text-xl font-bold text-white tracking-wide font-minecraft'>
-              SPATIUM DASHBOARD
-            </span>
-          </motion.a>
-
-          {showNavigation && (
-            <nav className='hidden md:flex items-center gap-8'>
-              {[
-                { href: '/pricing', label: 'Pricing' },
-                { href: '#docs', label: 'Documentation' },
-              ].map((item, index) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className='text-discord-text hover:text-white transition-colors font-medium font-minecraft'
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-          )}
-
-          <motion.div
-            className='flex items-center gap-4'
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <ThemeToggle />
-            <SignedOut>
-              <SignInButton mode='modal'>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                >
-                  <Button className='bg-discord-blurple hover:bg-discord-blurple-hover text-white font-bold px-6 py-2 rounded-lg transition-all duration-300 font-minecraft'>
-                    SIGN IN
-                  </Button>
-                </motion.div>
-              </SignInButton>
-            </SignedOut>
-            <SignedIn>
-              <Link href='/servers'>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                >
-                  <Button className='discord-button-outline font-minecraft'>
-                    <LayoutDashboard className='h-4 w-4 mr-2' />
-                    DASHBOARD
-                  </Button>
-                </motion.div>
-              </Link>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: 'h-8 w-8',
-                  },
-                }}
-              />
-            </SignedIn>
-          </motion.div>
+          </div>
         </div>
-      </div>
-    </motion.header>
+      </div >
+    </motion.header >
   );
 }

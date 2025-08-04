@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react';
 
 export default function Loading() {
   return (
-    <div className='bg-discord-dark font-minecraft min-h-screen'>
+    <div className='bg-discord-dark min-h-screen'>
       <div className='fixed inset-0 z-0'>
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
         <div className='absolute inset-0 bg-grid-pattern opacity-5' />

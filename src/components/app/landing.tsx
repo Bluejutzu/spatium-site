@@ -430,7 +430,7 @@ export function LandingPage() {
   ]
 
   return (
-    <div className="bg-discord-dark overflow-hidden font-minecraft min-h-screen" ref={containerRef}>
+    <div className="bg-discord-dark overflow-hidden min-h-screen" ref={containerRef}>
       {/* Enhanced Atmospheric Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black" />

@@ -17,6 +17,7 @@ export default defineSchema({
 		name: v.string(),
 		icon: v.optional(v.string()),
 		ownerId: v.string(),
+		// TODO: Add Permissions to dashboard for Roles and Users
 		memberCount: v.number(),
 		onlineCount: v.number(),
 		botJoinedAt: v.number(),

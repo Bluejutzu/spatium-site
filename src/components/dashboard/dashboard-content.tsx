@@ -318,12 +318,8 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                 trend: "neutral",
               },
             ].map((stat, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
                 className="group"
               >
                 <Card className="discord-card border-2 border-white/10 h-full hover:border-discord-blurple/50 transition-all duration-500 relative overflow-hidden">
@@ -331,13 +327,11 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                   <div className={`absolute inset-0 bg-gradient-to-br from-${stat.accent}/5 via-transparent to-${stat.accent}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                   <CardContent className="p-8 text-center relative z-10">
-                    <motion.div
+                    <div
                       className={`p-4 rounded-2xl bg-gradient-to-r from-${stat.accent}/20 to-${stat.accent}/10 w-fit mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow duration-300 border border-${stat.accent}/30`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
                       <stat.icon className={`h-8 w-8 text-${stat.accent}`} />
-                    </motion.div>
+                    </div>
 
                     <h3 className="text-sm font-bold text-white mb-3 tracking-wide uppercase">
                       {stat.title}
@@ -355,17 +349,13 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                     </Badge>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Enhanced Quick Actions */}
         <section>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+          <div
           >
             <div className="mb-8">
               <Badge className="mb-4 bg-discord-green/20 text-discord-green border-discord-green/30 px-4 py-2 font-bold">
@@ -412,7 +402,7 @@ export function DashboardContent({ serverId }: DashboardContentProps) {
                 />
               ))}
             </div>
-          </motion.div>
+          </div>
         </section>
 
         {/* Enhanced Activity & System Status */}

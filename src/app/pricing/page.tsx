@@ -37,7 +37,7 @@ export default function PricingPage() {
 
   if (!isLoaded || loading) {
     return (
-      <div className='bg-discord-dark font-minecraft min-h-screen flex items-center justify-center'>
+      <div className='bg-discord-dark min-h-screen flex items-center justify-center'>
         <div className='flex items-center gap-3 text-white'>
           <Loader2 className='h-6 w-6 animate-spin text-discord-blurple' />
           <span className='text-xl'>Loading pricing...</span>
@@ -47,7 +47,7 @@ export default function PricingPage() {
   }
 
   return (
-    <div className='bg-discord-dark font-minecraft'>
+    <div className='bg-discord-dark'>
       {/* Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
