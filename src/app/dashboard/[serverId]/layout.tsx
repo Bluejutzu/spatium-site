@@ -9,7 +9,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <div className='bg-discord-dark min-h-screen'>
       {/* Atmospheric Background */}

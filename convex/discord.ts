@@ -63,6 +63,8 @@ export const syncDiscordServers = mutation({
 					lastUpdated: Date.now(),
 				});
 
+				const now = Date.now();
+				const hourInMs = 60 * 60 * 1000;
 				const latestMetric = await ctx.db
 					.query('serverMetrics')
 					.withIndex('by_server_timestamp', q =>
@@ -71,27 +73,23 @@ export const syncDiscordServers = mutation({
 					.order('desc')
 					.first();
 
-				const metricChanged =
+				// Only create a new metric if:
+				// 1. No metrics exist yet
+				// 2. Last metric is over an hour old
+				// 3. Significant changes in member count or online count (>5% change)
+				const shouldCreateNewMetric = 
 					!latestMetric ||
-					latestMetric.memberCount !== server.memberCount ||
-					latestMetric.onlineCount !== server.onlineCount ||
-					latestMetric.commandsUsed !== (latestMetric?.commandsUsed ?? 0);
+					now - latestMetric.timestamp > hourInMs ||
+					Math.abs(latestMetric.memberCount - server.memberCount) / latestMetric.memberCount > 0.05 ||
+					Math.abs(latestMetric.onlineCount - server.onlineCount) / latestMetric.onlineCount > 0.05;
 
-				if (metricChanged && latestMetric) {
-					await ctx.db.patch(latestMetric._id, {
-						memberCount: server.memberCount,
-						onlineCount: server.onlineCount,
-						commandsUsed: latestMetric.commandsUsed ?? 0,
-						timestamp: Date.now(),
-					});
-				}
-				if (!latestMetric) {
+				if (shouldCreateNewMetric) {
 					await ctx.db.insert('serverMetrics', {
 						serverId: server.serverId,
 						memberCount: server.memberCount,
 						onlineCount: server.onlineCount,
-						commandsUsed: 0,
-						timestamp: Date.now(),
+						commandsUsed: latestMetric?.commandsUsed ?? 0,
+						timestamp: now,
 					});
 				}
 			} else {

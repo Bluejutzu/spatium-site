@@ -13,6 +13,9 @@ export async function GET(req: NextRequest) {
     const guild = await discordApi.getGuildWithBotToken(serverId);
     return NextResponse.json(guild);
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch guild' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch guild' },
+      { status: 500 }
+    );
   }
 }

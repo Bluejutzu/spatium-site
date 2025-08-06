@@ -54,10 +54,21 @@ import { EmbedBuilder } from '@/components/app/embed-builder';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -77,244 +88,244 @@ import { api } from '../../../../../../convex/_generated/api';
 
 export const DEFAULT_NODE_CONFIGS = {
   root: {
-    type: "root",
-    name: "command",
-    description: "",
+    type: 'root',
+    name: 'command',
+    description: '',
     ephemeral: false,
     cooldown: 0,
   },
   'send-message': {
-    type: "send-message",
-    content: "",
+    type: 'send-message',
+    content: '',
     embeds: [],
     tts: false,
     components: [],
     ephemeral: false,
-    storeIdAs: "",
+    storeIdAs: '',
   },
   'option-user': {
-    type: "option-user",
-    name: "",
-    description: "",
+    type: 'option-user',
+    name: '',
+    description: '',
     required: true,
-    value: "",
+    value: '',
   },
   'edit-message': {
-    type: "edit-message",
-    message_ref_block: "",
-    content: "",
+    type: 'edit-message',
+    message_ref_block: '',
+    content: '',
     embeds: [],
     components: [],
-    storeIdAs: "",
+    storeIdAs: '',
   },
   condition: {
-    type: "condition",
-    conditionType: "",
-    roleId: "",
+    type: 'condition',
+    conditionType: '',
+    roleId: '',
   },
   wait: {
-    type: "wait",
+    type: 'wait',
     duration: 0,
-    unit: "milliseconds",
+    unit: 'milliseconds',
   },
   'unq-variable': {
-    type: "unq-variable",
-    name: "",
-    value: "",
+    type: 'unq-variable',
+    name: '',
+    value: '',
   },
   'add-role': {
-    type: "add-role",
-    roleId: "",
-    userId: "",
-    reason: "",
+    type: 'add-role',
+    roleId: '',
+    userId: '',
+    reason: '',
   },
   'remove-role': {
-    type: "remove-role",
-    roleId: "",
-    userId: "",
-    reason: "",
+    type: 'remove-role',
+    roleId: '',
+    userId: '',
+    reason: '',
   },
   'kick-member': {
-    type: "kick-member",
-    userId: "",
-    reason: "",
+    type: 'kick-member',
+    userId: '',
+    reason: '',
     deleteMessageDays: 0,
   },
   'ban-member': {
-    type: "ban-member",
-    userId: "",
-    reason: "",
+    type: 'ban-member',
+    userId: '',
+    reason: '',
     deleteMessageDays: 0,
   },
   'timeout-member': {
-    type: "timeout-member",
-    userId: "",
+    type: 'timeout-member',
+    userId: '',
     duration: 0,
-    reason: "",
+    reason: '',
   },
   'set-nickname': {
-    type: "set-nickname",
-    userId: "",
-    nickname: "",
-    reason: "",
+    type: 'set-nickname',
+    userId: '',
+    nickname: '',
+    reason: '',
   },
   'create-channel': {
-    type: "create-channel",
-    name: "",
+    type: 'create-channel',
+    name: '',
     channelType: 0,
-    categoryId: "",
-    topic: "",
+    categoryId: '',
+    topic: '',
     nsfw: false,
   },
   'delete-channel': {
-    type: "delete-channel",
-    channelId: "",
-    reason: "",
+    type: 'delete-channel',
+    channelId: '',
+    reason: '',
   },
   'modify-channel': {
-    type: "modify-channel",
-    channelId: "",
-    name: "",
-    topic: "",
+    type: 'modify-channel',
+    channelId: '',
+    name: '',
+    topic: '',
     nsfw: false,
   },
   'send-dm': {
-    type: "send-dm",
-    userId: "",
-    content: "",
+    type: 'send-dm',
+    userId: '',
+    content: '',
     embeds: [],
   },
   'create-webhook': {
-    type: "create-webhook",
-    channelId: "",
-    name: "",
-    avatar: "",
+    type: 'create-webhook',
+    channelId: '',
+    name: '',
+    avatar: '',
   },
   'delete-webhook': {
-    type: "delete-webhook",
-    webhookId: "",
-    reason: "",
+    type: 'delete-webhook',
+    webhookId: '',
+    reason: '',
   },
   'move-member': {
-    type: "move-member",
-    userId: "",
-    channelId: "",
-    reason: "",
+    type: 'move-member',
+    userId: '',
+    channelId: '',
+    reason: '',
   },
   'mute-member': {
-    type: "mute-member",
-    userId: "",
+    type: 'mute-member',
+    userId: '',
     mute: false,
-    reason: "",
+    reason: '',
   },
   'deafen-member': {
-    type: "deafen-member",
-    userId: "",
+    type: 'deafen-member',
+    userId: '',
     deafen: false,
-    reason: "",
+    reason: '',
   },
   'fetch-user': {
-    type: "fetch-user",
-    userId: "",
-    storeIdAs: "",
+    type: 'fetch-user',
+    userId: '',
+    storeIdAs: '',
   },
   'fetch-member': {
-    type: "fetch-member",
-    userId: "",
-    storeIdAs: "",
+    type: 'fetch-member',
+    userId: '',
+    storeIdAs: '',
   },
   'fetch-channel': {
-    type: "fetch-channel",
-    channelId: "",
-    storeIdAs: "",
+    type: 'fetch-channel',
+    channelId: '',
+    storeIdAs: '',
   },
   'fetch-role': {
-    type: "fetch-role",
-    roleId: "",
-    storeIdAs: "",
+    type: 'fetch-role',
+    roleId: '',
+    storeIdAs: '',
   },
   'create-invite': {
-    type: "create-invite",
-    channelId: "",
+    type: 'create-invite',
+    channelId: '',
     maxUses: 0,
     maxAge: 0,
     temporary: false,
     unique: false,
   },
   'delete-invite': {
-    type: "delete-invite",
-    inviteCode: "",
-    reason: "",
+    type: 'delete-invite',
+    inviteCode: '',
+    reason: '',
   },
   'add-reaction': {
-    type: "add-reaction",
-    messageId: "",
-    emoji: "",
-    channelId: "",
+    type: 'add-reaction',
+    messageId: '',
+    emoji: '',
+    channelId: '',
   },
   'remove-reaction': {
-    type: "remove-reaction",
-    messageId: "",
-    emoji: "",
-    userId: "",
-    channelId: "",
+    type: 'remove-reaction',
+    messageId: '',
+    emoji: '',
+    userId: '',
+    channelId: '',
   },
   'pin-message': {
-    type: "pin-message",
-    messageId: "",
-    channelId: "",
+    type: 'pin-message',
+    messageId: '',
+    channelId: '',
   },
   'unpin-message': {
-    type: "unpin-message",
-    messageId: "",
-    channelId: "",
+    type: 'unpin-message',
+    messageId: '',
+    channelId: '',
   },
   'delete-message': {
-    type: "delete-message",
-    messageId: "",
-    channelId: "",
-    reason: "",
+    type: 'delete-message',
+    messageId: '',
+    channelId: '',
+    reason: '',
   },
   'bulk-delete': {
-    type: "bulk-delete",
-    channelId: "",
+    type: 'bulk-delete',
+    channelId: '',
     count: 0,
-    reason: "",
+    reason: '',
   },
   'create-role': {
-    type: "create-role",
-    name: "",
+    type: 'create-role',
+    name: '',
     color: 0,
-    permissions: "",
+    permissions: '',
     hoist: false,
     mentionable: false,
   },
   'delete-role': {
-    type: "delete-role",
-    roleId: "",
-    reason: "",
+    type: 'delete-role',
+    roleId: '',
+    reason: '',
   },
   'modify-role': {
-    type: "modify-role",
-    roleId: "",
-    name: "",
+    type: 'modify-role',
+    roleId: '',
+    name: '',
     color: 0,
-    permissions: "",
+    permissions: '',
     hoist: false,
     mentionable: false,
   },
   'audit-log': {
-    type: "audit-log",
-    userId: "",
+    type: 'audit-log',
+    userId: '',
     actionType: 0,
     limit: 0,
-    storeIdAs: "",
+    storeIdAs: '',
   },
   random: {
-    type: "random",
+    type: 'random',
     min: 0,
     max: 0,
-    storeIdAs: "",
+    storeIdAs: '',
   },
 };
 
@@ -401,12 +412,13 @@ const getLayoutedNodes = (nodes: Node[], edges: Edge[]): Node[] => {
 const RootNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -439,12 +451,13 @@ const ConditionNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <div className='h-2' style={{ backgroundColor: color }} />
@@ -499,12 +512,13 @@ const MessageNode = ({ data, selected }: NodeProps) => {
   const color = 'var(--color-discord-blurple)';
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <div className='h-2' style={{ backgroundColor: color }} />
@@ -539,91 +553,93 @@ const MessageNode = ({ data, selected }: NodeProps) => {
 
 const createCommandOptionNode =
   (icon: React.ComponentType<any>, label: string) =>
-    ({ data, selected }: NodeProps) => {
-      const color = 'var(--color-discord-green)';
-      const IconComponent = icon;
-      return (
-        <div
-          className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected ? 'outline-2 outline-discord-blurple' : ''
-            }`}
-          style={{ backgroundColor: 'var(--color-discord-darker)' }}
-        >
-          <div className='h-2' style={{ backgroundColor: color }} />
-          <div className='p-3'>
-            <div className='text-center relative z-10'>
-              <IconComponent className='w-4 h-4 mx-auto mb-1' />
-              <span>{label}</span>
-              <div className='text-xs mt-1 opacity-80'>
-                {data.config?.name || 'Unnamed Option'}
-              </div>
+  ({ data, selected }: NodeProps) => {
+    const color = 'var(--color-discord-green)';
+    const IconComponent = icon;
+    return (
+      <div
+        className={`shadow-lg rounded-lg min-w-[200px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+          selected ? 'outline-2 outline-discord-blurple' : ''
+        }`}
+        style={{ backgroundColor: 'var(--color-discord-darker)' }}
+      >
+        <div className='h-2' style={{ backgroundColor: color }} />
+        <div className='p-3'>
+          <div className='text-center relative z-10'>
+            <IconComponent className='w-4 h-4 mx-auto mb-1' />
+            <span>{label}</span>
+            <div className='text-xs mt-1 opacity-80'>
+              {data.config?.name || 'Unnamed Option'}
             </div>
-            <Handle
-              type='source'
-              position={Position.Bottom}
-              className='w-3 h-3 shadow-lg'
-              style={{ backgroundColor: color }}
-            />
           </div>
+          <Handle
+            type='source'
+            position={Position.Bottom}
+            className='w-3 h-3 shadow-lg'
+            style={{ backgroundColor: color }}
+          />
         </div>
-      );
-    };
+      </div>
+    );
+  };
 
 const createDiscordNode =
   (icon: React.ComponentType<any>, defaultCategory: string, label: string) =>
-    ({ data, selected }: NodeProps) => {
-      const blockType = BLOCK_TYPES.find(b => b.type === data.type);
-      const category = blockType?.category || defaultCategory;
-      const IconComponent = icon;
+  ({ data, selected }: NodeProps) => {
+    const blockType = BLOCK_TYPES.find(b => b.type === data.type);
+    const category = blockType?.category || defaultCategory;
+    const IconComponent = icon;
 
-      const colorMap: Record<string, string> = {
-        messaging: 'var(--color-discord-blurple)',
-        moderation: 'var(--color-discord-red)',
-        roles: 'var(--color-discord-orange)',
-        channels: 'var(--color-discord-green)',
-        members: 'var(--color-discord-purple)',
-        voice: 'var(--color-discord-yellow)',
-        webhooks: 'var(--color-discord-green)',
-        logic: 'var(--color-discord-blurple)',
-        utilities: 'var(--color-discord-purple)',
-      };
+    const colorMap: Record<string, string> = {
+      messaging: 'var(--color-discord-blurple)',
+      moderation: 'var(--color-discord-red)',
+      roles: 'var(--color-discord-orange)',
+      channels: 'var(--color-discord-green)',
+      members: 'var(--color-discord-purple)',
+      voice: 'var(--color-discord-yellow)',
+      webhooks: 'var(--color-discord-green)',
+      logic: 'var(--color-discord-blurple)',
+      utilities: 'var(--color-discord-purple)',
+    };
 
-      const color = colorMap[category] || 'var(--color-discord-blurple)';
+    const color = colorMap[category] || 'var(--color-discord-blurple)';
 
-      return (
-        <div
-          className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
+    return (
+      <div
+        className={`shadow-lg rounded-lg min-w-[280px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+          selected
             ? 'outline-2 outline-discord-blurple'
             : data.isHovered
               ? 'outline-2 outline-discord-purple'
               : ''
-            }`}
-          style={{ backgroundColor: 'var(--color-discord-darker)' }}
-        >
-          <div className='h-2' style={{ backgroundColor: color }} />
-          <div className='p-4'>
-            <Handle
-              type='target'
-              position={Position.Top}
-              className='w-3 h-3 shadow-lg'
-              style={{ backgroundColor: color }}
-            />
-            <div className='text-center relative z-10'>
-              <IconComponent className='w-4 h-4 mx-auto mb-1' />
-              <span>{label}</span>
-              <div className='text-xs mt-1 opacity-80'>
-                {data.config?.configured ? 'Configured' : 'Not configured'}
-              </div>
+        }`}
+        style={{ backgroundColor: 'var(--color-discord-darker)' }}
+      >
+        <div className='h-2' style={{ backgroundColor: color }} />
+        <div className='p-4'>
+          <Handle
+            type='target'
+            position={Position.Top}
+            className='w-3 h-3 shadow-lg'
+            style={{ backgroundColor: color }}
+          />
+          <div className='text-center relative z-10'>
+            <IconComponent className='w-4 h-4 mx-auto mb-1' />
+            <span>{label}</span>
+            <div className='text-xs mt-1 opacity-80'>
+              {data.config?.configured ? 'Configured' : 'Not configured'}
             </div>
-            <Handle
-              type='source'
-              position={Position.Bottom}
-              className='w-3 h-3 shadow-lg'
-              style={{ backgroundColor: color }}
-            />
           </div>
+          <Handle
+            type='source'
+            position={Position.Bottom}
+            className='w-3 h-3 shadow-lg'
+            style={{ backgroundColor: color }}
+          />
         </div>
-      );
-    };
+      </div>
+    );
+  };
 
 const BLOCK_TYPES = [
   // Command Options
@@ -918,15 +934,15 @@ const BLOCK_TYPES = [
   },
 ] as const;
 
-export type BlockTypeId = typeof BLOCK_TYPES[number]['type'];
+export type BlockTypeId = (typeof BLOCK_TYPES)[number]['type'];
 
 type NodeTypeComponent = (props: NodeProps) => JSX.Element;
 
 type NodeTypesMap = {
   root: NodeTypeComponent;
 } & {
-    [K in BlockTypeId]: NodeTypeComponent;
-  };
+  [K in BlockTypeId]: NodeTypeComponent;
+};
 
 const nodeTypes: NodeTypesMap = {
   root: RootNode,
@@ -958,8 +974,16 @@ const nodeTypes: NodeTypesMap = {
   'add-reaction': createDiscordNode(Zap, 'messaging', 'Add Reaction'),
   'remove-reaction': createDiscordNode(Zap, 'messaging', 'Remove Reaction'),
   'pin-message': createDiscordNode(MessageSquare, 'messaging', 'Pin Message'),
-  'unpin-message': createDiscordNode(MessageSquare, 'messaging', 'Unpin Message'),
-  'delete-message': createDiscordNode(MessageSquare, 'messaging', 'Delete Message'),
+  'unpin-message': createDiscordNode(
+    MessageSquare,
+    'messaging',
+    'Unpin Message'
+  ),
+  'delete-message': createDiscordNode(
+    MessageSquare,
+    'messaging',
+    'Delete Message'
+  ),
   'edit-message': createDiscordNode(MessageSquare, 'messaging', 'Edit Message'),
   'bulk-delete': createDiscordNode(MessageSquare, 'messaging', 'Bulk Delete'),
   'set-nickname': createDiscordNode(Users, 'moderation', 'Set Nickname'),
@@ -1075,8 +1099,12 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   > | null>(null);
 
   // State for fetching server data
-  const [roles, setRoles] = useState<import('@/types/discord').DiscordRole[]>([]);
-  const [channels, setChannels] = useState<import('@/types/discord').DiscordChannel[]>([]);
+  const [roles, setRoles] = useState<import('@/types/discord').DiscordRole[]>(
+    []
+  );
+  const [channels, setChannels] = useState<
+    import('@/types/discord').DiscordChannel[]
+  >([]);
   const [rolesLoading, setRolesLoading] = useState(false);
   const [channelsLoading, setChannelsLoading] = useState(false);
   const [rolesError, setRolesError] = useState<string | null>(null);
@@ -1219,7 +1247,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     }
   }, [selectedNode, setNodes, setEdges]);
 
-  const getDefaultConfig = <T extends keyof typeof DEFAULT_NODE_CONFIGS>(type: T): typeof DEFAULT_NODE_CONFIGS[T] => {
+  const getDefaultConfig = <T extends keyof typeof DEFAULT_NODE_CONFIGS>(
+    type: T
+  ): (typeof DEFAULT_NODE_CONFIGS)[T] => {
     return { ...DEFAULT_NODE_CONFIGS[type] };
   };
 
@@ -1265,9 +1295,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         nds.map(n =>
           n.id === nodeId
             ? {
-              ...n,
-              data: { ...n.data, config: { ...n.data.config, ...config } },
-            }
+                ...n,
+                data: { ...n.data, config: { ...n.data.config, ...config } },
+              }
             : n
         )
       );
@@ -1275,19 +1305,18 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         setSelectedNode(prev =>
           prev
             ? {
-              ...prev,
-              data: {
-                ...prev.data,
-                config: { ...prev.data.config, ...config },
-              },
-            }
+                ...prev,
+                data: {
+                  ...prev.data,
+                  config: { ...prev.data.config, ...config },
+                },
+              }
             : null
         );
       }
     },
     [setNodes, selectedNode]
   );
-
 
   const removeEdge = useCallback(
     (edgeId: string) => {
@@ -1313,26 +1342,29 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     }
     if (!existingCommand) {
       toast.error('No Command', 'You must save the command before sharing.');
-      return
+      return;
     }
     if (!shareCode) {
-      const newShareCode = `share_${commandId}`
+      const newShareCode = `share_${commandId}`;
       await saveCommandMutation({
         commandId: existingCommand._id,
         serverId: existingCommand.serverId,
         name: existingCommand.name,
-        description: existingCommand.description || "",
+        description: existingCommand.description || '',
         blocks: existingCommand.blocks,
         cooldown: existingCommand.cooldown || 0,
         shareCode: newShareCode,
-        options: existingCommand.options
+        options: existingCommand.options,
       })
-        .catch((e) => console.error(e))
+        .catch(e => console.error(e))
         .then(() => {
-          toast.success('Share Code Created!', 'You can now share this command. ');
+          toast.success(
+            'Share Code Created!',
+            'You can now share this command. '
+          );
         });
 
-      console.log(newShareCode, existingCommand)
+      console.log(newShareCode, existingCommand);
       return;
     }
     setSharePopoverOpen(true);
@@ -1349,20 +1381,23 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     setIsDeleting(true);
     try {
       if (!existingCommand) {
-        toast.error("No Command found", "A command was not found to delete")
-        return
+        toast.error('No Command found', 'A command was not found to delete');
+        return;
       }
       await saveCommandMutation({
         commandId: existingCommand._id,
         serverId: existingCommand.serverId,
         name: existingCommand.name,
-        description: existingCommand.description || "",
+        description: existingCommand.description || '',
         blocks: existingCommand.blocks,
         cooldown: existingCommand.cooldown || 0,
-        shareCode: "",
-        options: existingCommand.options
+        shareCode: '',
+        options: existingCommand.options,
       });
-      toast.success('Share Code Deleted', 'This share code is no longer shareable.');
+      toast.success(
+        'Share Code Deleted',
+        'This share code is no longer shareable.'
+      );
       setDeleteDialogOpen(false);
       setSharePopoverOpen(false);
     } catch (err) {
@@ -1375,7 +1410,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
   const handleImport = async () => {
     const id = importValue.trim();
     if (!id) {
-      toast.error('Invalid Link', 'Please enter a valid share link or command ID.');
+      toast.error(
+        'Invalid Link',
+        'Please enter a valid share link or command ID.'
+      );
       return;
     }
     setImportLoading(true);
@@ -1392,14 +1430,22 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         cooldown: data.cooldown || 0,
         options: data.options || [],
       });
-      toast.success('Command Imported!', 'The command has been added to this server.');
+      toast.success(
+        'Command Imported!',
+        'The command has been added to this server.'
+      );
       setImportValue('');
       // Optionally, redirect to the new command
       if (result.commandId) {
-        router.push(`/dashboard/${serverId}/commands/builder?commandId=${result.commandId}`);
+        router.push(
+          `/dashboard/${serverId}/commands/builder?commandId=${result.commandId}`
+        );
       }
     } catch (err) {
-      toast.error('Import Failed', err instanceof Error ? err.message : 'Unknown error');
+      toast.error(
+        'Import Failed',
+        err instanceof Error ? err.message : 'Unknown error'
+      );
     } finally {
       setImportLoading(false);
     }
@@ -1431,17 +1477,19 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
 
     const description = rootNode.data.config?.description || '';
     const blocks = JSON.stringify({ nodes, edges });
-    const options = nodes.filter(n => n.type?.startsWith('option-')).map(n => ({
-      type: n.data.type,
-      ...n.data.config
-    }))
+    const options = nodes
+      .filter(n => n.type?.startsWith('option-'))
+      .map(n => ({
+        type: n.data.type,
+        ...n.data.config,
+      }));
 
     const commandData = {
       name,
       description,
       blocks,
       serverId,
-      commandId: commandId as any || undefined,
+      commandId: (commandId as any) || undefined,
       cooldown: rootNode.data.config?.cooldown || 0,
       options,
     };
@@ -1479,7 +1527,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     setRolesError(null);
 
     try {
-      const roles = await fetch(`/api/discord/guild/roles?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
+      const roles = await fetch(
+        `/api/discord/guild/roles?serverId=${serverId}&userId=${user.id}`
+      ).then(res => res.json());
       setRoles(roles);
     } catch (err: any) {
       setRolesError(err.message);
@@ -1497,7 +1547,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
     setChannelsError(null);
 
     try {
-      const channels = await fetch(`/api/discord/guild/channels?serverId=${serverId}&userId=${user.id}`).then(res => res.json())
+      const channels = await fetch(
+        `/api/discord/guild/channels?serverId=${serverId}&userId=${user.id}`
+      ).then(res => res.json());
       setChannels(channels);
     } catch (err: any) {
       setChannelsError(err.message);
@@ -1509,16 +1561,29 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
 
   // Auto-fetch roles and channels when needed
   useEffect(() => {
-    if (selectedNode?.data.type === 'option-role' && roles.length === 0 && !rolesLoading) {
+    if (
+      selectedNode?.data.type === 'option-role' &&
+      roles.length === 0 &&
+      !rolesLoading
+    ) {
       fetchRoles();
     }
   }, [selectedNode?.data.type, roles.length, rolesLoading, fetchRoles]);
 
   useEffect(() => {
-    if (selectedNode?.data.type === 'option-channel' && channels.length === 0 && !channelsLoading) {
+    if (
+      selectedNode?.data.type === 'option-channel' &&
+      channels.length === 0 &&
+      !channelsLoading
+    ) {
       fetchChannels();
     }
-  }, [selectedNode?.data.type, channels.length, channelsLoading, fetchChannels]);
+  }, [
+    selectedNode?.data.type,
+    channels.length,
+    channelsLoading,
+    fetchChannels,
+  ]);
 
   const openEmbedBuilder = (embedIndex = 0) => {
     setCurrentEmbedIndex(embedIndex);
@@ -1620,7 +1685,6 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 }
                 placeholder='e.g., message'
               />
-
             </div>
             <div>
               <Label className='text-white font-medium'>Description</Label>
@@ -1762,7 +1826,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div className='flex items-center gap-2'>
                           <div
                             className='w-3 h-3 rounded-full'
-                            style={{ backgroundColor: `#${role.color.toString(16).padStart(6, '0')}` }}
+                            style={{
+                              backgroundColor: `#${role.color.toString(16).padStart(6, '0')}`,
+                            }}
                           />
                           <span>{role.name}</span>
                         </div>
@@ -1838,7 +1904,13 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                         <div className='flex items-center gap-2'>
                           <span>#{channel.name}</span>
                           <span className='text-xs text-gray-400'>
-                            ({channel.type === 0 ? 'Text' : channel.type === 2 ? 'Voice' : 'Other'})
+                            (
+                            {channel.type === 0
+                              ? 'Text'
+                              : channel.type === 2
+                                ? 'Voice'
+                                : 'Other'}
+                            )
                           </span>
                         </div>
                       </SelectItem>
@@ -1890,9 +1962,11 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               <Label className='text-white font-medium'>Default Value</Label>
               <div className='flex items-center space-x-2'>
                 <Switch
-                  checked={config.value || "false"}
+                  checked={config.value || 'false'}
                   onCheckedChange={checked =>
-                    updateNodeConfig(selectedNode.id, { value: checked ? "true" : "false" })
+                    updateNodeConfig(selectedNode.id, {
+                      value: checked ? 'true' : 'false',
+                    })
                   }
                 />
                 <Label className='text-white'>
@@ -2057,10 +2131,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                     )}
                   </Card>
                 )) || (
-                    <div className='text-center py-4 text-gray-400'>
-                      No embeds added yet. Click "Add Embed" to get started.
-                    </div>
-                  )}
+                  <div className='text-center py-4 text-gray-400'>
+                    No embeds added yet. Click "Add Embed" to get started.
+                  </div>
+                )}
               </div>
             </TabsContent>
 
@@ -2367,11 +2441,11 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   <SelectValue placeholder='Select channel type...' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={"0"}>Text</SelectItem>
-                  <SelectItem value={"2"}>Voice</SelectItem>
-                  <SelectItem value={"4"}>Category</SelectItem>
-                  <SelectItem value={"5"}>News</SelectItem>
-                  <SelectItem value={"13"}>Stage</SelectItem>
+                  <SelectItem value={'0'}>Text</SelectItem>
+                  <SelectItem value={'2'}>Voice</SelectItem>
+                  <SelectItem value={'4'}>Category</SelectItem>
+                  <SelectItem value={'5'}>News</SelectItem>
+                  <SelectItem value={'13'}>Stage</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -2565,10 +2639,10 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                   )}
                 </Card>
               )) || (
-                  <div className='text-center py-4 text-gray-400'>
-                    No embeds added yet. Click "Add Embed" to get started.
-                  </div>
-                )}
+                <div className='text-center py-4 text-gray-400'>
+                  No embeds added yet. Click "Add Embed" to get started.
+                </div>
+              )}
             </div>
           </div>
         );
@@ -3322,7 +3396,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
         return (
           <div className='space-y-4'>
             <div>
-              <Label className='text-white font-medium'>User ID (Optional)</Label>
+              <Label className='text-white font-medium'>
+                User ID (Optional)
+              </Label>
               <Input
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.userId || ''}
@@ -3333,14 +3409,18 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
               />
             </div>
             <div>
-              <Label className='text-white font-medium'>Action Type (Optional)</Label>
+              <Label className='text-white font-medium'>
+                Action Type (Optional)
+              </Label>
               <Input
                 type='number'
                 min={0}
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.actionType || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { actionType: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    actionType: Number(e.target.value),
+                  })
                 }
                 placeholder='e.g., 1 (Guild Update)'
               />
@@ -3357,7 +3437,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.limit || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { limit: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    limit: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -3367,12 +3449,15 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., audit-logs'
               />
               <p className='text-xs text-gray-400 mt-1'>
-                Use {'{variable-name}'} in other blocks to access this stored audit log data.
+                Use {'{variable-name}'} in other blocks to access this stored
+                audit log data.
               </p>
             </div>
           </div>
@@ -3387,7 +3472,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.min || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { min: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    min: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -3398,7 +3485,9 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.max || 0}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { max: Number(e.target.value) })
+                  updateNodeConfig(selectedNode.id, {
+                    max: Number(e.target.value),
+                  })
                 }
               />
             </div>
@@ -3408,12 +3497,15 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.storeIdAs || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { storeIdAs: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    storeIdAs: e.target.value,
+                  })
                 }
                 placeholder='e.g., random-number'
               />
               <p className='text-xs text-gray-400 mt-1'>
-                Use {'{variable-name}'} in other blocks to access this stored random number.
+                Use {'{variable-name}'} in other blocks to access this stored
+                random number.
               </p>
             </div>
           </div>
@@ -3491,23 +3583,23 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
       className='h-screen w-full relative overflow-hidden'
       style={{ backgroundColor: 'rgb(15 23 42)' }}
     >
-      <div className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-6 h-16 bg-[#181A20] border-b border-[#23262F] shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 flex items-center justify-center bg-[#23262F] rounded-md">
-            <Settings className="w-6 h-6 text-white" />
+      <div className='fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-6 h-16 bg-[#181A20] border-b border-[#23262F] shadow-lg'>
+        <div className='flex items-center gap-3'>
+          <div className='w-8 h-8 flex items-center justify-center bg-[#23262F] rounded-md'>
+            <Settings className='w-6 h-6 text-white' />
           </div>
 
-          <div className="mt-1 flex gap-2">
+          <div className='mt-1 flex gap-2'>
             <Input
               value={importValue}
               onChange={e => setImportValue(e.target.value)}
-              placeholder="Paste share link or command ID..."
-              className="w-64 bg-[#23262F] text-white border border-[#353945] h-8 text-sm px-2"
+              placeholder='Paste share link or command ID...'
+              className='w-64 bg-[#23262F] text-white border border-[#353945] h-8 text-sm px-2'
               disabled={importLoading}
             />
             <Button
-              size="sm"
-              className="bg-discord-blurple text-white font-semibold hover:bg-discord-blurple/80 h-8 px-4"
+              size='sm'
+              className='bg-discord-blurple text-white font-semibold hover:bg-discord-blurple/80 h-8 px-4'
               onClick={handleImport}
               disabled={importLoading || !importValue.trim()}
             >
@@ -3516,17 +3608,21 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center">
-          <div className="text-slate-400 font-medium flex items-center gap-1">
-            <a className="hover:underline cursor-pointer" href={`/dashboard/${serverId}`} >Dashboard</a>
-            <span className="mx-1">/</span>
-            <span className="text-white font-semibold">Command Builder</span>
+        <div className='flex-1 flex flex-col items-center'>
+          <div className='text-slate-400 font-medium flex items-center gap-1'>
+            <a
+              className='hover:underline cursor-pointer'
+              href={`/dashboard/${serverId}?tab=commands`}
+            >
+              Dashboard
+            </a>
+            <span className='mx-1'>/</span>
+            <span className='text-white font-semibold'>Command Builder</span>
           </div>
           {/* Import Field */}
-
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex space-x-2 mr-2">
+        <div className='flex items-center gap-3'>
+          <div className='flex space-x-2 mr-2'>
             <Button
               onClick={saveCommand}
               size='sm'
@@ -3544,55 +3640,107 @@ function CommandFlowBuilder({ serverId }: CommandFlowBuilderProps) {
           </div>
           <Popover open={sharePopoverOpen} onOpenChange={setSharePopoverOpen}>
             <PopoverTrigger asChild>
-              <Button size="sm" className="bg-white text-black font-semibold hover:bg-gray-200" onClick={handleShareClick} style={{ borderRadius: 'var(--radius)', background: 'var(--color-popover)', color: 'var(--color-popover-foreground)', border: '1px solid var(--color-border)' }}>
-                Share <Share className="w-4 h-4 ml-1" />
+              <Button
+                size='sm'
+                className='bg-white text-black font-semibold hover:bg-gray-200'
+                onClick={handleShareClick}
+                style={{
+                  borderRadius: 'var(--radius)',
+                  background: 'var(--color-popover)',
+                  color: 'var(--color-popover-foreground)',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                Share <Share className='w-4 h-4 ml-1' />
               </Button>
             </PopoverTrigger>
             {shareCode && (
-              <PopoverContent style={{ background: 'var(--color-discord-darker)', color: 'var(--color-popover-foreground)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', minWidth: 320 }}>
-                <div className="flex flex-col space-y-4">
-                  <div className="flex flex-col space-y-1">
-                    <span className='text-sm font-medium text-gray-400'>Last Updated</span>
+              <PopoverContent
+                style={{
+                  background: 'var(--color-discord-darker)',
+                  color: 'var(--color-popover-foreground)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius)',
+                  minWidth: 320,
+                }}
+              >
+                <div className='flex flex-col space-y-4'>
+                  <div className='flex flex-col space-y-1'>
+                    <span className='text-sm font-medium text-gray-400'>
+                      Last Updated
+                    </span>
                     <span className='text-sm text-gray-300'>
                       {existingCommand?.lastUpdateTime
-                        ? new Date(existingCommand.lastUpdateTime).toLocaleString()
+                        ? new Date(
+                            existingCommand.lastUpdateTime
+                          ).toLocaleString()
                         : new Date().toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex flex-col space-y-2">
-                    <span className='text-sm font-medium text-gray-400'>Share Code</span>
-                    <div className="flex items-center justify-between p-2 rounded bg-[var(--color-discord-dark)]">
-                      <span className="font-mono text-sm truncate text-[var(--color-primary)]">{shareCode}</span>
-                      <Button variant="ghost" size="icon" onClick={handleCopyShareCode} className="text-[var(--color-discord-blurple)] hover:text-[var(--color-discord-blurple)] hover:bg-[var(--color-discord-darker)]">
-                        <Copy className="w-4 h-4" />
+                  <div className='flex flex-col space-y-2'>
+                    <span className='text-sm font-medium text-gray-400'>
+                      Share Code
+                    </span>
+                    <div className='flex items-center justify-between p-2 rounded bg-[var(--color-discord-dark)]'>
+                      <span className='font-mono text-sm truncate text-[var(--color-primary)]'>
+                        {shareCode}
+                      </span>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        onClick={handleCopyShareCode}
+                        className='text-[var(--color-discord-blurple)] hover:text-[var(--color-discord-blurple)] hover:bg-[var(--color-discord-darker)]'
+                      >
+                        <Copy className='w-4 h-4' />
                       </Button>
                     </div>
                   </div>
 
                   <Button
-                    variant="destructive"
-                    size="sm"
+                    variant='destructive'
+                    size='sm'
                     onClick={() => setDeleteDialogOpen(true)}
-                    className="w-full bg-[var(--color-discord-red)] hover:bg-[var(--color-discord-red)/90] mt-2"
+                    className='w-full bg-[var(--color-discord-red)] hover:bg-[var(--color-discord-red)/90] mt-2'
                   >
-                    <Trash2 className="w-4 h-4 mr-2" /> Delete Share Code
+                    <Trash2 className='w-4 h-4 mr-2' /> Delete Share Code
                   </Button>
                 </div>
               </PopoverContent>
             )}
           </Popover>
           <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <DialogContent style={{ background: 'var(--color-discord-darker)', color: 'var(--color-card-foreground)', borderRadius: 'var(--radius)' }}>
+            <DialogContent
+              style={{
+                background: 'var(--color-discord-darker)',
+                color: 'var(--color-card-foreground)',
+                borderRadius: 'var(--radius)',
+              }}
+            >
               <DialogHeader>
                 <DialogTitle>Delete Share Code?</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete this share code? This action cannot be undone.
+                  Are you sure you want to delete this share code? This action
+                  cannot be undone.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} style={{ borderRadius: 'var(--radius-sm)' }}>Cancel</Button>
-                <Button variant="destructive" onClick={handleDeleteShareCode} disabled={isDeleting} style={{ background: 'var(--color-discord-red)', borderRadius: 'var(--radius-sm)' }}>
+                <Button
+                  variant='outline'
+                  onClick={() => setDeleteDialogOpen(false)}
+                  style={{ borderRadius: 'var(--radius-sm)' }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant='destructive'
+                  onClick={handleDeleteShareCode}
+                  disabled={isDeleting}
+                  style={{
+                    background: 'var(--color-discord-red)',
+                    borderRadius: 'var(--radius-sm)',
+                  }}
+                >
                   {isDeleting ? 'Deleting...' : 'Delete'}
                 </Button>
               </DialogFooter>

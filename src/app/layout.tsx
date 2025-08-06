@@ -1,25 +1,26 @@
-import "./globals.css";
+import './globals.css';
 
-import { ClerkProvider } from "@clerk/nextjs";
-import { Geist_Mono, Inter, Open_Sans } from "next/font/google";
-import { Toaster } from "sonner";
+import { ClerkProvider } from '@clerk/nextjs';
+import { Geist_Mono, Inter, Open_Sans } from 'next/font/google';
+import { Toaster } from 'sonner';
 
-import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ConvexClientProvider, SyncClerkToConvex } from "@/features/auth";
+import { ThemeProvider } from '@/components/theme/theme-provider';
+import { ScreenSizeGate } from '@/components/ui/screen-size-gate';
+import { ConvexClientProvider, SyncClerkToConvex } from '@/features/auth';
 
 const fontSans = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  subsets: ['latin'],
+  variable: '--font-sans',
 });
 
 const fontOpenSans = Open_Sans({
-  subsets: ["latin"],
-  variable: "--font-open-sans",
+  subsets: ['latin'],
+  variable: '--font-open-sans',
 });
 
 const fontMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
+  variable: '--font-mono',
+  subsets: ['latin'],
 });
 
 export default async function RootLayout({
@@ -28,10 +29,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} ${fontOpenSans.variable} font-sans antialiased`}
       >
+        <ScreenSizeGate />
         <ClerkProvider
           appearance={{
             variables: {
@@ -39,19 +41,20 @@ export default async function RootLayout({
               colorSuccess: 'var(--color-discord-green)',
               colorWarning: 'var(--color-discord-red)',
               colorShimmer: 'var(--color-discord-blurple-hover)',
-              colorText: "white",
+              colorText: 'white',
               colorInputBackground: 'white',
-              colorTextSecondary: "var(--color-discord-text)",
+              colorTextSecondary: 'var(--color-discord-text)',
               colorInputText: 'white',
               colorBackground: 'var(--color-discord-darker)',
               fontFamily: 'minecraft',
               colorInput: 'white',
               colorNeutral: 'white',
             },
-          }}>
+          }}
+        >
           <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
+            attribute='class'
+            defaultTheme='system'
             enableSystem
             disableTransitionOnChange
           >

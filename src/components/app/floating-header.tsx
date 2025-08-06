@@ -14,7 +14,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-
 
 interface FloatingHeaderProps {
   showSearch?: boolean;

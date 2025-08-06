@@ -11,21 +11,31 @@ export const syncUser = mutation({
     avatarUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query('users')
-      .withIndex('by_clerk_id', q => q.eq('clerkId', args.clerkId))
-      .first();
+    try {
+      const existing = await ctx.db
+        .query('users')
+        .withIndex('by_clerk_id', q => q.eq('clerkId', args.clerkId))
+        .first();
 
-    if (existing) {
-      await ctx.db.patch(existing._id, {
+      const userData = {
         ...args,
+        updatedAt: Date.now(),
+      };
+
+      if (existing) {
+        await ctx.db.patch(existing._id, userData);
+        return { success: true, userId: existing._id };
+      }
+
+      const newUserId = await ctx.db.insert('users', {
+        ...userData,
+        createdAt: Date.now(),
       });
-      return existing._id;
-    } else {
-      console.log('Creating entry for ' + args.clerkId);
-      return await ctx.db.insert('users', {
-        ...args,
-      });
+
+      return { success: true, userId: newUserId };
+    } catch (error) {
+      console.error('Error syncing user:', error);
+      return { success: false, error: 'Failed to sync user' };
     }
   },
 });
@@ -33,9 +43,32 @@ export const syncUser = mutation({
 export const getUserByClerkId = query({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query('users')
-      .withIndex('by_clerk_id', q => q.eq('clerkId', args.clerkId))
-      .first();
+    try {
+      const user = await ctx.db
+        .query('users')
+        .withIndex('by_clerk_id', q => q.eq('clerkId', args.clerkId))
+        .first();
+
+      return user ? { success: true, user } : { success: false, error: 'User not found' };
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return { success: false, error: 'Failed to fetch user' };
+    }
+  },
+});
+
+export const getUser = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    try {
+      const user = await ctx.db
+        .query('users')
+        .withIndex('by_discord_id', q => q.eq('discordUserId', args.userId))
+        .first();
+      return user ? { success: true, user } : { success: false, error: 'User not found' };
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return { success: false, error: 'Failed to fetch user' };
+    }
   },
 });

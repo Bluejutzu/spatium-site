@@ -15,17 +15,25 @@ export async function GET(req: NextRequest) {
 
   try {
     const discordApi = new DiscordAPI(process.env.DISCORD_BOT_TOKEN!);
-    const members = await discordApi.getGuildMembersWithBotToken(serverId, limit, after);
+    const members = await discordApi.getGuildMembersWithBotToken(
+      serverId,
+      limit,
+      after
+    );
     let filtered = members;
     if (search) {
       const s = search.toLowerCase();
-      filtered = members.filter(m =>
-        m.user?.username?.toLowerCase().includes(s) ||
-        m.nick?.toLowerCase().includes(s)
+      filtered = members.filter(
+        m =>
+          m.user?.username?.toLowerCase().includes(s) ||
+          m.nick?.toLowerCase().includes(s)
       );
     }
     return NextResponse.json({ members: filtered, total: filtered.length });
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch members' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch members' },
+      { status: 500 }
+    );
   }
 }

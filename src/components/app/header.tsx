@@ -4,7 +4,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 import { motion, useMotionValueEvent, useScroll } from 'framer-motion';
 import { Bot, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,9 @@ interface AnimatedHeaderProps {
 }
 
 export function AnimatedHeader({ showNavigation = true }: AnimatedHeaderProps) {
+  const [windowLocation, setWindow] = useState(
+    typeof window !== 'undefined' ? window.location : null
+  );
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -126,14 +129,18 @@ export function AnimatedHeader({ showNavigation = true }: AnimatedHeaderProps) {
                 </SignInButton>
               </SignedOut>
               <SignedIn>
-                {window.location.pathname === "/servers" ? (
+                {windowLocation && windowLocation.pathname === '/servers' ? (
                   <></>
                 ) : (
                   <Link href='/servers'>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 17,
+                      }}
                     >
                       <Button className='discord-button-outline font-minecraft'>
                         <LayoutDashboard className='h-4 w-4 mr-2' />
@@ -153,7 +160,7 @@ export function AnimatedHeader({ showNavigation = true }: AnimatedHeaderProps) {
             </motion.div>
           </div>
         </div>
-      </div >
-    </motion.header >
+      </div>
+    </motion.header>
   );
 }

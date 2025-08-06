@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import { useQuery } from 'convex/react';
 import { motion } from 'framer-motion';
 import {
+  AlertTriangle,
   ArrowDown,
   BarChart3,
   Bot,
@@ -13,11 +14,13 @@ import {
   Sparkles,
   Star,
   Users,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
+import { BanWarning } from '@/components/app/BanWarning';
 import { DiscordFooter } from '@/components/app/footer';
 import { AnimatedHeader } from '@/components/app/header';
 import { StaticNoise } from '@/components/ui/AnimatedNoise';
@@ -37,6 +40,13 @@ export default function ServerPage() {
   const [hasError, setHasError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showTimeout, setShowTimeout] = useState(false);
+  const [selectedBannedServer, setSelectedBannedServer] = useState<{
+    serverId: string;
+    name: string;
+    banned: boolean;
+    banReason?: string;
+    bannedAt?: string;
+  } | null>(null);
   const servers = useQuery(
     api.discord.getUserServers,
     user ? { userId: user.externalAccounts[0]?.providerUserId } : 'skip'
@@ -62,7 +72,10 @@ export default function ServerPage() {
     if (servers === null) {
       setHasError(true);
       setLoading(false);
-      toast.error('Failed to fetch servers', 'There was a problem fetching your servers. Please try again later.');
+      toast.error(
+        'Failed to fetch servers',
+        'There was a problem fetching your servers. Please try again later.'
+      );
       return;
     }
 
@@ -87,12 +100,14 @@ export default function ServerPage() {
           <span className='text-xl'>Loading your servers...</span>
           {showTimeout && (
             <div className='flex flex-col items-center gap-2 mt-4'>
-              <p className='text-discord-text text-sm'>This is taking a bit long...</p>
+              <p className='text-discord-text text-sm'>
+                This is taking a bit long...
+              </p>
               <button
                 className='px-4 py-2 rounded bg-discord-blurple text-white font-bold hover:bg-discord-blurple/80 transition'
-                onClick={() => router.push(`/servers`)}
+                onClick={() => router.push(`/`)}
               >
-                Go back to Dashboard
+                Go back Home
               </button>
             </div>
           )}
@@ -140,20 +155,22 @@ export default function ServerPage() {
         <div className='flex flex-col items-center gap-3 text-white'>
           <Bot className='h-20 w-20 mb-4 text-discord-blurple' />
           <span className='text-2xl font-bold'>Failed to load servers</span>
-          <span className='text-discord-text'>There was a problem fetching your servers. Please try again later.</span>
-          <Button onClick={() => window.location.reload()} className='mt-4'>Retry</Button>
+          <span className='text-discord-text'>
+            There was a problem fetching your servers. Please try again later.
+          </span>
+          <Button onClick={() => window.location.reload()} className='mt-4'>
+            Retry
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-discord-dark overflow-hidden min-h-screen">
+    <div className='bg-discord-dark overflow-hidden min-h-screen'>
       {/* Enhanced Atmospheric Background */}
       <div className='fixed inset-0 z-0'>
-        <StaticNoise
-          opacity={.05}
-        />
+        <StaticNoise opacity={0.05} />
         <div className='absolute inset-0 bg-gradient-to-br from-discord-dark via-discord-darker to-black' />
         <div className='floating-orb floating-orb-1' />
         <div className='floating-orb floating-orb-2' />
@@ -167,8 +184,6 @@ export default function ServerPage() {
         {/* Enhanced Hero Section */}
         <section className='min-h-screen flex items-center justify-center py-20 pt-32'>
           <div className='w-full max-w-7xl mx-auto px-6'>
-
-
             <div className='flex justify-center'>
               <Card className='discord-card border-2 border-white/10 w-full max-w-6xl backdrop-blur-xl'>
                 <CardHeader className='border-b border-discord-border p-8'>
@@ -197,13 +212,25 @@ export default function ServerPage() {
                 <CardContent>
                   {servers && servers.length > 0 ? (
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
-                      {servers.map((server) => (
+                      {servers.map(server => (
                         <div key={server._id} className='w-full max-w-sm'>
                           <Card
                             className='discord-card hover:border-discord-border-hover transition-all duration-300 cursor-pointer group h-full'
-                            onClick={() => router.push(`/dashboard/${server.serverId}`)}
+                            onClick={() => {
+                              if (server.banned) {
+                                setSelectedBannedServer({
+                                  serverId: server.serverId,
+                                  name: server.name,
+                                  banned: server.banned || false,
+                                  banReason: server.banReason,
+                                  bannedAt: server.bannedAt?.toString(),
+                                });
+                              } else {
+                                router.push(`/dashboard/${server.serverId}`);
+                              }
+                            }}
                             tabIndex={0}
-                            role="button"
+                            role='button'
                             style={{ outline: 'none' }}
                           >
                             <CardContent>
@@ -226,9 +253,17 @@ export default function ServerPage() {
                                 </div>
 
                                 <div className='flex-1 min-w-0'>
-                                  <h3 className='font-bold text-white truncate group-hover:text-discord-blurple transition-colors'>
-                                    {server.name}
-                                  </h3>
+                                  <div className='flex items-center gap-2'>
+                                    <h3 className='font-bold text-white truncate group-hover:text-discord-blurple transition-colors'>
+                                      {server.name}
+                                    </h3>
+                                    {server.banned && (
+                                      <span className='flex items-center gap-1 bg-red-500/10 text-red-500 px-2 py-0.5 rounded text-xs font-medium'>
+                                        <AlertTriangle className='h-3 w-3' />
+                                        BANNED
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className='flex items-center gap-4 mt-1 text-sm text-discord-text'>
                                     <span className='flex items-center gap-1'>
                                       <Users className='h-3 w-3' />
@@ -239,9 +274,18 @@ export default function ServerPage() {
                                       {server.onlineCount} online
                                     </span>
                                   </div>
-
+                                  {server.banned && server.banReason && (
+                                    <div className='mt-2 text-sm text-red-400'>
+                                      <p className='truncate'>
+                                        Reason: {server.banReason}
+                                      </p>
+                                    </div>
+                                  )}
                                   <span className='flex items-center gap-1 text-xs text-discord-text/80'>
-                                    Last Sync: {new Date(server.lastUpdated).toDateString()}
+                                    Last Sync:{' '}
+                                    {new Date(
+                                      server.lastUpdated
+                                    ).toDateString()}
                                   </span>
                                 </div>
                               </div>
@@ -258,9 +302,15 @@ export default function ServerPage() {
             </div>
           </div>
         </section>
-
-
       </div>
+
+      {selectedBannedServer && (
+        <BanWarning
+          serverName={selectedBannedServer.name}
+          banReason={selectedBannedServer.banReason || 'No reason provided'}
+          banDate={selectedBannedServer.bannedAt || 'No date provided'}
+        />
+      )}
 
       <DiscordFooter />
     </div>

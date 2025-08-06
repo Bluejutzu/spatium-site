@@ -29,16 +29,64 @@ export const updateServerSettings = mutation({
 		leaveNotifications: v.boolean(),
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query('serverSettings')
-			.withIndex('by_server_id', q => q.eq('serverId', args.serverId))
-			.first();
-		if (existing) {
-			await ctx.db.patch(existing._id, { ...args });
-			return { updated: true };
-		} else {
-			await ctx.db.insert('serverSettings', { ...args });
-			return { created: true };
+		try {
+			// Validate server exists
+			const server = await ctx.db
+				.query('discordServers')
+				.withIndex('by_server_id', q => q.eq('serverId', args.serverId))
+				.first();
+
+			if (!server) {
+				return {
+					success: false,
+					error: 'Server not found',
+				};
+			}
+
+			// Validate autoRole settings
+			if (args.autoRole && !args.autoRoleId) {
+				return {
+					success: false,
+					error: 'Auto role enabled but no role ID provided',
+				};
+			}
+
+			const now = Date.now();
+			const settingsData = {
+				...args,
+				updatedAt: now,
+			};
+
+			const existing = await ctx.db
+				.query('serverSettings')
+				.withIndex('by_server_id', q => q.eq('serverId', args.serverId))
+				.first();
+
+			if (existing) {
+				await ctx.db.patch(existing._id, settingsData);
+				return {
+					success: true,
+					status: 'updated',
+					settingsId: existing._id,
+				};
+			}
+
+			const newSettingsId = await ctx.db.insert('serverSettings', {
+				...settingsData,
+				createdAt: now,
+			});
+
+			return {
+				success: true,
+				status: 'created',
+				settingsId: newSettingsId,
+			};
+		} catch (error) {
+			console.error('Error updating server settings:', error);
+			return {
+				success: false,
+				error: 'Failed to update server settings',
+			};
 		}
 	},
 });

@@ -13,7 +13,10 @@ export async function GET(req: NextRequest) {
       },
     });
     if (!res.ok) {
-      return NextResponse.json({ error: 'Failed to fetch user' }, { status: res.status });
+      return NextResponse.json(
+        { error: 'Failed to fetch user' },
+        { status: res.status }
+      );
     }
     const user = await res.json();
     return NextResponse.json(user);

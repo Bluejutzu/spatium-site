@@ -38,18 +38,33 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({
   serverId,
-  serverName = "Gaming Community",
+  serverName = 'Gaming Community',
   onlineCount = 0,
-  memberCount = 0
+  memberCount = 0,
 }: DashboardHeaderProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [notifications] = useState(3);
 
   const quickActions = [
-    { icon: BarChart3, label: 'Analytics', shortcut: '⌘A', color: 'text-blue-500' },
+    {
+      icon: BarChart3,
+      label: 'Analytics',
+      shortcut: '⌘A',
+      color: 'text-blue-500',
+    },
     { icon: Users, label: 'Members', shortcut: '⌘M', color: 'text-green-500' },
-    { icon: MessageSquare, label: 'Commands', shortcut: '⌘C', color: 'text-purple-500' },
-    { icon: Shield, label: 'Moderation', shortcut: '⌘S', color: 'text-red-500' },
+    {
+      icon: MessageSquare,
+      label: 'Commands',
+      shortcut: '⌘C',
+      color: 'text-purple-500',
+    },
+    {
+      icon: Shield,
+      label: 'Moderation',
+      shortcut: '⌘S',
+      color: 'text-red-500',
+    },
   ];
 
   return (
@@ -62,32 +77,34 @@ export function DashboardHeader({
       <div className='flex items-center justify-between'>
         {/* Left Section */}
         <div className='flex items-center gap-6'>
-          <SidebarTrigger className="hover:bg-white/10 transition-colors duration-300" />
+          <SidebarTrigger className='hover:bg-white/10 transition-colors duration-300' />
 
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex items-center gap-4"
+            className='flex items-center gap-4'
           >
             {/* Server Icon */}
-            <div className="w-12 h-12 bg-gradient-to-r from-discord-blurple to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            <div className='w-12 h-12 bg-gradient-to-r from-discord-blurple to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg'>
               🎮
             </div>
 
             <div>
-              <h1 className='text-2xl font-bold text-white tracking-wide'>{serverName}</h1>
-              <div className="flex items-center gap-4 text-sm text-discord-text">
-                <span className="flex items-center gap-1">
-                  <Globe className="w-3 h-3" />
+              <h1 className='text-2xl font-bold text-white tracking-wide'>
+                {serverName}
+              </h1>
+              <div className='flex items-center gap-4 text-sm text-discord-text'>
+                <span className='flex items-center gap-1'>
+                  <Globe className='w-3 h-3' />
                   ID: {serverId}
                 </span>
-                <span className="flex items-center gap-1">
-                  <Users className="w-3 h-3" />
+                <span className='flex items-center gap-1'>
+                  <Users className='w-3 h-3' />
                   {memberCount.toLocaleString()} members
                 </span>
-                <span className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className='flex items-center gap-1'>
+                  <div className='w-2 h-2 bg-green-500 rounded-full animate-pulse' />
                   {onlineCount} online
                 </span>
               </div>
@@ -100,12 +117,12 @@ export function DashboardHeader({
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="hidden lg:flex items-center relative"
+          className='hidden lg:flex items-center relative'
         >
           <motion.div
             animate={{ width: searchFocused ? 400 : 320 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="relative"
+            className='relative'
           >
             <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-discord-text' />
             <Input
@@ -149,7 +166,7 @@ export function DashboardHeader({
                 >
                   <div className='flex items-center gap-3'>
                     <action.icon className={`h-4 w-4 ${action.color}`} />
-                    <span className="font-medium">{action.label}</span>
+                    <span className='font-medium'>{action.label}</span>
                   </div>
                   <kbd className='text-xs bg-white/10 px-2 py-1 rounded border border-white/20'>
                     {action.shortcut}
@@ -188,7 +205,9 @@ export function DashboardHeader({
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
-                <span className='text-xs text-white font-bold'>{notifications}</span>
+                <span className='text-xs text-white font-bold'>
+                  {notifications}
+                </span>
               </motion.div>
             )}
           </Button>

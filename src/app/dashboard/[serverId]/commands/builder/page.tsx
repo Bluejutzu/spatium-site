@@ -1,27 +1,129 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
+import { Loader2, UserX } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
+import { useCommandSession } from '@/hooks/use-command-session';
 import { isPromise } from '@/lib/utils';
 
 import CommandFlowBuilder from './CommandFlowBuilder';
 
 export default function CommandBuilderPage({ params }: any) {
-  const unwrappedParams = isPromise(params)
-    ? React.use(params)
-    : params;
+  const unwrappedParams = isPromise(params) ? React.use(params) : params;
   const serverId = unwrappedParams?.serverId || '';
+  const searchParams = new URLSearchParams(window?.location?.search || '');
+  const commandId = searchParams.get('commandId') || '';
+  const [showTimeout, setShowTimeout] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const router = useRouter();
+  const { user } = useUser();
 
+  // Only initialize session when we have all required data
+  const { isEditing, currentEditor, acquire, release } = useCommandSession(
+    commandId && user?.id ? commandId : '',
+    user?.id || '',
+    serverId
+  );
+
+  // Handle session initialization
   React.useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 5000);
-    return () => clearTimeout(timeout);
-  }, []);
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    const initSession = async () => {
+      try {
+        // Only try to acquire a session if we're editing an existing command
+        if (commandId) {
+          const acquired = await acquire();
+          if (!acquired) {
+            // If we couldn't acquire the session, router.back() is called in the hook
+            return;
+          }
+          console.log('Session acquired successfully');
+        }
+
+        if (mounted) {
+          setLoading(false);
+          console.log('Session mounted successfully');
+        }
+      } catch (error) {
+        console.error('Failed to initialize session:', error);
+        if (mounted) {
+          setLoading(false);
+          setShowTimeout(true);
+        }
+      }
+    };
+
+    initSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id, commandId, acquire]);
+
+  // Handle loading timeout separately
+  React.useEffect(() => {
+    if (!loading) return;
+
+    const timeoutId = setTimeout(() => {
+      setShowTimeout(true);
+      console.log('Loading took too long, showing timeout message');
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [loading]);
+
+  // Handle cleanup on page unload or final unmount
+  React.useEffect(() => {
+    const cleanup = (source: string) => {
+      // Only release the session if we're in an active editing state
+      if (commandId && user?.id && isEditing && !loading) {
+        console.log('Cleaning up session on page unload');
+        release(source);
+        console.log('Session released - page closed or navigated away');
+      }
+    };
+
+    // Add a beforeunload listener to ensure cleanup on page unload
+    window.addEventListener('beforeunload', () => cleanup('beforeunload'));
+
+    return () => {
+      window.removeEventListener('beforeunload', () => cleanup('beforeunload'));
+      // Only do final cleanup if we're actually unmounting (page navigation/close)
+      if (!window.document.body.contains(document.activeElement)) {
+        console.log('Final cleanup on component unmount');
+        cleanup('window.document');
+      }
+    };
+  }, [commandId, user?.id, isEditing, release, loading]);
 
   if (loading) {
     return (
-      <div className='bg-discord-darker min-h-screen flex items-center justify-center'>
-        <span className="text-white text-lg">Loading...</span>
+      <div className='bg-discord-dark min-h-screen flex items-center justify-center'>
+        <div className='flex flex-col items-center gap-4 text-white'>
+          <Loader2 className='h-8 w-8 animate-spin text-discord-blurple' />
+          <p className='text-discord-text'>Loading builder...</p>
+          {showTimeout && (
+            <div className='flex flex-col items-center gap-2 mt-4'>
+              <p className='text-discord-text text-sm'>
+                This is taking a bit long...
+              </p>
+              <button
+                className='px-4 py-2 rounded bg-discord-blurple text-white font-bold hover:bg-discord-blurple/80 transition'
+                onClick={() => router.push(`/dashboard/${serverId}`)}
+              >
+                Go back to Dashboard
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

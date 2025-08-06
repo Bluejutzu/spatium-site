@@ -5,6 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import importSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import stylistic from "@stylistic/eslint-plugin"
+import prettier from "eslint-plugin-prettier";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +17,7 @@ export default tseslint.config(
       importSort,
       unusedImports,
       stylistic,
+      prettier,
       'react-hooks': reactHooks
     },
     languageOptions: {
@@ -44,6 +46,7 @@ export default tseslint.config(
       'stylistic/no-extra-semi': 'error',
       'importSort/imports': 'error',
       'importSort/exports': 'error',
+      'prettier/prettier': 'warn'
     },
   },
   {

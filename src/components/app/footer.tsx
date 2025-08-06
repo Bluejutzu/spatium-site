@@ -32,7 +32,6 @@ export function DiscordFooter() {
       <div className='relative flex-1 flex flex-col'>
         <div className='flex-1 py-20'>
           {/* I fucking hate CSS, removing this breaks everything */}
-
         </div>
 
         {/* Large Discord Text Section */}

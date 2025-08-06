@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { Roboto } from 'next/font/google';
 import Link from 'next/link';
-import { useCallback, useMemo,useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import ReactFlow, {
   addEdge,
   Background,
@@ -46,7 +46,14 @@ import ReactFlow, {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription,DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -66,12 +73,13 @@ const INPUT_FONT = roboto.className;
 const RootNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -103,12 +111,13 @@ const RootNode = ({ data, selected }: NodeProps) => {
 const ConditionNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -140,12 +149,13 @@ const ConditionNode = ({ data, selected }: NodeProps) => {
 const MessageNode = ({ data, selected }: NodeProps) => {
   return (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -178,12 +188,13 @@ const MessageNode = ({ data, selected }: NodeProps) => {
 const createCommandOptionNode = (Icon: any, label: string) => {
   return ({ data, selected }: NodeProps) => (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -216,12 +227,13 @@ const createCommandOptionNode = (Icon: any, label: string) => {
 const createDiscordNode = (Icon: any, category: string, label: string) => {
   return ({ data, selected }: NodeProps) => (
     <div
-      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${selected
-        ? 'outline-2 outline-discord-blurple'
-        : data.isHovered
-          ? 'outline-2 outline-discord-purple'
-          : ''
-        }`}
+      className={`shadow-lg rounded-lg min-w-[100px] text-white font-bold relative overflow-hidden border border-slate-700 ${
+        selected
+          ? 'outline-2 outline-discord-blurple'
+          : data.isHovered
+            ? 'outline-2 outline-discord-purple'
+            : ''
+      }`}
       style={{ backgroundColor: 'var(--color-discord-darker)' }}
     >
       <Handle
@@ -236,9 +248,7 @@ const createDiscordNode = (Icon: any, category: string, label: string) => {
           <Icon className='w-4 h-4' />
           <span>{label}</span>
         </div>
-        <div className='text-xs mt-1 opacity-80 relative z-10'>
-          {category}
-        </div>
+        <div className='text-xs mt-1 opacity-80 relative z-10'>{category}</div>
         <Handle
           type='source'
           position={Position.Bottom}
@@ -282,8 +292,16 @@ const nodeTypes = {
   'add-reaction': createDiscordNode(Zap, 'messaging', 'Add Reaction'),
   'remove-reaction': createDiscordNode(Zap, 'messaging', 'Remove Reaction'),
   'pin-message': createDiscordNode(MessageSquare, 'messaging', 'Pin Message'),
-  'unpin-message': createDiscordNode(MessageSquare, 'messaging', 'Unpin Message'),
-  'delete-message': createDiscordNode(MessageSquare, 'messaging', 'Delete Message'),
+  'unpin-message': createDiscordNode(
+    MessageSquare,
+    'messaging',
+    'Unpin Message'
+  ),
+  'delete-message': createDiscordNode(
+    MessageSquare,
+    'messaging',
+    'Delete Message'
+  ),
   'edit-message': createDiscordNode(MessageSquare, 'messaging', 'Edit Message'),
   'bulk-delete': createDiscordNode(MessageSquare, 'messaging', 'Bulk Delete'),
   'set-nickname': createDiscordNode(Users, 'moderation', 'Set Nickname'),
@@ -424,7 +442,9 @@ export function PlaygroundCommandFlowBuilder() {
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const toast = useToast();
-  const [rfInstance, setRfInstance] = useState<ReturnType<typeof useReactFlow> | null>(null);
+  const [rfInstance, setRfInstance] = useState<ReturnType<
+    typeof useReactFlow
+  > | null>(null);
 
   const memoizedNodes = useMemo(() => {
     return nodes.map(n => ({
@@ -491,7 +511,7 @@ export function PlaygroundCommandFlowBuilder() {
       case 'option-user':
         return { name: '', description: '', required: true, value: '' };
       case 'option-boolean':
-        return { name: '', description: '', required: true, value: "false" };
+        return { name: '', description: '', required: true, value: 'false' };
       case 'option-role':
         return { name: '', description: '', required: false, value: '' };
       case 'option-channel':
@@ -520,9 +540,9 @@ export function PlaygroundCommandFlowBuilder() {
       case 'ban-member':
         return { userId: '', reason: '', deleteMessageDays: 0 };
       case 'wait':
-        return { duration: 0, unit: "milliseconds" }
+        return { duration: 0, unit: 'milliseconds' };
       default:
-        return {}
+        return {};
     }
   };
 
@@ -566,9 +586,9 @@ export function PlaygroundCommandFlowBuilder() {
         nds.map(n =>
           n.id === nodeId
             ? {
-              ...n,
-              data: { ...n.data, config: { ...n.data.config, ...config } },
-            }
+                ...n,
+                data: { ...n.data, config: { ...n.data.config, ...config } },
+              }
             : n
         )
       );
@@ -576,12 +596,12 @@ export function PlaygroundCommandFlowBuilder() {
         setSelectedNode(prev =>
           prev
             ? {
-              ...prev,
-              data: {
-                ...prev.data,
-                config: { ...prev.data.config, ...config },
-              },
-            }
+                ...prev,
+                data: {
+                  ...prev.data,
+                  config: { ...prev.data.config, ...config },
+                },
+              }
             : null
         );
       }
@@ -595,7 +615,10 @@ export function PlaygroundCommandFlowBuilder() {
       return;
     }
     // In playground, just show a success message
-    toast.success('Command Saved!', 'Your command has been saved successfully (actually it didnt lol).');
+    toast.success(
+      'Command Saved!',
+      'Your command has been saved successfully (actually it didnt lol).'
+    );
   };
 
   const renderNodeConfiguration = () => {
@@ -689,7 +712,9 @@ export function PlaygroundCommandFlowBuilder() {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.description || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { description: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    description: e.target.value,
+                  })
                 }
                 placeholder='What is this option for?'
               />
@@ -715,7 +740,9 @@ export function PlaygroundCommandFlowBuilder() {
                 className={'mt-1 ' + INPUT_FONT}
                 value={config.condition || ''}
                 onChange={e =>
-                  updateNodeConfig(selectedNode.id, { condition: e.target.value })
+                  updateNodeConfig(selectedNode.id, {
+                    condition: e.target.value,
+                  })
                 }
                 placeholder='Enter your condition...'
               />
@@ -739,35 +766,41 @@ export function PlaygroundCommandFlowBuilder() {
       style={{ backgroundColor: 'rgb(15 23 42)' }}
     >
       {/* Fixed Top Bar */}
-      <div className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-6 h-16 bg-[#181A20] border-b border-[#23262F] shadow-lg">
+      <div className='fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-6 h-16 bg-[#181A20] border-b border-[#23262F] shadow-lg'>
         {/* Left: Back button and title */}
-        <div className="flex items-center gap-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+        <div className='flex items-center gap-4'>
+          <Link href='/'>
+            <Button
+              variant='ghost'
+              size='sm'
+              className='text-slate-400 hover:text-white'
+            >
+              <ArrowLeft className='w-4 h-4 mr-2' />
               Back to Home
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 flex items-center justify-center bg-discord-blurple rounded-md">
-              <Sparkles className="w-5 h-5 text-white" />
+          <div className='flex items-center gap-2'>
+            <div className='w-8 h-8 flex items-center justify-center bg-discord-blurple rounded-md'>
+              <Sparkles className='w-5 h-5 text-white' />
             </div>
-            <span className="text-white font-bold">Command Builder Playground</span>
+            <span className='text-white font-bold'>
+              Command Builder Playground
+            </span>
           </div>
         </div>
 
         {/* Right: Save button */}
-        <div className="flex items-center gap-4">
-          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+        <div className='flex items-center gap-4'>
+          <Badge className='bg-yellow-500/20 text-yellow-400 border-yellow-500/30'>
             Playground Mode
           </Badge>
           <Button
             onClick={handleSave}
             disabled={isLoading}
-            className="bg-discord-blurple text-white font-semibold hover:bg-discord-blurple/80"
+            className='bg-discord-blurple text-white font-semibold hover:bg-discord-blurple/80'
           >
             {isLoading ? 'Saving...' : 'Save Command'}
-            <Save className="w-4 h-4 ml-2" />
+            <Save className='w-4 h-4 ml-2' />
           </Button>
         </div>
       </div>
@@ -804,14 +837,23 @@ export function PlaygroundCommandFlowBuilder() {
 
               <ScrollArea className='flex-1'>
                 <div className='p-4'>
-                  <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <Tabs
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
                     <TabsList className='grid w-full grid-cols-2 mb-4'>
-                      <TabsTrigger value='options' className='text-xs'>Options</TabsTrigger>
-                      <TabsTrigger value='messaging' className='text-xs'>Messages</TabsTrigger>
+                      <TabsTrigger value='options' className='text-xs'>
+                        Options
+                      </TabsTrigger>
+                      <TabsTrigger value='messaging' className='text-xs'>
+                        Messages
+                      </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value='options' className='space-y-2'>
-                      {BLOCK_TYPES.filter(block => block.category === 'options').map(block => (
+                      {BLOCK_TYPES.filter(
+                        block => block.category === 'options'
+                      ).map(block => (
                         <Card
                           key={block.type}
                           className='cursor-pointer hover:bg-discord-dark/50 transition-colors border-discord-border'
@@ -821,8 +863,12 @@ export function PlaygroundCommandFlowBuilder() {
                             <div className='flex items-center gap-3'>
                               <block.icon className='w-5 h-5 text-discord-blurple' />
                               <div>
-                                <p className='text-white text-sm font-medium'>{block.label}</p>
-                                <p className='text-discord-text text-xs'>{block.description}</p>
+                                <p className='text-white text-sm font-medium'>
+                                  {block.label}
+                                </p>
+                                <p className='text-discord-text text-xs'>
+                                  {block.description}
+                                </p>
                               </div>
                             </div>
                           </CardContent>
@@ -831,7 +877,9 @@ export function PlaygroundCommandFlowBuilder() {
                     </TabsContent>
 
                     <TabsContent value='messaging' className='space-y-2'>
-                      {BLOCK_TYPES.filter(block => block.category === 'messaging').map(block => (
+                      {BLOCK_TYPES.filter(
+                        block => block.category === 'messaging'
+                      ).map(block => (
                         <Card
                           key={block.type}
                           className='cursor-pointer hover:bg-discord-dark/50 transition-colors border-discord-border'
@@ -841,8 +889,12 @@ export function PlaygroundCommandFlowBuilder() {
                             <div className='flex items-center gap-3'>
                               <block.icon className='w-5 h-5 text-discord-blurple' />
                               <div>
-                                <p className='text-white text-sm font-medium'>{block.label}</p>
-                                <p className='text-discord-text text-xs'>{block.description}</p>
+                                <p className='text-white text-sm font-medium'>
+                                  {block.label}
+                                </p>
+                                <p className='text-discord-text text-xs'>
+                                  {block.description}
+                                </p>
                               </div>
                             </div>
                           </CardContent>
@@ -932,21 +984,24 @@ export function PlaygroundCommandFlowBuilder() {
       </ReactFlowProvider>
       {/* Save Dialog */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-        <DialogContent className="bg-discord-darker border-discord-border">
+        <DialogContent className='bg-discord-darker border-discord-border'>
           <DialogHeader>
-            <DialogTitle className="text-white">Sign Up to Save Your Command</DialogTitle>
-            <DialogDescription className="text-discord-text">
-              Create a free account to save your commands and deploy them to your Discord servers.
+            <DialogTitle className='text-white'>
+              Sign Up to Save Your Command
+            </DialogTitle>
+            <DialogDescription className='text-discord-text'>
+              Create a free account to save your commands and deploy them to
+              your Discord servers.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
+            <Button variant='outline' onClick={() => setSaveDialogOpen(false)}>
               Cancel
             </Button>
-            <SignInButton mode="modal">
-              <Button className="bg-discord-blurple text-white hover:bg-discord-blurple/80">
+            <SignInButton mode='modal'>
+              <Button className='bg-discord-blurple text-white hover:bg-discord-blurple/80'>
                 Sign Up Now
-                <Sparkles className="w-4 h-4 ml-2" />
+                <Sparkles className='w-4 h-4 ml-2' />
               </Button>
             </SignInButton>
           </DialogFooter>

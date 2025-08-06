@@ -1,18 +1,18 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps } from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 export function StaticNoise({
   opacity,
   className,
-  backgroundSize = "400px",
+  backgroundSize = '400px',
   ...props
-}: { opacity: number; backgroundSize?: string } & ComponentProps<"div">) {
+}: { opacity: number; backgroundSize?: string } & ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        "absolute inset-0 z-40 pointer-events-none select-none repeat-infinite invert dark:invert-0",
-        className,
+        'absolute inset-0 z-40 pointer-events-none select-none repeat-infinite invert dark:invert-0',
+        className
       )}
       style={{
         backgroundImage: svgUrlEncoded,

@@ -2,12 +2,26 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
 export default defineSchema({
+	commandSessions: defineTable({
+		commandId: v.string(),
+		userId: v.string(),
+		serverId: v.string(),
+		lastActive: v.number(),
+	})
+		.index('by_command_id', ['commandId'])
+		.index('by_user_id', ['userId'])
+		.index('by_server_id', ['serverId']),
+
 	users: defineTable({
 		clerkId: v.string(),
 		discordUserId: v.string(),
 		username: v.string(),
 		email: v.string(),
 		avatarUrl: v.optional(v.string()),
+		banned: v.optional(v.boolean()),
+		banReason: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
 	})
 		.index('by_clerk_id', ['clerkId'])
 		.index('by_discord_id', ['discordUserId']),
@@ -17,13 +31,15 @@ export default defineSchema({
 		name: v.string(),
 		icon: v.optional(v.string()),
 		ownerId: v.string(),
-		// TODO: Add Permissions to dashboard for Roles and Users
 		memberCount: v.number(),
 		onlineCount: v.number(),
 		botJoinedAt: v.number(),
 		permissions: v.optional(v.array(v.string())),
 		features: v.array(v.string()),
 		lastUpdated: v.number(),
+		banned: v.optional(v.boolean()),
+		banReason: v.optional(v.string()),
+		bannedAt: v.optional(v.number()),
 	})
 		.index('by_server_id', ['serverId'])
 		.index('by_owner_id', ['ownerId']),
@@ -50,6 +66,8 @@ export default defineSchema({
 		logChannelId: v.optional(v.string()),
 		joinNotifications: v.boolean(),
 		leaveNotifications: v.boolean(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
 	}).index('by_server_id', ['serverId']),
 
 	alerts: defineTable({

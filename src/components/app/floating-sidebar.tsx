@@ -35,7 +35,6 @@ import {
 
 import { api } from '../../../convex/_generated/api';
 
-
 const navigationItems = [
   {
     icon: Home,
@@ -190,10 +189,11 @@ export function FloatingSidebar() {
                       key={item.href}
                       href={getMobileNavHref(item.href) as RoutePath}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 p-3 rounded-lg transition-all ${pathname === item.href
-                        ? 'bg-blue-600 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                        }`}
+                      className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                        pathname === item.href
+                          ? 'bg-blue-600 text-white'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
                     >
                       <item.icon className='h-5 w-5' />
                       <span className='font-medium'>{item.label}</span>
@@ -318,10 +318,11 @@ export function FloatingSidebar() {
                       <TooltipTrigger asChild>
                         <Link href={getMobileNavHref(item.href) as RoutePath}>
                           <motion.div
-                            className={`flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${isActive
-                              ? 'bg-blue-600 text-white shadow-lg'
-                              : 'text-slate-400 hover:text-white hover:bg-white/5'
-                              }`}
+                            className={`flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${
+                              isActive
+                                ? 'bg-blue-600 text-white shadow-lg'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                            }`}
                             whileHover={{ x: 2 }}
                             whileTap={{ scale: 0.98 }}
                           >
