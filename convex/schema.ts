@@ -94,6 +94,29 @@ export default defineSchema({
 		.index('by_server_id', ['serverId'])
 		.index('by_timestamp', ['timestamp']),
 
+	sessionEvents: defineTable({
+		type: v.union(
+			v.literal('FORCE_RELEASE'),
+			v.literal('SESSION_EXPIRED'),
+			v.literal('USER_KICKED')
+		),
+		commandId: v.string(),
+		userId: v.string(),
+		adminId: v.optional(v.string()),
+		timestamp: v.number(),
+		metadata: v.optional(v.object({
+			reason: v.optional(v.string()),
+			duration: v.optional(v.number())
+		})),
+		state: v.union(
+			v.literal('open'),
+			v.literal('closed')
+		)
+	})
+		.index('by_command_id', ['commandId'])
+		.index('by_user_id', ['userId'])
+		.index('by_timestamp', ['timestamp']),
+
 	commands: defineTable({
 		serverId: v.string(),
 		name: v.string(),

@@ -120,28 +120,47 @@ export function SettingsClient({ serverId }: { serverId: string }) {
 
   // Sync form state with loaded settings
   useEffect(() => {
-    if (settings) {
-      const loaded = {
-        prefix: settings.prefix || '!',
-        welcomeMessage: settings.welcomeMessage || '',
-        autoRole: settings.autoRole || false,
-        moderationEnabled: settings.moderationEnabled || false,
-        spamFilter: settings.spamFilter || false,
-        linkFilter: settings.linkFilter || false,
-        joinNotifications: settings.joinNotifications || false,
-        leaveNotifications: settings.leaveNotifications || false,
-        logChannelId: settings.logChannelId || '',
-        welcomeChannelId: settings.welcomeChannelId || '',
-        autoRoleId:
-          'autoRoleId' in settings ? (settings as any).autoRoleId || '' : '',
-      };
-      console.log(
-        '[useEffect settings] setForm and setInitialSettings:',
-        loaded
-      );
-      setForm(loaded);
-      setInitialSettings(loaded);
-    }
+    // Default settings when no settings exist yet
+    const defaultSettings = {
+      prefix: '!',
+      welcomeMessage: 'Welcome {userMention} to {serverName}! 🎉',
+      autoRole: false,
+      moderationEnabled: false,
+      spamFilter: false,
+      linkFilter: false,
+      joinNotifications: false,
+      leaveNotifications: false,
+      logChannelId: '',
+      welcomeChannelId: '',
+      autoRoleId: '',
+    };
+
+    const loaded = settings
+      ? {
+          prefix: settings.prefix || defaultSettings.prefix,
+          welcomeMessage:
+            settings.welcomeMessage || defaultSettings.welcomeMessage,
+          autoRole: settings.autoRole || defaultSettings.autoRole,
+          moderationEnabled:
+            settings.moderationEnabled || defaultSettings.moderationEnabled,
+          spamFilter: settings.spamFilter || defaultSettings.spamFilter,
+          linkFilter: settings.linkFilter || defaultSettings.linkFilter,
+          joinNotifications:
+            settings.joinNotifications || defaultSettings.joinNotifications,
+          leaveNotifications:
+            settings.leaveNotifications || defaultSettings.leaveNotifications,
+          logChannelId: settings.logChannelId || defaultSettings.logChannelId,
+          welcomeChannelId:
+            settings.welcomeChannelId || defaultSettings.welcomeChannelId,
+          autoRoleId:
+            'autoRoleId' in settings
+              ? (settings as any).autoRoleId || ''
+              : defaultSettings.autoRoleId,
+        }
+      : defaultSettings;
+
+    setForm(loaded);
+    setInitialSettings(loaded);
   }, [settings]);
 
   // Unsaved changes detection
@@ -176,17 +195,8 @@ export function SettingsClient({ serverId }: { serverId: string }) {
     if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
       newValue = e.target.checked;
     }
-    console.log(
-      `[handleChange] id: ${id}, value:`,
-      value,
-      'type:',
-      type,
-      'newValue:',
-      newValue
-    );
     setForm(prev => {
       const updated = { ...prev, [id]: newValue };
-      console.log('[handleChange] setForm updated:', updated);
       return updated;
     });
   };
@@ -774,17 +784,17 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
   };
   // Save all welcome settings on confirmation
   const handleSaveWelcomeSettings = async () => {
-    if (!serverSettings) return;
     setIsLoading(true);
     try {
       await updateSettings({
         serverId,
-        prefix: serverSettings.prefix,
-        moderationEnabled: serverSettings.moderationEnabled,
-        spamFilter: serverSettings.spamFilter,
-        linkFilter: serverSettings.linkFilter,
-        logChannelId: serverSettings.logChannelId,
-        // Welcome section fields:
+        // If no serverSettings exist, use defaults for non-welcome settings
+        prefix: serverSettings?.prefix || '!',
+        moderationEnabled: serverSettings?.moderationEnabled || false,
+        spamFilter: serverSettings?.spamFilter || false,
+        linkFilter: serverSettings?.linkFilter || false,
+        logChannelId: serverSettings?.logChannelId || '',
+        // Welcome section fields from local state:
         welcomeMessage: localSettings.welcomeMessage,
         welcomeChannelId: localSettings.welcomeChannelId,
         autoRole: localSettings.autoRole,
@@ -805,13 +815,6 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
     .replace('{serverName}', 'Gaming Community')
     .replace('{guildMemberCount}', '1000')
     .replace('{newGuildMemberCount}', '1001');
-  if (!serverSettings) {
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <div className='text-discord-text'>Loading welcome settings...</div>
-      </div>
-    );
-  }
   return (
     <div className='space-y-6'>
       <div>
@@ -879,13 +882,6 @@ export function WelcomeSettingsSection({ serverId }: { serverId: string }) {
                     ...prev,
                     welcomeMessage: e.target.value,
                   }));
-                  console.log(
-                    '[Textarea onChange] localSettings after change:',
-                    {
-                      ...localSettings,
-                      welcomeMessage: e.target.value,
-                    }
-                  );
                 }}
                 className='bg-discord-dark border-discord-border text-white min-h-[120px]'
               />

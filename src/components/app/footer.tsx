@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export function DiscordFooter() {
+export function Footer() {
   return (
     <footer className='bg-discord-blurple relative overflow-hidden min-h-screen flex flex-col'>
       {/* Background Effects */}
@@ -71,10 +71,8 @@ export function DiscordFooter() {
 
               <div className='flex flex-wrap items-center justify-center gap-8 text-base'>
                 {[
-                  { name: 'Terms of Service', href: '/terms' },
-                  { name: 'Privacy Policy', href: '/privacy' },
-                  { name: 'Cookie Settings', href: '/cookies' },
-                  { name: 'Accessibility', href: '/accessibility' },
+                  { name: 'Terms of Service', href: '/legal/terms' },
+                  { name: 'Privacy Policy', href: '/legal/privacy' },
                 ].map((link, _index) => (
                   <motion.div
                     key={link.name}

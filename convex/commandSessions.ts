@@ -21,10 +21,8 @@ export const acquireSession = mutation({
       if (now - existingSession.lastActive > sessionTimeout) {
         // Session expired, release it
         await ctx.db.delete(existingSession._id);
-        console.log('Session expired, creating new session');
       } else if (existingSession.userId !== userId) {
         // Session is active and belongs to another user
-        console.log('Session is active and belongs to another user');
         return {
           success: false,
           error: 'Command is being edited by another user',
@@ -32,7 +30,6 @@ export const acquireSession = mutation({
           lastActive: existingSession.lastActive,
         };
       } else {
-        console.log('Session is active and belongs to the same user');
         // Update last active time for existing session
         await ctx.db.patch(existingSession._id, { lastActive: now });
         return { success: true };
@@ -40,7 +37,6 @@ export const acquireSession = mutation({
     }
 
     // Create new session
-    console.log('Creating new session');
     await ctx.db.insert('commandSessions', {
       commandId,
       userId,
@@ -52,30 +48,67 @@ export const acquireSession = mutation({
   },
 });
 
+export const getLastSessionEvent = query({
+  args: {
+    commandId: v.string(),
+  },
+  handler: async (ctx, { commandId }) => {
+    return await ctx.db
+      .query('sessionEvents')
+      .withIndex('by_command_id', q => q.eq('commandId', commandId))
+      .filter(q => q.eq(q.field('state'), 'open'))
+      .order('desc')
+      .first();
+  },
+});
+
 export const releaseSession = mutation({
   args: {
     commandId: v.string(),
     userId: v.string(),
+    isForceRelease: v.optional(v.boolean()),
+    adminId: v.optional(v.string()),
   },
-  handler: async (ctx, { commandId, userId }) => {
+  handler: async (ctx, { commandId, userId, isForceRelease, adminId }) => {
     const session = await ctx.db
       .query('commandSessions')
-      .filter((q) => 
-        q.and(
-          q.eq(q.field('commandId'), commandId),
-          q.eq(q.field('userId'), userId)
-        )
+      .filter((q) =>
+        isForceRelease
+          ? q.eq(q.field('commandId'), commandId)
+          : q.and(
+            q.eq(q.field('commandId'), commandId),
+            q.eq(q.field('userId'), userId)
+          )
       )
       .first();
 
     if (session) {
-      console.log('Releasing session:', session._id, session.userId);
+
+      if (isForceRelease && adminId) {
+        // Store the force release event
+        await ctx.db.insert('sessionEvents', {
+          type: 'FORCE_RELEASE',
+          commandId,
+          userId: session.userId,
+          adminId,
+          timestamp: Date.now(),
+          metadata: {
+            reason: 'Administrator force released the session'
+          },
+          state: "open"
+        });
+      }
+
       await ctx.db.delete(session._id);
-    } else {
-      console.warn('No session found to release for commandId:', commandId, 'userId:', userId);
+
+      return {
+        success: true,
+        wasForceReleased: isForceRelease,
+        releasedUserId: session.userId
+      };
     }
 
-    return { success: true };
+    return { success: false, error: 'No active session found' };
   },
 });
 
@@ -128,7 +161,7 @@ export const keepSessionAlive = mutation({
   handler: async (ctx, { commandId, userId }) => {
     const session = await ctx.db
       .query('commandSessions')
-      .filter((q) => 
+      .filter((q) =>
         q.and(
           q.eq(q.field('commandId'), commandId),
           q.eq(q.field('userId'), userId)
@@ -150,6 +183,16 @@ export const forceReleaseSession = mutation({
   },
   handler: async (ctx, { sessionId }) => {
     await ctx.db.delete(sessionId);
+    return { success: true };
+  },
+});
+
+export const closeSessionEvent = mutation({
+  args: {
+    eventId: v.id('sessionEvents'),
+  },
+  handler: async (ctx, { eventId }) => {
+    await ctx.db.patch(eventId, { state: 'closed' });
     return { success: true };
   },
 });

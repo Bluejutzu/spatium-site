@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { AlertCircle, Loader2, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { DiscordFooter } from '@/components/app/footer';
+import { Footer } from '@/components/app/footer';
 import { AnimatedHeader } from '@/components/app/header';
 import { Badge } from '@/components/ui/badge';
 
@@ -111,7 +111,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <DiscordFooter />
+      <Footer />
     </div>
   );
 }

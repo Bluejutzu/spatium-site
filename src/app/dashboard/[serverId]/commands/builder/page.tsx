@@ -1,13 +1,19 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
+import { profile } from 'console';
+import { useQuery } from 'convex/react';
 import { Loader2, UserX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
+import { ForceReleaseModal } from '@/components/commands/ForceReleaseModal';
 import { useCommandSession } from '@/hooks/use-command-session';
+import { useToast } from '@/hooks/use-toast';
 import { isPromise } from '@/lib/utils';
+import { useDiscordCache } from '@/store/discordCache';
 
+import { api } from '../../../../../../convex/_generated/api';
 import CommandFlowBuilder from './CommandFlowBuilder';
 
 export default function CommandBuilderPage({ params }: any) {
@@ -17,8 +23,16 @@ export default function CommandBuilderPage({ params }: any) {
   const commandId = searchParams.get('commandId') || '';
   const [showTimeout, setShowTimeout] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [forceReleaseAdmin, setForceReleaseAdmin] = React.useState<
+    string | null
+  >(null);
+  const [showForceReleaseModal, setShowForceReleaseModal] =
+    React.useState(false);
+  const lastNotificationRef = React.useRef<string | null>(null);
   const router = useRouter();
   const { user } = useUser();
+
+  const { error } = useToast();
 
   // Only initialize session when we have all required data
   const { isEditing, currentEditor, acquire, release } = useCommandSession(
@@ -79,6 +93,43 @@ export default function CommandBuilderPage({ params }: any) {
 
     return () => clearTimeout(timeoutId);
   }, [loading]);
+  // Subscribe to session events
+  const lastSessionEvent = useQuery(
+    api.commandSessions.getLastSessionEvent,
+    commandId ? { commandId } : 'skip'
+  );
+
+  React.useEffect(() => {
+    const fetchAdminUser = async () => {
+      if (
+        lastSessionEvent?.type === 'FORCE_RELEASE' &&
+        lastSessionEvent.adminId &&
+        lastNotificationRef.current !== lastSessionEvent._id.toString()
+      ) {
+        try {
+          // Fetch admin user directly from Discord API
+          const response = await fetch(
+            `/api/discord/user?userId=${lastSessionEvent.adminId}`
+          );
+          if (!response.ok) throw new Error('Failed to fetch admin user');
+
+          const adminUser = await response.json();
+          setForceReleaseAdmin(adminUser.username);
+          setShowForceReleaseModal(true);
+
+          // Mark this event as handled
+          lastNotificationRef.current = lastSessionEvent._id.toString();
+        } catch (err) {
+          console.error('Failed to fetch admin user:', err);
+          setForceReleaseAdmin('Admin');
+          setShowForceReleaseModal(true);
+          lastNotificationRef.current = lastSessionEvent._id.toString();
+        }
+      }
+    };
+
+    fetchAdminUser();
+  }, [lastSessionEvent]);
 
   // Handle cleanup on page unload or final unmount
   React.useEffect(() => {
@@ -117,7 +168,9 @@ export default function CommandBuilderPage({ params }: any) {
               </p>
               <button
                 className='px-4 py-2 rounded bg-discord-blurple text-white font-bold hover:bg-discord-blurple/80 transition'
-                onClick={() => router.push(`/dashboard/${serverId}`)}
+                onClick={() =>
+                  router.push(`/dashboard/${serverId}?tab=commands`)
+                }
               >
                 Go back to Dashboard
               </button>
@@ -131,6 +184,16 @@ export default function CommandBuilderPage({ params }: any) {
   return (
     <div className='bg-discord-darker min-h-screen'>
       <CommandFlowBuilder serverId={serverId} />
+      {showForceReleaseModal && (
+        <ForceReleaseModal
+          adminUsername={forceReleaseAdmin || 'Admin'}
+          lastSessionEvent={lastSessionEvent}
+          onClose={() => {
+            setShowForceReleaseModal(false);
+            router.push(`/dashboard/${serverId}?tab=commands`);
+          }}
+        />
+      )}
     </div>
   );
 }
